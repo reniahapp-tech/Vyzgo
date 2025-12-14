@@ -1,0 +1,1042 @@
+import React, { useState } from 'react';
+import { useConfig } from '../contexts/ConfigContext';
+import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal } from 'lucide-react';
+import { availableIcons } from './IconMapper';
+import { ProductItem } from '../types';
+import PaymentGateway from './PaymentGateway';
+
+// Preset Themes Configuration
+const PRESET_THEMES = [
+  {
+    id: 'natura',
+    name: 'Natura Original',
+    colors: ['#FDFBF7', '#C27B63', '#8DA893'],
+    config: {
+      theme: {
+        backgroundColor: '#FDFBF7',
+        primaryColor: '#C27B63',
+        secondaryColor: '#8DA893',
+        accentColor: '#25D366',
+        textColor: '#1A2E22',
+      },
+      quiz: { bgColor: '#8DA893' }
+    }
+  },
+  {
+    id: 'dark',
+    name: 'Midnight Luxury',
+    colors: ['#121212', '#D4AF37', '#1E1E1E'],
+    config: {
+      theme: {
+        backgroundColor: '#121212',
+        primaryColor: '#D4AF37', // Gold
+        secondaryColor: '#2A2A2A', // Dark Gray
+        accentColor: '#10B981', // Emerald
+        textColor: '#F3F4F6',
+      },
+      quiz: { bgColor: '#2A2A2A' }
+    }
+  },
+  {
+    id: 'ocean',
+    name: 'Ocean Breeze',
+    colors: ['#F0F9FF', '#0EA5E9', '#BAE6FD'],
+    config: {
+      theme: {
+        backgroundColor: '#F0F9FF', // Sky 50
+        primaryColor: '#0284C7', // Sky 600
+        secondaryColor: '#7DD3FC', // Sky 300
+        accentColor: '#0EA5E9', // Sky 500
+        textColor: '#0C4A6E', // Sky 900
+      },
+      quiz: { bgColor: '#0284C7' }
+    }
+  },
+  {
+    id: 'lavender',
+    name: 'Lavanda Soft',
+    colors: ['#FAF5FF', '#9333EA', '#E9D5FF'],
+    config: {
+      theme: {
+        backgroundColor: '#FAF5FF', // Purple 50
+        primaryColor: '#9333EA', // Purple 600
+        secondaryColor: '#D8B4FE', // Purple 300
+        accentColor: '#A855F7', // Purple 500
+        textColor: '#3B0764', // Purple 950
+      },
+      quiz: { bgColor: '#9333EA' }
+    }
+  },
+  {
+    id: 'mint',
+    name: 'Mint Fresh',
+    colors: ['#F0FDF4', '#15803D', '#86EFAC'],
+    config: {
+      theme: {
+        backgroundColor: '#F0FDF4', // Green 50
+        primaryColor: '#15803D', // Green 700
+        secondaryColor: '#86EFAC', // Green 300
+        accentColor: '#16A34A', // Green 600
+        textColor: '#14532D', // Green 900
+      },
+      quiz: { bgColor: '#15803D' }
+    }
+  },
+  {
+    id: 'rose',
+    name: 'Rose Petal',
+    colors: ['#FFF1F2', '#BE123C', '#FECDD3'],
+    config: {
+      theme: {
+        backgroundColor: '#FFF1F2', // Rose 50
+        primaryColor: '#BE123C', // Rose 700
+        secondaryColor: '#FECDD3', // Rose 200
+        accentColor: '#E11D48', // Rose 600
+        textColor: '#881337', // Rose 900
+      },
+      quiz: { bgColor: '#BE123C' }
+    }
+  },
+  {
+    id: 'solar',
+    name: 'Solar Flare',
+    colors: ['#FFF7ED', '#C2410C', '#FFEDD5'],
+    config: {
+      theme: {
+        backgroundColor: '#FFF7ED', // Orange 50
+        primaryColor: '#C2410C', // Orange 700
+        secondaryColor: '#FFEDD5', // Orange 100
+        accentColor: '#EA580C', // Orange 600
+        textColor: '#7C2D12', // Orange 900
+      },
+      quiz: { bgColor: '#C2410C' }
+    }
+  },
+  {
+    id: 'slate',
+    name: 'Slate Minimal',
+    colors: ['#F8FAFC', '#334155', '#CBD5E1'],
+    config: {
+      theme: {
+        backgroundColor: '#F8FAFC', // Slate 50
+        primaryColor: '#334155', // Slate 700
+        secondaryColor: '#CBD5E1', // Slate 300
+        accentColor: '#475569', // Slate 600
+        textColor: '#0F172A', // Slate 900
+      },
+      quiz: { bgColor: '#334155' }
+    }
+  },
+  {
+    id: 'royal',
+    name: 'Royal Velvet',
+    colors: ['#F5F3FF', '#6D28D9', '#DDD6FE'],
+    config: {
+      theme: {
+        backgroundColor: '#F5F3FF', // Violet 50
+        primaryColor: '#6D28D9', // Violet 700
+        secondaryColor: '#DDD6FE', // Violet 200
+        accentColor: '#7C3AED', // Violet 600
+        textColor: '#4C1D95', // Violet 900
+      },
+      quiz: { bgColor: '#6D28D9' }
+    }
+  },
+  {
+    id: 'coffee',
+    name: 'Coffee Bean',
+    colors: ['#FFFCF5', '#78350F', '#E7D5C0'],
+    config: {
+      theme: {
+        backgroundColor: '#FFFCF5', // Custom Warm
+        primaryColor: '#78350F', // Amber 900
+        secondaryColor: '#E7D5C0', // Custom Beige
+        accentColor: '#92400E', // Amber 800
+        textColor: '#451A03', // Amber 950
+      },
+      quiz: { bgColor: '#78350F' }
+    }
+  },
+  {
+    id: 'cherry',
+    name: 'Cherry Bomb',
+    colors: ['#FEF2F2', '#B91C1C', '#FECACA'],
+    config: {
+      theme: {
+        backgroundColor: '#FEF2F2', // Red 50
+        primaryColor: '#B91C1C', // Red 700
+        secondaryColor: '#FECACA', // Red 200
+        accentColor: '#DC2626', // Red 600
+        textColor: '#7F1D1D', // Red 900
+      },
+      quiz: { bgColor: '#B91C1C' }
+    }
+  },
+  {
+    id: 'deepsea',
+    name: 'Deep Sea',
+    colors: ['#ECFEFF', '#0E7490', '#A5F3FC'],
+    config: {
+      theme: {
+        backgroundColor: '#ECFEFF', // Cyan 50
+        primaryColor: '#0E7490', // Cyan 700
+        secondaryColor: '#A5F3FC', // Cyan 200
+        accentColor: '#0891B2', // Cyan 600
+        textColor: '#164E63', // Cyan 900
+      },
+      quiz: { bgColor: '#0E7490' }
+    }
+  },
+  {
+    id: 'cyber',
+    name: 'Cyberpunk',
+    colors: ['#050505', '#D946EF', '#22D3EE'],
+    config: {
+      theme: {
+        backgroundColor: '#050505', // Black
+        primaryColor: '#D946EF', // Fuchsia 500
+        secondaryColor: '#22D3EE', // Cyan 400
+        accentColor: '#FACC15', // Yellow 400
+        textColor: '#F3F4F6', // Gray 100
+      },
+      quiz: { bgColor: '#18181B' } // Zinc 900
+    }
+  },
+  {
+    id: 'corporate',
+    name: 'Corporate Blue',
+    colors: ['#F0F4F8', '#1D4ED8', '#DBEAFE'],
+    config: {
+      theme: {
+        backgroundColor: '#F0F4F8', // Slate/Blue custom
+        primaryColor: '#1D4ED8', // Blue 700
+        secondaryColor: '#DBEAFE', // Blue 100
+        accentColor: '#2563EB', // Blue 600
+        textColor: '#1E3A8A', // Blue 900
+      },
+      quiz: { bgColor: '#1D4ED8' }
+    }
+  },
+  {
+    id: 'forest',
+    name: 'Deep Forest',
+    colors: ['#F2F8F4', '#14532D', '#86EFAC'],
+    config: {
+      theme: {
+        backgroundColor: '#F2F8F4',
+        primaryColor: '#14532D', // Green 900
+        secondaryColor: '#BBF7D0', // Green 200
+        accentColor: '#16A34A', // Green 600
+        textColor: '#052E16',
+      },
+      quiz: { bgColor: '#14532D' }
+    }
+  }
+];
+
+const WHATSAPP_LABELS = [
+  "Falar com Atendente",
+  "Comprar no WhatsApp",
+  "Tirar Dúvidas",
+  "Fazer Pedido",
+  "Falar com Especialista",
+  "Suporte Online",
+  "Orçamento Rápido"
+];
+
+const AdminPanel: React.FC = () => {
+  const { config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro } = useConfig();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+  const [pinInput, setPinInput] = useState('');
+  const [activeTab, setActiveTab] = useState<'themes' | 'branding' | 'home' | 'products' | 'plan' | 'social' | 'help'>('themes');
+  const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
+  
+  // State for editable presets
+  const [themesList, setThemesList] = useState(PRESET_THEMES);
+
+  const isPro = config.plan === 'pro';
+
+  const applyTheme = (preset: typeof PRESET_THEMES[0]) => {
+    const newConfig = {
+      ...config,
+      theme: { ...config.theme, ...preset.config.theme },
+      quiz: { ...config.quiz, ...preset.config.quiz }
+    };
+    updateConfig(newConfig);
+    addToast(`Tema "${preset.name}" aplicado!`, 'success');
+  };
+
+  const updateThemeQuizColor = (id: string, color: string) => {
+    setThemesList(prev => prev.map(theme => {
+        if (theme.id === id) {
+            return {
+                ...theme,
+                config: {
+                    ...theme.config,
+                    quiz: {
+                        ...theme.config.quiz,
+                        bgColor: color
+                    }
+                }
+            };
+        }
+        return theme;
+    }));
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Imagem muito grande! Máximo 2MB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => callback(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddProduct = () => {
+    const newProduct: ProductItem = {
+      id: `prod-${Date.now()}`,
+      title: 'Novo Produto',
+      price: 'R$ 0,00',
+      description: 'Descrição do produto',
+      imageUrl: 'https://images.unsplash.com/photo-1590735213920-68192a487561?q=80&w=1000&auto=format&fit=crop'
+    };
+    addProductToCategory(selectedCategoryIndex, newProduct);
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pinInput === config.adminPin) {
+      setIsAuthenticated(true);
+      setPinInput('');
+      addToast('Modo Admin ativado!', 'success');
+    } else {
+      addToast('PIN incorreto', 'error');
+      setPinInput('');
+    }
+  };
+
+  // Helper to check if Tracking/Location is active
+  const hasTracking = config.categories.some(c => c.id === 'tracking');
+  const hasLocation = config.categories.some(c => c.id === 'location');
+  
+  const toggleCard = (type: 'tracking' | 'location') => {
+    if (type === 'tracking') {
+       if (hasTracking) {
+         updateConfig({ ...config, categories: config.categories.filter(c => c.id !== 'tracking') });
+         addToast('Card de Rastreio removido.');
+       } else {
+         const trackingCat = { id: 'tracking', title: 'Rastrear Pedido', subtitle: 'Localize sua caixa', iconKey: 'Package', bgColor: '#FFFFFF', iconColor: config.theme.primaryColor, hasBorder: true, products: [] };
+         updateConfig({ ...config, categories: [...config.categories, trackingCat] });
+         addToast('Card de Rastreio adicionado.');
+       }
+    }
+    if (type === 'location') {
+       if (hasLocation) {
+         updateConfig({ ...config, categories: config.categories.filter(c => c.id !== 'location') });
+         addToast('Card de Mapa removido.');
+       } else {
+         const locCat = { id: 'location', title: 'Nossa Loja', subtitle: 'Venha nos visitar', iconKey: 'MapPin', bgColor: '#FDFBF7', iconColor: config.theme.primaryColor, hasBorder: true, products: [] };
+         updateConfig({ ...config, categories: [...config.categories, locCat] });
+         addToast('Card de Mapa adicionado.');
+       }
+    }
+  };
+
+  const handleStoreModeChange = (mode: 'mixed' | 'store' | 'affiliate') => {
+    if (!isPro && mode !== 'mixed') {
+      setIsPaymentOpen(true); // Trigger payment gateway for pro features
+      return;
+    }
+    updateConfig({...config, storeMode: mode});
+  };
+
+  const handleWhatsappToggle = () => {
+    if (!isPro) {
+      setIsPaymentOpen(true);
+      return;
+    }
+    updateConfig({...config, enableWhatsapp: !config.enableWhatsapp});
+  };
+
+  // 1. Button to open panel (always visible)
+  if (!isOpen) {
+    return (
+      <button 
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 bg-white/10 backdrop-blur-md border border-white/20 text-dark p-4 rounded-full shadow-2xl z-50 hover:bg-white/30 transition-all hover:scale-110 group"
+        title="Admin Panel"
+      >
+        <div className="absolute inset-0 bg-gradient-to-tr from-terracotta/20 to-sage/20 rounded-full animate-spin-slow opacity-50 blur-md"></div>
+        {isAuthenticated ? (
+          <Unlock size={24} className="relative z-10 text-green-700" />
+        ) : (
+          <Settings size={24} className="relative z-10 text-gray-800" />
+        )}
+      </button>
+    );
+  }
+
+  // 2. Login Screen (if not authenticated)
+  if (!isAuthenticated) {
+    return (
+      <>
+        <div className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40" onClick={() => setIsOpen(false)} />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in zoom-in-95 duration-200">
+           <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 w-full max-w-xs border border-white">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+                  <Lock size={18} /> Acesso Restrito
+                </h2>
+                <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-black/5 rounded-full"><X size={20}/></button>
+              </div>
+              
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="text-center mb-2">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center text-3xl mb-2 shadow-inner">
+                    🔐
+                  </div>
+                  <p className="text-sm text-gray-500">Digite o PIN do proprietário.</p>
+                </div>
+                
+                <input 
+                  type="password" 
+                  autoFocus
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={pinInput}
+                  onChange={(e) => setPinInput(e.target.value)}
+                  placeholder="PIN"
+                  className="w-full text-center text-2xl font-bold tracking-widest py-3 rounded-xl bg-white border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                  maxLength={6}
+                />
+                
+                <button 
+                  type="submit"
+                  className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors"
+                >
+                  Entrar
+                </button>
+              </form>
+           </div>
+        </div>
+      </>
+    );
+  }
+
+  // 3. Admin Dashboard (Authenticated)
+  const InputGroup = ({ label, value, onChange, placeholder, textarea = false }: { label: string, value: string, onChange: (val: string) => void, placeholder?: string, textarea?: boolean }) => (
+    <div className="mb-3 group">
+      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-wider">{label}</label>
+      {textarea ? (
+        <textarea 
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          rows={2}
+          className="w-full bg-white/40 border border-white/50 backdrop-blur-sm rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none resize-none"
+        />
+      ) : (
+        <input 
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full bg-white/40 border border-white/50 backdrop-blur-sm rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none"
+        />
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40" onClick={() => setIsOpen(false)} />
+      <div className="fixed inset-y-4 right-4 w-96 rounded-3xl bg-white/70 backdrop-blur-2xl border border-white/40 shadow-2xl z-50 flex flex-col overflow-hidden animate-in slide-in-from-right duration-500 ease-out">
+        
+        {/* Header */}
+        <div className="p-5 border-b border-white/20 flex items-center justify-between bg-white/10">
+          <h2 className="font-bold text-lg flex items-center gap-2 text-gray-800">
+            <span className="bg-gradient-to-r from-terracotta to-sage bg-clip-text text-transparent">Admin</span> Studio
+            {!isPro && <span className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full uppercase">Free</span>}
+            {isPro && <span className="text-[10px] bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full uppercase font-bold flex items-center gap-1"><Crown size={10}/> Pro</span>}
+          </h2>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => { setIsAuthenticated(false); setIsOpen(false); }} 
+              className="p-2 hover:bg-red-50 text-red-500 rounded-full" 
+              title="Logout"
+            >
+              <Lock size={16}/>
+            </button>
+            <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-black/5 rounded-full"><X size={20}/></button>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex p-2 gap-1 overflow-x-auto scrollbar-hide">
+          {[
+            { id: 'plan', icon: Crown, label: 'Plano', highlight: !isPro },
+            { id: 'help', icon: HelpCircle, label: 'Ajuda' },
+            { id: 'themes', icon: Palette, label: 'Temas' },
+            { id: 'branding', icon: Link, label: 'Marca' },
+            { id: 'home', icon: Layout, label: 'Home' },
+            { id: 'products', icon: ShoppingBag, label: 'Itens' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex-1 py-2 px-3 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase transition-all whitespace-nowrap ${
+                activeTab === tab.id ? 'bg-white shadow-md text-gray-900 scale-105' : 'text-gray-500 hover:bg-white/30'
+              } ${tab.highlight ? 'text-yellow-600 bg-yellow-50' : ''}`}
+            >
+              <tab.icon size={18} className={tab.highlight ? 'fill-yellow-500 text-yellow-600' : ''} /> {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
+
+          {activeTab === 'help' && (
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                <h3 className="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
+                  <BookOpen size={16} /> Bem-vindo ao Vitrine
+                </h3>
+                <p className="text-xs text-blue-600 leading-relaxed mb-3">
+                  Este é seu painel de controle. Aqui você pode personalizar toda a aparência e funcionamento da sua loja virtual sem precisar de código.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <FAQItem 
+                  title="Primeiros Passos"
+                  content="Comece na aba 'Marca' para definir seu logo e nome. Depois, vá em 'Temas' para escolher as cores. Por fim, use 'Home' e 'Itens' para cadastrar seus produtos."
+                />
+                <FAQItem 
+                  title="Modos de Loja"
+                  content={
+                    <ul className="list-disc pl-4 space-y-1">
+                      <li><strong>Híbrido:</strong> O padrão. Permite carrinho de compras E links externos (afiliados).</li>
+                      <li><strong>Apenas Loja (Pro):</strong> Foca 100% no carrinho e envio do pedido para o WhatsApp.</li>
+                      <li><strong>Apenas Afiliado (Pro):</strong> Remove o carrinho e transforma todos os botões em links externos.</li>
+                    </ul>
+                  }
+                />
+                <FAQItem 
+                  title="Como recebo os pedidos?"
+                  content="Os pedidos feitos no carrinho geram uma mensagem automática formatada que o cliente envia para o seu WhatsApp cadastrado na aba 'Marca'."
+                />
+                <FAQItem 
+                  title="Como funciona o Plano Pro?"
+                  content="O plano Pro desbloqueia funcionalidades avançadas como modos exclusivos de loja, remoção de limites e controle total sobre o botão flutuante do WhatsApp."
+                />
+                <FAQItem 
+                  title="Esqueci meu PIN"
+                  content="O PIN padrão é '1234' (Demo) ou '0000' (Tech). Você pode alterá-lo na aba 'Marca' no final da página."
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'plan' && (
+            <div className="space-y-4">
+              <div className={`p-6 rounded-2xl text-center border-2 ${isPro ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white/50'}`}>
+                {isPro ? (
+                  <>
+                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+                        <Crown size={32} fill="currentColor" />
+                     </div>
+                     <h3 className="text-xl font-bold text-gray-800">Membro Premium</h3>
+                     <p className="text-sm text-gray-500 mb-4">Você tem acesso total a todos os recursos.</p>
+                     <div className="text-xs font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full inline-block">ATIVO</div>
+                  </>
+                ) : (
+                  <>
+                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                        <Lock size={32} />
+                     </div>
+                     <h3 className="text-xl font-bold text-gray-800">Plano Gratuito</h3>
+                     <p className="text-sm text-gray-500 mb-6">Desbloqueie modos exclusivos e remova limites.</p>
+                     <button 
+                       onClick={() => setIsPaymentOpen(true)}
+                       className="w-full py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl shadow-lg hover:scale-105 transition-transform font-bold flex items-center justify-center gap-2"
+                     >
+                       <Crown size={18} fill="gold" className="text-yellow-400" />
+                       Fazer Upgrade (R$ 29/mês)
+                     </button>
+                  </>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-gray-500 uppercase ml-1">Comparativo</h4>
+                <div className="bg-white/40 rounded-xl p-3 border border-white/50">
+                   <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-xs font-bold text-gray-700">Produtos Ilimitados</span>
+                      <CheckIcon active={true} />
+                   </div>
+                   <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-xs font-bold text-gray-700">Temas Premium</span>
+                      <CheckIcon active={true} />
+                   </div>
+                   <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-xs font-bold text-gray-700 flex items-center gap-1">Modo Loja <Crown size={10} className="text-yellow-600"/></span>
+                      <CheckIcon active={isPro} />
+                   </div>
+                   <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                      <span className="text-xs font-bold text-gray-700 flex items-center gap-1">Modo Afiliado <Crown size={10} className="text-yellow-600"/></span>
+                      <CheckIcon active={isPro} />
+                   </div>
+                   <div className="flex items-center justify-between py-2">
+                      <span className="text-xs font-bold text-gray-700 flex items-center gap-1">Controle WhatsApp <Crown size={10} className="text-yellow-600"/></span>
+                      <CheckIcon active={isPro} />
+                   </div>
+                </div>
+              </div>
+
+              {/* DEVELOPER BYPASS */}
+              <div className="mt-8 border-t border-dashed border-gray-300 pt-4">
+                  <div className="flex items-center justify-center gap-2 mb-3 text-gray-400">
+                      <Terminal size={12} />
+                      <p className="text-[10px] font-bold uppercase tracking-widest">Área do Desenvolvedor</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                      <button 
+                          onClick={() => {
+                              updateConfig({...config, plan: 'free'});
+                              addToast('Forçado para plano Free');
+                          }}
+                          className="py-2 px-3 rounded-lg bg-gray-100 text-gray-500 text-xs font-bold hover:bg-gray-200 transition-colors"
+                      >
+                          Forçar Free
+                      </button>
+                      <button 
+                          onClick={() => {
+                              updateConfig({...config, plan: 'pro'});
+                              addToast('Forçado para plano Pro');
+                          }}
+                          className="py-2 px-3 rounded-lg bg-yellow-50 text-yellow-700 text-xs font-bold border border-yellow-200 hover:bg-yellow-100 transition-colors flex items-center justify-center gap-1"
+                      >
+                          <Crown size={12} /> Forçar Pro
+                      </button>
+                  </div>
+              </div>
+            </div>
+          )}
+          
+          {activeTab === 'themes' && (
+            <div className="space-y-3">
+              <div className="bg-white/40 p-3 rounded-xl border border-white/50 mb-4">
+                  <h3 className="text-xs font-bold text-gray-700 uppercase mb-2">Ajuste Rápido (Atual)</h3>
+                  <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-600">Cor Fundo Quiz</span>
+                      <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full shadow-sm border border-white" style={{backgroundColor: config.quiz.bgColor}}></div>
+                          <input 
+                              type="color" 
+                              value={config.quiz.bgColor} 
+                              onChange={(e) => updateNestedConfig('quiz.bgColor', e.target.value)}
+                              className="w-8 h-8 rounded-lg cursor-pointer border-0 p-0"
+                          />
+                      </div>
+                  </div>
+              </div>
+
+              <h3 className="text-xs font-bold text-gray-700 uppercase mb-2">Bibliotecas de Temas</h3>
+              <div className="grid grid-cols-1 gap-3">
+                {themesList.map(theme => (
+                  <div key={theme.id} className="flex items-center gap-2 p-2 bg-white/40 rounded-xl border border-white/50 hover:shadow-md transition-all">
+                      <button
+                        onClick={() => applyTheme(theme)}
+                        className="flex-1 flex items-center gap-4 text-left"
+                      >
+                        <div className="flex -space-x-2">
+                          {theme.colors.map((c, i) => <div key={i} className="w-6 h-6 rounded-full border border-white" style={{ backgroundColor: c }} />)}
+                        </div>
+                        <span className="font-bold text-xs text-gray-700">{theme.name}</span>
+                      </button>
+                      
+                      <div className="flex flex-col items-center border-l border-white/50 pl-2">
+                          <label className="text-[8px] font-bold text-gray-400 uppercase mb-1">Quiz</label>
+                          <input 
+                             type="color" 
+                             value={theme.config.quiz.bgColor}
+                             onChange={(e) => updateThemeQuizColor(theme.id, e.target.value)}
+                             title="Cor do Quiz Card"
+                             className="w-6 h-6 rounded-full border-none p-0 overflow-hidden cursor-pointer shadow-sm"
+                          />
+                      </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'social' && (
+             <div className="space-y-4">
+               <div className="bg-white/40 border border-white/50 rounded-xl p-3">
+                 <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
+                   <Share2 size={14} /> Redes Sociais
+                 </h3>
+                 <p className="text-[10px] text-gray-500 mb-3">Links que aparecerão no rodapé do app.</p>
+
+                 <InputGroup label="Instagram (@usuario ou link)" value={config.social.instagram} onChange={(v) => updateNestedConfig('social.instagram', v)} />
+                 <InputGroup label="Facebook (Link)" value={config.social.facebook} onChange={(v) => updateNestedConfig('social.facebook', v)} />
+                 <InputGroup label="TikTok (Link)" value={config.social.tiktok} onChange={(v) => updateNestedConfig('social.tiktok', v)} />
+               </div>
+
+               <div className="bg-white/40 border border-white/50 rounded-xl p-3">
+                 <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
+                   <MapPin size={14} /> Endereço Físico
+                 </h3>
+                 <InputGroup label="Endereço Completo" value={config.location.address} onChange={(v) => updateNestedConfig('location.address', v)} />
+                 <InputGroup label="Link do Google Maps Embed (iframe)" value={config.location.mapUrl} onChange={(v) => updateNestedConfig('location.mapUrl', v)} textarea placeholder="Cole a URL do src do iframe do Google Maps aqui" />
+               </div>
+             </div>
+          )}
+
+          {activeTab === 'branding' && (
+             <div className="space-y-4">
+               {/* CONFIGURAÇÕES GERAIS DA LOJA */}
+               <div className="bg-white/40 border border-white/50 rounded-xl p-3 mb-4 relative overflow-hidden">
+                  <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
+                    <Store size={14} /> Modo de Operação
+                  </h3>
+                  
+                  <div className="space-y-2 relative z-10">
+                     <label className="flex items-center gap-3 p-2 bg-white/50 rounded-lg cursor-pointer hover:bg-white/80 transition-colors">
+                        <input 
+                           type="radio" 
+                           name="storeMode" 
+                           checked={config.storeMode === 'mixed'} 
+                           onChange={() => handleStoreModeChange('mixed')}
+                           className="text-terracotta focus:ring-terracotta"
+                        />
+                        <div>
+                           <p className="text-xs font-bold text-gray-800">Híbrido (Padrão)</p>
+                           <p className="text-[10px] text-gray-500">Carrinho + Links Externos</p>
+                        </div>
+                     </label>
+
+                     <label className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${!isPro ? 'opacity-50 grayscale bg-gray-100' : 'bg-white/50 hover:bg-white/80'}`}>
+                        <div className="relative">
+                          <input 
+                             type="radio" 
+                             name="storeMode" 
+                             checked={config.storeMode === 'store'} 
+                             onChange={() => handleStoreModeChange('store')}
+                             className="text-terracotta focus:ring-terracotta"
+                             disabled={!isPro}
+                          />
+                        </div>
+                        <div className="flex-1">
+                           <div className="flex justify-between items-center">
+                              <p className="text-xs font-bold text-gray-800">Apenas Loja</p>
+                              {!isPro && <Lock size={12} className="text-gray-500"/>}
+                           </div>
+                           <p className="text-[10px] text-gray-500">Apenas Carrinho / WhatsApp</p>
+                        </div>
+                     </label>
+
+                     <label className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${!isPro ? 'opacity-50 grayscale bg-gray-100' : 'bg-white/50 hover:bg-white/80'}`}>
+                        <input 
+                           type="radio" 
+                           name="storeMode" 
+                           checked={config.storeMode === 'affiliate'} 
+                           onChange={() => handleStoreModeChange('affiliate')}
+                           className="text-terracotta focus:ring-terracotta"
+                           disabled={!isPro}
+                        />
+                        <div className="flex-1">
+                           <div className="flex justify-between items-center">
+                             <p className="text-xs font-bold text-gray-800">Apenas Afiliado</p>
+                             {!isPro && <Lock size={12} className="text-gray-500"/>}
+                           </div>
+                           <p className="text-[10px] text-gray-500">Esconde Carrinho. Foco em Links.</p>
+                        </div>
+                     </label>
+                  </div>
+               </div>
+               
+               {/* TOGGLE WHATSAPP */}
+               <div className={`bg-white/40 border border-white/50 rounded-xl p-3 ${!isPro ? 'opacity-60' : ''}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold text-gray-700 flex items-center gap-2">
+                        Botão WhatsApp Flutuante
+                        {!isPro && <Lock size={12} />}
+                    </span>
+                    <button 
+                        onClick={handleWhatsappToggle}
+                        className={`text-2xl transition-colors ${config.enableWhatsapp ? 'text-green-600' : 'text-gray-400'}`}
+                    >
+                        {config.enableWhatsapp ? <ToggleRight size={32} /> : <ToggleLeft size={32} />}
+                    </button>
+                  </div>
+                  
+                  {/* WhatsApp Label Selector */}
+                  {config.enableWhatsapp && (
+                      <div className="mt-2">
+                          <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Texto do Botão</label>
+                          <div className="relative">
+                            <select
+                                value={config.whatsapp.label}
+                                onChange={(e) => updateNestedConfig('whatsapp.label', e.target.value)}
+                                disabled={!isPro}
+                                className="w-full bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs outline-none appearance-none pr-8"
+                            >
+                                {WHATSAPP_LABELS.map((label) => (
+                                    <option key={label} value={label}>{label}</option>
+                                ))}
+                            </select>
+                            <ChevronDown size={14} className="absolute right-3 top-2.5 text-gray-400 pointer-events-none" />
+                          </div>
+                      </div>
+                  )}
+               </div>
+
+               {/* HEADER CONFIGURATION GROUP */}
+               <div className="bg-white/40 border border-white/50 rounded-xl p-3">
+                 <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
+                   <ImageIcon size={14} /> Identidade Visual
+                 </h3>
+
+                 {/* Logo Upload */}
+                 <div className="mb-4">
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2">Logotipo da Loja</label>
+                    <div className="flex items-center gap-3">
+                        <div className="w-16 h-16 bg-white rounded-xl border border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative group">
+                            {config.header.logoUrl ? (
+                                <img src={config.header.logoUrl} className="w-full h-full object-contain p-1" />
+                            ) : (
+                                <span className="text-gray-300 text-xs text-center px-1">Sem Logo</span>
+                            )}
+                            
+                            <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                                <Upload size={16} className="text-white" />
+                                <input 
+                                    type="file" 
+                                    accept="image/*"
+                                    className="hidden" 
+                                    onChange={(e) => handleImageUpload(e, (url) => updateNestedConfig('header.logoUrl', url))} 
+                                />
+                            </label>
+                        </div>
+                        
+                        <div className="flex-1 space-y-2">
+                            <p className="text-[10px] text-gray-500 leading-tight">
+                                Carregue sua logo para substituir o título em texto. <br/>
+                                <span className="text-[9px] opacity-70">Recomendado: PNG transparente.</span>
+                            </p>
+                            {config.header.logoUrl && (
+                                <button 
+                                    onClick={() => updateNestedConfig('header.logoUrl', '')}
+                                    className="px-3 py-1 bg-red-50 text-red-500 text-[10px] font-bold rounded-lg flex items-center gap-1 hover:bg-red-100 transition-colors"
+                                >
+                                    <Trash2 size={10} /> Remover Logo
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                 </div>
+
+                 <InputGroup label="Nome da Loja (Usado se sem logo)" value={config.header.title} onChange={(v) => updateNestedConfig('header.title', v)} />
+                 <InputGroup label="Subtítulo" value={config.header.subtitle} onChange={(v) => updateNestedConfig('header.subtitle', v)} />
+                 <div className="pt-2 border-t border-white/20 mt-2">
+                    <InputGroup label="Texto do Rodapé (Direitos Autorais)" value={config.footerText} onChange={(v) => updateConfig({...config, footerText: v})} />
+                 </div>
+               </div>
+
+               <InputGroup label="WhatsApp" value={config.whatsapp.phoneNumber} onChange={(v) => updateNestedConfig('whatsapp.phoneNumber', v)} />
+               
+               {/* Tracking & Location Toggle */}
+               <div className="pt-2 border-t border-white/20">
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-wider">Funcionalidades Extras</label>
+                  <div className="space-y-2">
+                    <button 
+                      onClick={() => toggleCard('tracking')}
+                      className={`w-full py-2 px-3 rounded-xl flex items-center justify-between text-xs font-bold transition-all ${hasTracking ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}
+                    >
+                      <span className="flex items-center gap-2">
+                        {hasTracking ? <MapPinOff size={14} /> : <MapPin size={14} />}
+                        Rastreio de Pedido
+                      </span>
+                      <span className="text-[10px] opacity-60 uppercase">{hasTracking ? 'Ativo' : 'Inativo'}</span>
+                    </button>
+
+                    <button 
+                      onClick={() => toggleCard('location')}
+                      className={`w-full py-2 px-3 rounded-xl flex items-center justify-between text-xs font-bold transition-all ${hasLocation ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}
+                    >
+                      <span className="flex items-center gap-2">
+                        {hasLocation ? <MapPinOff size={14} /> : <MapPin size={14} />}
+                        Mapa da Loja
+                      </span>
+                      <span className="text-[10px] opacity-60 uppercase">{hasLocation ? 'Ativo' : 'Inativo'}</span>
+                    </button>
+                  </div>
+               </div>
+
+               <div className="pt-2 border-t border-white/20">
+                 <InputGroup label="Alterar PIN Admin" value={config.adminPin} onChange={(v) => updateConfig({...config, adminPin: v})} />
+               </div>
+             </div>
+          )}
+
+          {activeTab === 'home' && (
+             <div className="space-y-6">
+                <div>
+                   <h3 className="font-bold text-xs text-gray-800 mb-2">Banners da Home</h3>
+                   {config.categories.map((cat, index) => (
+                     <div key={cat.id} className="mb-2 p-2 bg-white/40 rounded-xl border border-white/50 flex items-center justify-between">
+                        <span className="text-xs font-bold text-gray-600">{cat.title}</span>
+                        <div className="flex gap-2">
+                          <label className="cursor-pointer text-blue-500">
+                             <ImageIcon size={14} />
+                             <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, (url) => updateNestedConfig(`categories.${index}.imageUrl`, url))} />
+                          </label>
+                          {cat.id !== 'tracking' && cat.id !== 'location' && (
+                             <button onClick={() => removeCategory(index)} className="text-red-400"><Trash2 size={14} /></button>
+                          )}
+                        </div>
+                     </div>
+                   ))}
+                   <button onClick={addCategory} className="w-full py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 mt-2">
+                     <Plus size={14} /> Nova Categoria
+                   </button>
+                </div>
+             </div>
+          )}
+
+          {activeTab === 'products' && (
+             <div className="space-y-4">
+                <div className="mb-4">
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Selecionar Categoria</label>
+                  <select 
+                    value={selectedCategoryIndex}
+                    onChange={(e) => setSelectedCategoryIndex(Number(e.target.value))}
+                    className="w-full bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs outline-none"
+                  >
+                    {config.categories.map((cat, i) => (
+                      <option key={cat.id} value={i}>{cat.title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-3">
+                   {config.categories[selectedCategoryIndex]?.products.map((prod, pIndex) => (
+                     <div key={prod.id} className="bg-white/40 border border-white/50 rounded-xl p-3">
+                        <div className="flex gap-2 mb-2">
+                           <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0 relative group">
+                              <img src={prod.imageUrl} className="w-full h-full object-cover" />
+                              <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer text-white">
+                                <Upload size={12} />
+                                <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, (url) => updateProduct(selectedCategoryIndex, pIndex, 'imageUrl', url))} />
+                              </label>
+                           </div>
+                           <div className="flex-1 space-y-1">
+                              <input 
+                                value={prod.title} 
+                                onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'title', e.target.value)}
+                                className="w-full bg-transparent border-b border-gray-200 text-xs font-bold outline-none"
+                                placeholder="Nome do Produto"
+                              />
+                              <input 
+                                value={prod.price} 
+                                onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'price', e.target.value)}
+                                className="w-full bg-transparent border-b border-gray-200 text-xs text-green-600 outline-none"
+                                placeholder="Preço"
+                              />
+                           </div>
+                           <button onClick={() => removeProductFromCategory(selectedCategoryIndex, pIndex)} className="text-red-400 self-start">
+                             <Trash2 size={14} />
+                           </button>
+                        </div>
+                        <textarea 
+                          value={prod.description} 
+                          onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'description', e.target.value)}
+                          className="w-full bg-white/50 rounded-lg p-2 text-[10px] resize-none outline-none mb-2"
+                          placeholder="Descrição..."
+                          rows={2}
+                        />
+                        {/* Affiliate Link Input */}
+                        <div className="bg-blue-50/50 p-2 rounded-lg border border-blue-100">
+                           <div className="flex items-center gap-1 mb-1">
+                              <Link size={10} className="text-blue-500" />
+                              <label className="text-[9px] font-bold text-blue-600 uppercase">Link de Afiliado/Externo (Opcional)</label>
+                           </div>
+                           <input 
+                             value={prod.affiliateUrl || ''}
+                             onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'affiliateUrl', e.target.value)}
+                             placeholder="https://..."
+                             className="w-full bg-white border border-blue-100 rounded px-2 py-1 text-[10px] text-blue-800 outline-none"
+                           />
+                        </div>
+                     </div>
+                   ))}
+
+                   <button 
+                     onClick={handleAddProduct}
+                     className="w-full py-3 bg-green-50 text-green-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-green-100 shadow-sm"
+                   >
+                     <Plus size={14} /> Adicionar Produto em {config.categories[selectedCategoryIndex]?.title}
+                   </button>
+                </div>
+             </div>
+          )}
+
+        </div>
+        
+        {/* Footer */}
+        <div className="p-4 border-t border-white/20 bg-white/10">
+          <button onClick={resetConfig} className="w-full flex items-center justify-center gap-2 text-red-500 text-xs font-bold opacity-60 hover:opacity-100"><RotateCcw size={12}/> Resetar App</button>
+        </div>
+      </div>
+      
+      <PaymentGateway 
+        isOpen={isPaymentOpen} 
+        onClose={() => setIsPaymentOpen(false)}
+        onSuccess={upgradeToPro}
+        planName="Plano Pro"
+        price="R$ 29,90"
+      />
+    </>
+  );
+};
+
+// FAQ Accordion Component
+const FAQItem = ({ title, content }: { title: string, content: React.ReactNode }) => {
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <div className="bg-white/40 border border-white/50 rounded-xl overflow-hidden transition-all">
+      <button 
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-3 text-left hover:bg-white/30"
+      >
+        <span className="text-xs font-bold text-gray-700">{title}</span>
+        {open ? <ChevronUp size={14} className="text-gray-400"/> : <ChevronDown size={14} className="text-gray-400"/>}
+      </button>
+      {open && (
+        <div className="px-3 pb-3 pt-0">
+          <div className="text-[11px] text-gray-600 leading-relaxed border-t border-gray-100 pt-2">
+            {content}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const CheckIcon = ({ active }: { active: boolean }) => (
+  active ? 
+  <div className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center text-green-600"><Unlock size={10} /></div> : 
+  <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><Lock size={10} /></div>
+);
+
+export default AdminPanel;
