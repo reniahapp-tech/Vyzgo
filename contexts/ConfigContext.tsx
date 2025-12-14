@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AppConfig, CategoryItem, CartItem, ViewState, ProductItem, Toast } from '../types';
+import { useNavigate } from 'react-router-dom';
+import { AppConfig, CategoryItem, CartItem, ProductItem, Toast } from '../types';
 
 // SAAS CONFIGURATION
 const DEFAULT_STORE_ID = 'demo';
@@ -11,7 +12,7 @@ const BASE_CONFIGS: Record<string, AppConfig> = {
     storeMode: 'mixed',
     enableWhatsapp: true,
     plan: 'free',
-    footerText: 'Feito com amor por Geenfo 🌿',
+    footerText: 'Vitrine App - Demonstração',
     theme: {
       backgroundColor: '#FDFBF7',
       primaryColor: '#C27B63',
@@ -20,64 +21,70 @@ const BASE_CONFIGS: Record<string, AppConfig> = {
       textColor: '#1A2E22',
     },
     header: {
-      title: 'Sua Marca',
-      subtitle: 'Adapta-se ao seu negócio',
+      title: 'Boutique Elegance',
+      subtitle: 'Moda que inspira você',
       logoUrl: '',
-      avatarUrl: '', 
+      avatarUrl: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=300&auto=format&fit=crop',
       showStatus: true,
     },
     hero: {
-      title: 'Destaque da Semana',
-      subtitle: 'Use este espaço para promover seu principal produto ou coleção.',
-      description: 'Esta é uma descrição de exemplo. No seu app, você detalhará os benefícios do seu produto estrela aqui.',
-      price: 'R$ 99,90',
-      buttonText: 'Ver Detalhes',
-      imageUrl: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=1887&auto=format&fit=crop',
+      title: 'Coleção Verão 2025',
+      subtitle: 'Leveza e estilo para os dias de sol.',
+      description: 'Descubra peças exclusivas feitas com tecidos sustentáveis e design atemporal. A escolha perfeita para quem busca conforto sem abrir mão da elegância.',
+      price: 'A partir de R$ 89,90',
+      buttonText: 'Ver Coleção',
+      imageUrl: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=1000&auto=format&fit=crop',
     },
     categories: [
       {
-        id: 'cat1',
-        title: 'Categoria A',
-        subtitle: 'Seus produtos aqui',
-        iconKey: 'ShoppingBag',
-        bgColor: '#EFF5F2',
-        iconColor: '#38BDF8',
+        id: 'lancamentos',
+        title: 'Lançamentos',
+        subtitle: 'Novidades da semana',
+        iconKey: 'Sparkles',
+        bgColor: '#FFF5F5',
+        iconColor: '#E53E3E',
         products: [
-           { id: '1', title: 'Produto Exemplo 1', price: 'R$ 45,90', description: 'Descrição curta do produto.', imageUrl: 'https://images.unsplash.com/photo-1608571423902-eed4a5e84e43?q=80&w=1000' }
+          { id: 'l1', title: 'Vestido Floral Midi', price: 'R$ 149,90', description: 'Vestido leve com estampa floral exclusiva, perfeito para ocasiões diurnas.', imageUrl: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?q=80&w=800' },
+          { id: 'l2', title: 'Conjunto Linho Bege', price: 'R$ 219,90', description: 'Elegância e frescor. Conjunto de calça e blazer em linho puro.', imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800' }
         ]
       },
       {
-        id: 'cat2',
-        title: 'Categoria B',
-        subtitle: 'Mais vendidos',
-        iconKey: 'Star',
-        bgColor: '#EFF5F2',
-        iconColor: '#059669',
-        products: []
+        id: 'acessorios',
+        title: 'Acessórios',
+        subtitle: 'Complemente seu look',
+        iconKey: 'ShoppingBag',
+        bgColor: '#F0FFF4',
+        iconColor: '#38A169',
+        products: [
+          { id: 'a1', title: 'Bolsa Couro Caramelo', price: 'R$ 289,90', description: 'Design minimalista e espaçosa. Ideal para o dia a dia.', imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=800' },
+          { id: 'a2', title: 'Óculos de Sol Vintage', price: 'R$ 99,90', description: 'Proteção UV400 com estilo retrô.', imageUrl: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?q=80&w=800' }
+        ]
       },
       {
-        id: 'cat3',
-        title: 'Serviços',
-        subtitle: 'Consultoria & Mais',
-        iconKey: 'Zap',
-        bgColor: '#FFF9EE',
-        iconColor: '#EF4444',
-        products: []
+        id: 'sapatos',
+        title: 'Sapatos',
+        subtitle: 'Conforto e design',
+        iconKey: 'Anchor',
+        bgColor: '#EEF2FF',
+        iconColor: '#6366F1',
+        products: [
+          { id: 's1', title: 'Sandália Salto Bloco', price: 'R$ 129,90', description: 'Conforto garantido para o dia todo.', imageUrl: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800' }
+        ]
       },
       {
         id: 'tracking',
         title: 'Rastrear Pedido',
-        subtitle: 'Status de entrega',
+        subtitle: 'Acompanhe sua entrega',
         iconKey: 'Package',
         bgColor: '#FFFFFF',
-        iconColor: '#B45309',
+        iconColor: '#D97706',
         hasBorder: true,
         products: []
       },
       {
         id: 'location',
-        title: 'Localização',
-        subtitle: 'Onde nos encontrar',
+        title: 'Nossa Loja',
+        subtitle: 'Venha nos visitar',
         iconKey: 'MapPin',
         bgColor: '#FDFBF7',
         iconColor: '#C27B63',
@@ -86,23 +93,23 @@ const BASE_CONFIGS: Record<string, AppConfig> = {
       }
     ],
     quiz: {
-      title: 'Consultoria Digital',
-      subtitle: 'Ajude seu cliente a escolher.',
+      title: 'Personal Stylist',
+      subtitle: 'Descubra seu estilo ideal em 1 min.',
       emoji: '✨',
-      bgColor: '#8DA893',
+      bgColor: '#C27B63',
     },
     whatsapp: {
-      label: 'Falar com Atendente',
+      label: 'Falar com Consultora',
       phoneNumber: '5511999999999',
     },
     location: {
       enabled: true,
-      address: 'Seu Endereço Aqui - Cidade, UF',
+      address: 'Rua Oscar Freire, 1234 - Jardins, São Paulo',
       mapUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.197577884869!2d-46.65429988502223!3d-23.563842984681657!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce59c8da0aa315%3A0xd59f9431f2c9776a!2sAv.%20Paulista%2C%201000%20-%20Bela%20Vista%2C%20S%C3%A3o%20Paulo%20-%20SP%2C%2001310-100!5e0!3m2!1spt-BR!2sbr!4v1647891234567!5m2!1spt-BR!2sbr'
     },
     social: {
-      instagram: 'sualoja',
-      facebook: '',
+      instagram: 'boutique.elegance',
+      facebook: 'boutiqueelegance',
       tiktok: ''
     }
   },
@@ -124,7 +131,7 @@ const BASE_CONFIGS: Record<string, AppConfig> = {
       title: 'TechStore',
       subtitle: 'Eletrônicos Premium',
       logoUrl: '',
-      avatarUrl: '', 
+      avatarUrl: '',
       showStatus: true,
     },
     hero: {
@@ -185,20 +192,20 @@ interface ConfigContextType {
   isCartOpen: boolean;
   isTrackingOpen: boolean;
   isLocationOpen: boolean; // NEW
-  currentView: ViewState;
+
   toasts: Toast[];
-  
+
   navigateHome: () => void;
   navigateCategory: (categoryId: string) => void;
   navigateProduct: (productId: string, fromCategoryId: string) => void;
-  
+
   setIsCartOpen: (isOpen: boolean) => void;
   setIsTrackingOpen: (isOpen: boolean) => void;
   setIsLocationOpen: (isOpen: boolean) => void; // NEW
   addToCart: (item: Omit<CartItem, 'id' | 'priceValue'>) => void;
   removeFromCart: (id: string) => void;
   getCartTotal: () => number;
-  
+
   addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   removeToast: (id: string) => void;
 
@@ -236,6 +243,7 @@ const getStoreId = () => {
 };
 
 export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
   const [storeId, setStoreId] = useState(getStoreId());
   const storageKey = `app_config_${storeId}_v6`; // Bump version for footerText
 
@@ -269,10 +277,10 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         const parsed = JSON.parse(savedConfig);
         const base = BASE_CONFIGS[storeId] || BASE_CONFIGS['demo'];
         // Merge allows new fields to appear in old configs
-        return { 
-          ...base, 
+        return {
+          ...base,
           ...parsed,
-          footerText: parsed.footerText || base.footerText, 
+          footerText: parsed.footerText || base.footerText,
           location: { ...base.location, ...parsed.location },
           social: { ...base.social, ...parsed.social }
         };
@@ -287,7 +295,8 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<ViewState>({ type: 'HOME' });
+
+  // currentView removed
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   useEffect(() => {
@@ -316,9 +325,9 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
-  const navigateHome = () => setCurrentView({ type: 'HOME' });
-  const navigateCategory = (categoryId: string) => setCurrentView({ type: 'CATEGORY', categoryId });
-  const navigateProduct = (productId: string, fromCategoryId: string) => setCurrentView({ type: 'PRODUCT', productId, fromCategoryId });
+  const navigateHome = () => navigate('/');
+  const navigateCategory = (categoryId: string) => navigate(`/category/${categoryId}`);
+  const navigateProduct = (productId: string, fromCategoryId: string) => navigate(`/product/${productId}`, { state: { fromCategoryId } });
 
   const addToCart = (item: Omit<CartItem, 'id' | 'priceValue'>) => {
     const newItem: CartItem = {
@@ -396,7 +405,7 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     const base = BASE_CONFIGS[storeId] || BASE_CONFIGS['demo'];
     setConfig(base);
     localStorage.removeItem(storageKey);
-    setCurrentView({ type: 'HOME' });
+    navigate('/');
     addToast('Loja resetada para o padrão!', 'info');
   };
 
@@ -406,8 +415,8 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   };
 
   return (
-    <ConfigContext.Provider value={{ 
-      storeId, config, cart, isCartOpen, currentView, toasts, isTrackingOpen, isLocationOpen,
+    <ConfigContext.Provider value={{
+      storeId, config, cart, isCartOpen, toasts, isTrackingOpen, isLocationOpen,
       navigateHome, navigateCategory, navigateProduct,
       setIsCartOpen, setIsTrackingOpen, setIsLocationOpen, addToCart, removeFromCart, getCartTotal,
       addToast, removeToast,

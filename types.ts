@@ -18,7 +18,7 @@ export interface CategoryItem {
   iconColor: string;
   hasBorder?: boolean;
   imageUrl?: string;
-  products: ProductItem[]; 
+  products: ProductItem[];
 }
 
 export interface CartItem {
@@ -31,10 +31,9 @@ export interface CartItem {
   quantity: number;
 }
 
-export type ViewState = 
-  | { type: 'HOME' }
-  | { type: 'CATEGORY', categoryId: string }
-  | { type: 'PRODUCT', productId: string, fromCategoryId: string };
+
+// ViewState removed in favor of React Router
+
 
 export interface Toast {
   id: string;
@@ -48,7 +47,7 @@ export type PlanType = 'free' | 'pro';
 
 export interface AppConfig {
   adminPin: string;
-  storeMode: StoreMode; 
+  storeMode: StoreMode;
   enableWhatsapp: boolean;
   plan: PlanType;
   footerText: string; // New Field

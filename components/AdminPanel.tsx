@@ -4,6 +4,7 @@ import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus
 import { availableIcons } from './IconMapper';
 import { ProductItem } from '../types';
 import PaymentGateway from './PaymentGateway';
+import { uploadToR2 } from '../services/r2';
 
 // Preset Themes Configuration
 const PRESET_THEMES = [
@@ -252,7 +253,7 @@ const AdminPanel: React.FC = () => {
   const [pinInput, setPinInput] = useState('');
   const [activeTab, setActiveTab] = useState<'themes' | 'branding' | 'home' | 'products' | 'plan' | 'social' | 'help'>('themes');
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
-  
+
   // State for editable presets
   const [themesList, setThemesList] = useState(PRESET_THEMES);
 
@@ -270,32 +271,46 @@ const AdminPanel: React.FC = () => {
 
   const updateThemeQuizColor = (id: string, color: string) => {
     setThemesList(prev => prev.map(theme => {
-        if (theme.id === id) {
-            return {
-                ...theme,
-                config: {
-                    ...theme.config,
-                    quiz: {
-                        ...theme.config.quiz,
-                        bgColor: color
-                    }
-                }
-            };
-        }
-        return theme;
+      if (theme.id === id) {
+        return {
+          ...theme,
+          config: {
+            ...theme.config,
+            quiz: {
+              ...theme.config.quiz,
+              bgColor: color
+            }
+          }
+        };
+      }
+      return theme;
     }));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert("Imagem muito grande! Máximo 2MB.");
+      // Limit 5MB for R2
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Imagem muito grande! Máximo 5MB.");
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => callback(reader.result as string);
-      reader.readAsDataURL(file);
+
+      addToast('Iniciando upload...', 'info');
+
+      try {
+        const url = await uploadToR2(file);
+        callback(url);
+        addToast('Upload concluído!', 'success');
+      } catch (error) {
+        console.error("R2 Upload failed, falling back to base64", error);
+        addToast('Erro no R2. Usando modo offline (limitado).', 'error');
+
+        // Fallback to Base64
+        const reader = new FileReader();
+        reader.onloadend = () => callback(reader.result as string);
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -325,27 +340,27 @@ const AdminPanel: React.FC = () => {
   // Helper to check if Tracking/Location is active
   const hasTracking = config.categories.some(c => c.id === 'tracking');
   const hasLocation = config.categories.some(c => c.id === 'location');
-  
+
   const toggleCard = (type: 'tracking' | 'location') => {
     if (type === 'tracking') {
-       if (hasTracking) {
-         updateConfig({ ...config, categories: config.categories.filter(c => c.id !== 'tracking') });
-         addToast('Card de Rastreio removido.');
-       } else {
-         const trackingCat = { id: 'tracking', title: 'Rastrear Pedido', subtitle: 'Localize sua caixa', iconKey: 'Package', bgColor: '#FFFFFF', iconColor: config.theme.primaryColor, hasBorder: true, products: [] };
-         updateConfig({ ...config, categories: [...config.categories, trackingCat] });
-         addToast('Card de Rastreio adicionado.');
-       }
+      if (hasTracking) {
+        updateConfig({ ...config, categories: config.categories.filter(c => c.id !== 'tracking') });
+        addToast('Card de Rastreio removido.');
+      } else {
+        const trackingCat = { id: 'tracking', title: 'Rastrear Pedido', subtitle: 'Localize sua caixa', iconKey: 'Package', bgColor: '#FFFFFF', iconColor: config.theme.primaryColor, hasBorder: true, products: [] };
+        updateConfig({ ...config, categories: [...config.categories, trackingCat] });
+        addToast('Card de Rastreio adicionado.');
+      }
     }
     if (type === 'location') {
-       if (hasLocation) {
-         updateConfig({ ...config, categories: config.categories.filter(c => c.id !== 'location') });
-         addToast('Card de Mapa removido.');
-       } else {
-         const locCat = { id: 'location', title: 'Nossa Loja', subtitle: 'Venha nos visitar', iconKey: 'MapPin', bgColor: '#FDFBF7', iconColor: config.theme.primaryColor, hasBorder: true, products: [] };
-         updateConfig({ ...config, categories: [...config.categories, locCat] });
-         addToast('Card de Mapa adicionado.');
-       }
+      if (hasLocation) {
+        updateConfig({ ...config, categories: config.categories.filter(c => c.id !== 'location') });
+        addToast('Card de Mapa removido.');
+      } else {
+        const locCat = { id: 'location', title: 'Nossa Loja', subtitle: 'Venha nos visitar', iconKey: 'MapPin', bgColor: '#FDFBF7', iconColor: config.theme.primaryColor, hasBorder: true, products: [] };
+        updateConfig({ ...config, categories: [...config.categories, locCat] });
+        addToast('Card de Mapa adicionado.');
+      }
     }
   };
 
@@ -354,7 +369,7 @@ const AdminPanel: React.FC = () => {
       setIsPaymentOpen(true); // Trigger payment gateway for pro features
       return;
     }
-    updateConfig({...config, storeMode: mode});
+    updateConfig({ ...config, storeMode: mode });
   };
 
   const handleWhatsappToggle = () => {
@@ -362,13 +377,13 @@ const AdminPanel: React.FC = () => {
       setIsPaymentOpen(true);
       return;
     }
-    updateConfig({...config, enableWhatsapp: !config.enableWhatsapp});
+    updateConfig({ ...config, enableWhatsapp: !config.enableWhatsapp });
   };
 
   // 1. Button to open panel (always visible)
   if (!isOpen) {
     return (
-      <button 
+      <button
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 bg-white/10 backdrop-blur-md border border-white/20 text-dark p-4 rounded-full shadow-2xl z-50 hover:bg-white/30 transition-all hover:scale-110 group"
         title="Admin Panel"
@@ -389,42 +404,42 @@ const AdminPanel: React.FC = () => {
       <>
         <div className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40" onClick={() => setIsOpen(false)} />
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in zoom-in-95 duration-200">
-           <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 w-full max-w-xs border border-white">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="font-bold text-lg text-gray-800 flex items-center gap-2">
-                  <Lock size={18} /> Acesso Restrito
-                </h2>
-                <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-black/5 rounded-full"><X size={20}/></button>
-              </div>
-              
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="text-center mb-2">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center text-3xl mb-2 shadow-inner">
-                    🔐
-                  </div>
-                  <p className="text-sm text-gray-500">Digite o PIN do proprietário.</p>
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 w-full max-w-xs border border-white">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+                <Lock size={18} /> Acesso Restrito
+              </h2>
+              <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-black/5 rounded-full"><X size={20} /></button>
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="text-center mb-2">
+                <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center text-3xl mb-2 shadow-inner">
+                  🔐
                 </div>
-                
-                <input 
-                  type="password" 
-                  autoFocus
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={pinInput}
-                  onChange={(e) => setPinInput(e.target.value)}
-                  placeholder="PIN"
-                  className="w-full text-center text-2xl font-bold tracking-widest py-3 rounded-xl bg-white border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                  maxLength={6}
-                />
-                
-                <button 
-                  type="submit"
-                  className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors"
-                >
-                  Entrar
-                </button>
-              </form>
-           </div>
+                <p className="text-sm text-gray-500">Digite o PIN do proprietário.</p>
+              </div>
+
+              <input
+                type="password"
+                autoFocus
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value)}
+                placeholder="PIN"
+                className="w-full text-center text-2xl font-bold tracking-widest py-3 rounded-xl bg-white border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                maxLength={6}
+              />
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors"
+              >
+                Entrar
+              </button>
+            </form>
+          </div>
         </div>
       </>
     );
@@ -435,7 +450,7 @@ const AdminPanel: React.FC = () => {
     <div className="mb-3 group">
       <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-wider">{label}</label>
       {textarea ? (
-        <textarea 
+        <textarea
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
@@ -443,7 +458,7 @@ const AdminPanel: React.FC = () => {
           className="w-full bg-white/40 border border-white/50 backdrop-blur-sm rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none resize-none"
         />
       ) : (
-        <input 
+        <input
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
@@ -457,23 +472,23 @@ const AdminPanel: React.FC = () => {
     <>
       <div className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40" onClick={() => setIsOpen(false)} />
       <div className="fixed inset-y-4 right-4 w-96 rounded-3xl bg-white/70 backdrop-blur-2xl border border-white/40 shadow-2xl z-50 flex flex-col overflow-hidden animate-in slide-in-from-right duration-500 ease-out">
-        
+
         {/* Header */}
         <div className="p-5 border-b border-white/20 flex items-center justify-between bg-white/10">
           <h2 className="font-bold text-lg flex items-center gap-2 text-gray-800">
             <span className="bg-gradient-to-r from-terracotta to-sage bg-clip-text text-transparent">Admin</span> Studio
             {!isPro && <span className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full uppercase">Free</span>}
-            {isPro && <span className="text-[10px] bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full uppercase font-bold flex items-center gap-1"><Crown size={10}/> Pro</span>}
+            {isPro && <span className="text-[10px] bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full uppercase font-bold flex items-center gap-1"><Crown size={10} /> Pro</span>}
           </h2>
           <div className="flex items-center gap-2">
-            <button 
-              onClick={() => { setIsAuthenticated(false); setIsOpen(false); }} 
-              className="p-2 hover:bg-red-50 text-red-500 rounded-full" 
+            <button
+              onClick={() => { setIsAuthenticated(false); setIsOpen(false); }}
+              className="p-2 hover:bg-red-50 text-red-500 rounded-full"
               title="Logout"
             >
-              <Lock size={16}/>
+              <Lock size={16} />
             </button>
-            <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-black/5 rounded-full"><X size={20}/></button>
+            <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-black/5 rounded-full"><X size={20} /></button>
           </div>
         </div>
 
@@ -490,9 +505,8 @@ const AdminPanel: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex-1 py-2 px-3 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase transition-all whitespace-nowrap ${
-                activeTab === tab.id ? 'bg-white shadow-md text-gray-900 scale-105' : 'text-gray-500 hover:bg-white/30'
-              } ${tab.highlight ? 'text-yellow-600 bg-yellow-50' : ''}`}
+              className={`flex-1 py-2 px-3 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-white shadow-md text-gray-900 scale-105' : 'text-gray-500 hover:bg-white/30'
+                } ${tab.highlight ? 'text-yellow-600 bg-yellow-50' : ''}`}
             >
               <tab.icon size={18} className={tab.highlight ? 'fill-yellow-500 text-yellow-600' : ''} /> {tab.label}
             </button>
@@ -514,11 +528,11 @@ const AdminPanel: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <FAQItem 
+                <FAQItem
                   title="Primeiros Passos"
                   content="Comece na aba 'Marca' para definir seu logo e nome. Depois, vá em 'Temas' para escolher as cores. Por fim, use 'Home' e 'Itens' para cadastrar seus produtos."
                 />
-                <FAQItem 
+                <FAQItem
                   title="Modos de Loja"
                   content={
                     <ul className="list-disc pl-4 space-y-1">
@@ -528,15 +542,15 @@ const AdminPanel: React.FC = () => {
                     </ul>
                   }
                 />
-                <FAQItem 
+                <FAQItem
                   title="Como recebo os pedidos?"
                   content="Os pedidos feitos no carrinho geram uma mensagem automática formatada que o cliente envia para o seu WhatsApp cadastrado na aba 'Marca'."
                 />
-                <FAQItem 
+                <FAQItem
                   title="Como funciona o Plano Pro?"
                   content="O plano Pro desbloqueia funcionalidades avançadas como modos exclusivos de loja, remoção de limites e controle total sobre o botão flutuante do WhatsApp."
                 />
-                <FAQItem 
+                <FAQItem
                   title="Esqueci meu PIN"
                   content="O PIN padrão é '1234' (Demo) ou '0000' (Tech). Você pode alterá-lo na aba 'Marca' no final da página."
                 />
@@ -549,27 +563,27 @@ const AdminPanel: React.FC = () => {
               <div className={`p-6 rounded-2xl text-center border-2 ${isPro ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white/50'}`}>
                 {isPro ? (
                   <>
-                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
-                        <Crown size={32} fill="currentColor" />
-                     </div>
-                     <h3 className="text-xl font-bold text-gray-800">Membro Premium</h3>
-                     <p className="text-sm text-gray-500 mb-4">Você tem acesso total a todos os recursos.</p>
-                     <div className="text-xs font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full inline-block">ATIVO</div>
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+                      <Crown size={32} fill="currentColor" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800">Membro Premium</h3>
+                    <p className="text-sm text-gray-500 mb-4">Você tem acesso total a todos os recursos.</p>
+                    <div className="text-xs font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full inline-block">ATIVO</div>
                   </>
                 ) : (
                   <>
-                     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
-                        <Lock size={32} />
-                     </div>
-                     <h3 className="text-xl font-bold text-gray-800">Plano Gratuito</h3>
-                     <p className="text-sm text-gray-500 mb-6">Desbloqueie modos exclusivos e remova limites.</p>
-                     <button 
-                       onClick={() => setIsPaymentOpen(true)}
-                       className="w-full py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl shadow-lg hover:scale-105 transition-transform font-bold flex items-center justify-center gap-2"
-                     >
-                       <Crown size={18} fill="gold" className="text-yellow-400" />
-                       Fazer Upgrade (R$ 29/mês)
-                     </button>
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                      <Lock size={32} />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800">Plano Gratuito</h3>
+                    <p className="text-sm text-gray-500 mb-6">Desbloqueie modos exclusivos e remova limites.</p>
+                    <button
+                      onClick={() => setIsPaymentOpen(true)}
+                      className="w-full py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl shadow-lg hover:scale-105 transition-transform font-bold flex items-center justify-center gap-2"
+                    >
+                      <Crown size={18} fill="gold" className="text-yellow-400" />
+                      Fazer Upgrade (R$ 29/mês)
+                    </button>
                   </>
                 )}
               </div>
@@ -577,101 +591,101 @@ const AdminPanel: React.FC = () => {
               <div className="space-y-2">
                 <h4 className="text-xs font-bold text-gray-500 uppercase ml-1">Comparativo</h4>
                 <div className="bg-white/40 rounded-xl p-3 border border-white/50">
-                   <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                      <span className="text-xs font-bold text-gray-700">Produtos Ilimitados</span>
-                      <CheckIcon active={true} />
-                   </div>
-                   <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                      <span className="text-xs font-bold text-gray-700">Temas Premium</span>
-                      <CheckIcon active={true} />
-                   </div>
-                   <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                      <span className="text-xs font-bold text-gray-700 flex items-center gap-1">Modo Loja <Crown size={10} className="text-yellow-600"/></span>
-                      <CheckIcon active={isPro} />
-                   </div>
-                   <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                      <span className="text-xs font-bold text-gray-700 flex items-center gap-1">Modo Afiliado <Crown size={10} className="text-yellow-600"/></span>
-                      <CheckIcon active={isPro} />
-                   </div>
-                   <div className="flex items-center justify-between py-2">
-                      <span className="text-xs font-bold text-gray-700 flex items-center gap-1">Controle WhatsApp <Crown size={10} className="text-yellow-600"/></span>
-                      <CheckIcon active={isPro} />
-                   </div>
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                    <span className="text-xs font-bold text-gray-700">Produtos Ilimitados</span>
+                    <CheckIcon active={true} />
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                    <span className="text-xs font-bold text-gray-700">Temas Premium</span>
+                    <CheckIcon active={true} />
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                    <span className="text-xs font-bold text-gray-700 flex items-center gap-1">Modo Loja <Crown size={10} className="text-yellow-600" /></span>
+                    <CheckIcon active={isPro} />
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                    <span className="text-xs font-bold text-gray-700 flex items-center gap-1">Modo Afiliado <Crown size={10} className="text-yellow-600" /></span>
+                    <CheckIcon active={isPro} />
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-xs font-bold text-gray-700 flex items-center gap-1">Controle WhatsApp <Crown size={10} className="text-yellow-600" /></span>
+                    <CheckIcon active={isPro} />
+                  </div>
                 </div>
               </div>
 
               {/* DEVELOPER BYPASS */}
               <div className="mt-8 border-t border-dashed border-gray-300 pt-4">
-                  <div className="flex items-center justify-center gap-2 mb-3 text-gray-400">
-                      <Terminal size={12} />
-                      <p className="text-[10px] font-bold uppercase tracking-widest">Área do Desenvolvedor</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                      <button 
-                          onClick={() => {
-                              updateConfig({...config, plan: 'free'});
-                              addToast('Forçado para plano Free');
-                          }}
-                          className="py-2 px-3 rounded-lg bg-gray-100 text-gray-500 text-xs font-bold hover:bg-gray-200 transition-colors"
-                      >
-                          Forçar Free
-                      </button>
-                      <button 
-                          onClick={() => {
-                              updateConfig({...config, plan: 'pro'});
-                              addToast('Forçado para plano Pro');
-                          }}
-                          className="py-2 px-3 rounded-lg bg-yellow-50 text-yellow-700 text-xs font-bold border border-yellow-200 hover:bg-yellow-100 transition-colors flex items-center justify-center gap-1"
-                      >
-                          <Crown size={12} /> Forçar Pro
-                      </button>
-                  </div>
+                <div className="flex items-center justify-center gap-2 mb-3 text-gray-400">
+                  <Terminal size={12} />
+                  <p className="text-[10px] font-bold uppercase tracking-widest">Área do Desenvolvedor</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => {
+                      updateConfig({ ...config, plan: 'free' });
+                      addToast('Forçado para plano Free');
+                    }}
+                    className="py-2 px-3 rounded-lg bg-gray-100 text-gray-500 text-xs font-bold hover:bg-gray-200 transition-colors"
+                  >
+                    Forçar Free
+                  </button>
+                  <button
+                    onClick={() => {
+                      updateConfig({ ...config, plan: 'pro' });
+                      addToast('Forçado para plano Pro');
+                    }}
+                    className="py-2 px-3 rounded-lg bg-yellow-50 text-yellow-700 text-xs font-bold border border-yellow-200 hover:bg-yellow-100 transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Crown size={12} /> Forçar Pro
+                  </button>
+                </div>
               </div>
             </div>
           )}
-          
+
           {activeTab === 'themes' && (
             <div className="space-y-3">
               <div className="bg-white/40 p-3 rounded-xl border border-white/50 mb-4">
-                  <h3 className="text-xs font-bold text-gray-700 uppercase mb-2">Ajuste Rápido (Atual)</h3>
-                  <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-600">Cor Fundo Quiz</span>
-                      <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full shadow-sm border border-white" style={{backgroundColor: config.quiz.bgColor}}></div>
-                          <input 
-                              type="color" 
-                              value={config.quiz.bgColor} 
-                              onChange={(e) => updateNestedConfig('quiz.bgColor', e.target.value)}
-                              className="w-8 h-8 rounded-lg cursor-pointer border-0 p-0"
-                          />
-                      </div>
+                <h3 className="text-xs font-bold text-gray-700 uppercase mb-2">Ajuste Rápido (Atual)</h3>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-600">Cor Fundo Quiz</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full shadow-sm border border-white" style={{ backgroundColor: config.quiz.bgColor }}></div>
+                    <input
+                      type="color"
+                      value={config.quiz.bgColor}
+                      onChange={(e) => updateNestedConfig('quiz.bgColor', e.target.value)}
+                      className="w-8 h-8 rounded-lg cursor-pointer border-0 p-0"
+                    />
                   </div>
+                </div>
               </div>
 
               <h3 className="text-xs font-bold text-gray-700 uppercase mb-2">Bibliotecas de Temas</h3>
               <div className="grid grid-cols-1 gap-3">
                 {themesList.map(theme => (
                   <div key={theme.id} className="flex items-center gap-2 p-2 bg-white/40 rounded-xl border border-white/50 hover:shadow-md transition-all">
-                      <button
-                        onClick={() => applyTheme(theme)}
-                        className="flex-1 flex items-center gap-4 text-left"
-                      >
-                        <div className="flex -space-x-2">
-                          {theme.colors.map((c, i) => <div key={i} className="w-6 h-6 rounded-full border border-white" style={{ backgroundColor: c }} />)}
-                        </div>
-                        <span className="font-bold text-xs text-gray-700">{theme.name}</span>
-                      </button>
-                      
-                      <div className="flex flex-col items-center border-l border-white/50 pl-2">
-                          <label className="text-[8px] font-bold text-gray-400 uppercase mb-1">Quiz</label>
-                          <input 
-                             type="color" 
-                             value={theme.config.quiz.bgColor}
-                             onChange={(e) => updateThemeQuizColor(theme.id, e.target.value)}
-                             title="Cor do Quiz Card"
-                             className="w-6 h-6 rounded-full border-none p-0 overflow-hidden cursor-pointer shadow-sm"
-                          />
+                    <button
+                      onClick={() => applyTheme(theme)}
+                      className="flex-1 flex items-center gap-4 text-left"
+                    >
+                      <div className="flex -space-x-2">
+                        {theme.colors.map((c, i) => <div key={i} className="w-6 h-6 rounded-full border border-white" style={{ backgroundColor: c }} />)}
                       </div>
+                      <span className="font-bold text-xs text-gray-700">{theme.name}</span>
+                    </button>
+
+                    <div className="flex flex-col items-center border-l border-white/50 pl-2">
+                      <label className="text-[8px] font-bold text-gray-400 uppercase mb-1">Quiz</label>
+                      <input
+                        type="color"
+                        value={theme.config.quiz.bgColor}
+                        onChange={(e) => updateThemeQuizColor(theme.id, e.target.value)}
+                        title="Cor do Quiz Card"
+                        className="w-6 h-6 rounded-full border-none p-0 overflow-hidden cursor-pointer shadow-sm"
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -679,327 +693,327 @@ const AdminPanel: React.FC = () => {
           )}
 
           {activeTab === 'social' && (
-             <div className="space-y-4">
-               <div className="bg-white/40 border border-white/50 rounded-xl p-3">
-                 <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
-                   <Share2 size={14} /> Redes Sociais
-                 </h3>
-                 <p className="text-[10px] text-gray-500 mb-3">Links que aparecerão no rodapé do app.</p>
+            <div className="space-y-4">
+              <div className="bg-white/40 border border-white/50 rounded-xl p-3">
+                <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
+                  <Share2 size={14} /> Redes Sociais
+                </h3>
+                <p className="text-[10px] text-gray-500 mb-3">Links que aparecerão no rodapé do app.</p>
 
-                 <InputGroup label="Instagram (@usuario ou link)" value={config.social.instagram} onChange={(v) => updateNestedConfig('social.instagram', v)} />
-                 <InputGroup label="Facebook (Link)" value={config.social.facebook} onChange={(v) => updateNestedConfig('social.facebook', v)} />
-                 <InputGroup label="TikTok (Link)" value={config.social.tiktok} onChange={(v) => updateNestedConfig('social.tiktok', v)} />
-               </div>
+                <InputGroup label="Instagram (@usuario ou link)" value={config.social.instagram} onChange={(v) => updateNestedConfig('social.instagram', v)} />
+                <InputGroup label="Facebook (Link)" value={config.social.facebook} onChange={(v) => updateNestedConfig('social.facebook', v)} />
+                <InputGroup label="TikTok (Link)" value={config.social.tiktok} onChange={(v) => updateNestedConfig('social.tiktok', v)} />
+              </div>
 
-               <div className="bg-white/40 border border-white/50 rounded-xl p-3">
-                 <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
-                   <MapPin size={14} /> Endereço Físico
-                 </h3>
-                 <InputGroup label="Endereço Completo" value={config.location.address} onChange={(v) => updateNestedConfig('location.address', v)} />
-                 <InputGroup label="Link do Google Maps Embed (iframe)" value={config.location.mapUrl} onChange={(v) => updateNestedConfig('location.mapUrl', v)} textarea placeholder="Cole a URL do src do iframe do Google Maps aqui" />
-               </div>
-             </div>
+              <div className="bg-white/40 border border-white/50 rounded-xl p-3">
+                <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
+                  <MapPin size={14} /> Endereço Físico
+                </h3>
+                <InputGroup label="Endereço Completo" value={config.location.address} onChange={(v) => updateNestedConfig('location.address', v)} />
+                <InputGroup label="Link do Google Maps Embed (iframe)" value={config.location.mapUrl} onChange={(v) => updateNestedConfig('location.mapUrl', v)} textarea placeholder="Cole a URL do src do iframe do Google Maps aqui" />
+              </div>
+            </div>
           )}
 
           {activeTab === 'branding' && (
-             <div className="space-y-4">
-               {/* CONFIGURAÇÕES GERAIS DA LOJA */}
-               <div className="bg-white/40 border border-white/50 rounded-xl p-3 mb-4 relative overflow-hidden">
-                  <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
-                    <Store size={14} /> Modo de Operação
-                  </h3>
-                  
-                  <div className="space-y-2 relative z-10">
-                     <label className="flex items-center gap-3 p-2 bg-white/50 rounded-lg cursor-pointer hover:bg-white/80 transition-colors">
-                        <input 
-                           type="radio" 
-                           name="storeMode" 
-                           checked={config.storeMode === 'mixed'} 
-                           onChange={() => handleStoreModeChange('mixed')}
-                           className="text-terracotta focus:ring-terracotta"
-                        />
-                        <div>
-                           <p className="text-xs font-bold text-gray-800">Híbrido (Padrão)</p>
-                           <p className="text-[10px] text-gray-500">Carrinho + Links Externos</p>
-                        </div>
-                     </label>
+            <div className="space-y-4">
+              {/* CONFIGURAÇÕES GERAIS DA LOJA */}
+              <div className="bg-white/40 border border-white/50 rounded-xl p-3 mb-4 relative overflow-hidden">
+                <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
+                  <Store size={14} /> Modo de Operação
+                </h3>
 
-                     <label className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${!isPro ? 'opacity-50 grayscale bg-gray-100' : 'bg-white/50 hover:bg-white/80'}`}>
-                        <div className="relative">
-                          <input 
-                             type="radio" 
-                             name="storeMode" 
-                             checked={config.storeMode === 'store'} 
-                             onChange={() => handleStoreModeChange('store')}
-                             className="text-terracotta focus:ring-terracotta"
-                             disabled={!isPro}
-                          />
-                        </div>
-                        <div className="flex-1">
-                           <div className="flex justify-between items-center">
-                              <p className="text-xs font-bold text-gray-800">Apenas Loja</p>
-                              {!isPro && <Lock size={12} className="text-gray-500"/>}
-                           </div>
-                           <p className="text-[10px] text-gray-500">Apenas Carrinho / WhatsApp</p>
-                        </div>
-                     </label>
-
-                     <label className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${!isPro ? 'opacity-50 grayscale bg-gray-100' : 'bg-white/50 hover:bg-white/80'}`}>
-                        <input 
-                           type="radio" 
-                           name="storeMode" 
-                           checked={config.storeMode === 'affiliate'} 
-                           onChange={() => handleStoreModeChange('affiliate')}
-                           className="text-terracotta focus:ring-terracotta"
-                           disabled={!isPro}
-                        />
-                        <div className="flex-1">
-                           <div className="flex justify-between items-center">
-                             <p className="text-xs font-bold text-gray-800">Apenas Afiliado</p>
-                             {!isPro && <Lock size={12} className="text-gray-500"/>}
-                           </div>
-                           <p className="text-[10px] text-gray-500">Esconde Carrinho. Foco em Links.</p>
-                        </div>
-                     </label>
-                  </div>
-               </div>
-               
-               {/* TOGGLE WHATSAPP */}
-               <div className={`bg-white/40 border border-white/50 rounded-xl p-3 ${!isPro ? 'opacity-60' : ''}`}>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold text-gray-700 flex items-center gap-2">
-                        Botão WhatsApp Flutuante
-                        {!isPro && <Lock size={12} />}
-                    </span>
-                    <button 
-                        onClick={handleWhatsappToggle}
-                        className={`text-2xl transition-colors ${config.enableWhatsapp ? 'text-green-600' : 'text-gray-400'}`}
-                    >
-                        {config.enableWhatsapp ? <ToggleRight size={32} /> : <ToggleLeft size={32} />}
-                    </button>
-                  </div>
-                  
-                  {/* WhatsApp Label Selector */}
-                  {config.enableWhatsapp && (
-                      <div className="mt-2">
-                          <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Texto do Botão</label>
-                          <div className="relative">
-                            <select
-                                value={config.whatsapp.label}
-                                onChange={(e) => updateNestedConfig('whatsapp.label', e.target.value)}
-                                disabled={!isPro}
-                                className="w-full bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs outline-none appearance-none pr-8"
-                            >
-                                {WHATSAPP_LABELS.map((label) => (
-                                    <option key={label} value={label}>{label}</option>
-                                ))}
-                            </select>
-                            <ChevronDown size={14} className="absolute right-3 top-2.5 text-gray-400 pointer-events-none" />
-                          </div>
-                      </div>
-                  )}
-               </div>
-
-               {/* HEADER CONFIGURATION GROUP */}
-               <div className="bg-white/40 border border-white/50 rounded-xl p-3">
-                 <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
-                   <ImageIcon size={14} /> Identidade Visual
-                 </h3>
-
-                 {/* Logo Upload */}
-                 <div className="mb-4">
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2">Logotipo da Loja</label>
-                    <div className="flex items-center gap-3">
-                        <div className="w-16 h-16 bg-white rounded-xl border border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative group">
-                            {config.header.logoUrl ? (
-                                <img src={config.header.logoUrl} className="w-full h-full object-contain p-1" />
-                            ) : (
-                                <span className="text-gray-300 text-xs text-center px-1">Sem Logo</span>
-                            )}
-                            
-                            <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-                                <Upload size={16} className="text-white" />
-                                <input 
-                                    type="file" 
-                                    accept="image/*"
-                                    className="hidden" 
-                                    onChange={(e) => handleImageUpload(e, (url) => updateNestedConfig('header.logoUrl', url))} 
-                                />
-                            </label>
-                        </div>
-                        
-                        <div className="flex-1 space-y-2">
-                            <p className="text-[10px] text-gray-500 leading-tight">
-                                Carregue sua logo para substituir o título em texto. <br/>
-                                <span className="text-[9px] opacity-70">Recomendado: PNG transparente.</span>
-                            </p>
-                            {config.header.logoUrl && (
-                                <button 
-                                    onClick={() => updateNestedConfig('header.logoUrl', '')}
-                                    className="px-3 py-1 bg-red-50 text-red-500 text-[10px] font-bold rounded-lg flex items-center gap-1 hover:bg-red-100 transition-colors"
-                                >
-                                    <Trash2 size={10} /> Remover Logo
-                                </button>
-                            )}
-                        </div>
+                <div className="space-y-2 relative z-10">
+                  <label className="flex items-center gap-3 p-2 bg-white/50 rounded-lg cursor-pointer hover:bg-white/80 transition-colors">
+                    <input
+                      type="radio"
+                      name="storeMode"
+                      checked={config.storeMode === 'mixed'}
+                      onChange={() => handleStoreModeChange('mixed')}
+                      className="text-terracotta focus:ring-terracotta"
+                    />
+                    <div>
+                      <p className="text-xs font-bold text-gray-800">Híbrido (Padrão)</p>
+                      <p className="text-[10px] text-gray-500">Carrinho + Links Externos</p>
                     </div>
-                 </div>
+                  </label>
 
-                 <InputGroup label="Nome da Loja (Usado se sem logo)" value={config.header.title} onChange={(v) => updateNestedConfig('header.title', v)} />
-                 <InputGroup label="Subtítulo" value={config.header.subtitle} onChange={(v) => updateNestedConfig('header.subtitle', v)} />
-                 <div className="pt-2 border-t border-white/20 mt-2">
-                    <InputGroup label="Texto do Rodapé (Direitos Autorais)" value={config.footerText} onChange={(v) => updateConfig({...config, footerText: v})} />
-                 </div>
-               </div>
+                  <label className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${!isPro ? 'opacity-50 grayscale bg-gray-100' : 'bg-white/50 hover:bg-white/80'}`}>
+                    <div className="relative">
+                      <input
+                        type="radio"
+                        name="storeMode"
+                        checked={config.storeMode === 'store'}
+                        onChange={() => handleStoreModeChange('store')}
+                        className="text-terracotta focus:ring-terracotta"
+                        disabled={!isPro}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center">
+                        <p className="text-xs font-bold text-gray-800">Apenas Loja</p>
+                        {!isPro && <Lock size={12} className="text-gray-500" />}
+                      </div>
+                      <p className="text-[10px] text-gray-500">Apenas Carrinho / WhatsApp</p>
+                    </div>
+                  </label>
 
-               <InputGroup label="WhatsApp" value={config.whatsapp.phoneNumber} onChange={(v) => updateNestedConfig('whatsapp.phoneNumber', v)} />
-               
-               {/* Tracking & Location Toggle */}
-               <div className="pt-2 border-t border-white/20">
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-wider">Funcionalidades Extras</label>
-                  <div className="space-y-2">
-                    <button 
-                      onClick={() => toggleCard('tracking')}
-                      className={`w-full py-2 px-3 rounded-xl flex items-center justify-between text-xs font-bold transition-all ${hasTracking ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}
-                    >
-                      <span className="flex items-center gap-2">
-                        {hasTracking ? <MapPinOff size={14} /> : <MapPin size={14} />}
-                        Rastreio de Pedido
-                      </span>
-                      <span className="text-[10px] opacity-60 uppercase">{hasTracking ? 'Ativo' : 'Inativo'}</span>
-                    </button>
+                  <label className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${!isPro ? 'opacity-50 grayscale bg-gray-100' : 'bg-white/50 hover:bg-white/80'}`}>
+                    <input
+                      type="radio"
+                      name="storeMode"
+                      checked={config.storeMode === 'affiliate'}
+                      onChange={() => handleStoreModeChange('affiliate')}
+                      className="text-terracotta focus:ring-terracotta"
+                      disabled={!isPro}
+                    />
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center">
+                        <p className="text-xs font-bold text-gray-800">Apenas Afiliado</p>
+                        {!isPro && <Lock size={12} className="text-gray-500" />}
+                      </div>
+                      <p className="text-[10px] text-gray-500">Esconde Carrinho. Foco em Links.</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
 
-                    <button 
-                      onClick={() => toggleCard('location')}
-                      className={`w-full py-2 px-3 rounded-xl flex items-center justify-between text-xs font-bold transition-all ${hasLocation ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}
-                    >
-                      <span className="flex items-center gap-2">
-                        {hasLocation ? <MapPinOff size={14} /> : <MapPin size={14} />}
-                        Mapa da Loja
-                      </span>
-                      <span className="text-[10px] opacity-60 uppercase">{hasLocation ? 'Ativo' : 'Inativo'}</span>
-                    </button>
+              {/* TOGGLE WHATSAPP */}
+              <div className={`bg-white/40 border border-white/50 rounded-xl p-3 ${!isPro ? 'opacity-60' : ''}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold text-gray-700 flex items-center gap-2">
+                    Botão WhatsApp Flutuante
+                    {!isPro && <Lock size={12} />}
+                  </span>
+                  <button
+                    onClick={handleWhatsappToggle}
+                    className={`text-2xl transition-colors ${config.enableWhatsapp ? 'text-green-600' : 'text-gray-400'}`}
+                  >
+                    {config.enableWhatsapp ? <ToggleRight size={32} /> : <ToggleLeft size={32} />}
+                  </button>
+                </div>
+
+                {/* WhatsApp Label Selector */}
+                {config.enableWhatsapp && (
+                  <div className="mt-2">
+                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Texto do Botão</label>
+                    <div className="relative">
+                      <select
+                        value={config.whatsapp.label}
+                        onChange={(e) => updateNestedConfig('whatsapp.label', e.target.value)}
+                        disabled={!isPro}
+                        className="w-full bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs outline-none appearance-none pr-8"
+                      >
+                        {WHATSAPP_LABELS.map((label) => (
+                          <option key={label} value={label}>{label}</option>
+                        ))}
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3 top-2.5 text-gray-400 pointer-events-none" />
+                    </div>
                   </div>
-               </div>
+                )}
+              </div>
 
-               <div className="pt-2 border-t border-white/20">
-                 <InputGroup label="Alterar PIN Admin" value={config.adminPin} onChange={(v) => updateConfig({...config, adminPin: v})} />
-               </div>
-             </div>
+              {/* HEADER CONFIGURATION GROUP */}
+              <div className="bg-white/40 border border-white/50 rounded-xl p-3">
+                <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
+                  <ImageIcon size={14} /> Identidade Visual
+                </h3>
+
+                {/* Logo Upload */}
+                <div className="mb-4">
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2">Logotipo da Loja</label>
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-16 bg-white rounded-xl border border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative group">
+                      {config.header.logoUrl ? (
+                        <img src={config.header.logoUrl} className="w-full h-full object-contain p-1" />
+                      ) : (
+                        <span className="text-gray-300 text-xs text-center px-1">Sem Logo</span>
+                      )}
+
+                      <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                        <Upload size={16} className="text-white" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleImageUpload(e, (url) => updateNestedConfig('header.logoUrl', url))}
+                        />
+                      </label>
+                    </div>
+
+                    <div className="flex-1 space-y-2">
+                      <p className="text-[10px] text-gray-500 leading-tight">
+                        Carregue sua logo para substituir o título em texto. <br />
+                        <span className="text-[9px] opacity-70">Recomendado: PNG transparente.</span>
+                      </p>
+                      {config.header.logoUrl && (
+                        <button
+                          onClick={() => updateNestedConfig('header.logoUrl', '')}
+                          className="px-3 py-1 bg-red-50 text-red-500 text-[10px] font-bold rounded-lg flex items-center gap-1 hover:bg-red-100 transition-colors"
+                        >
+                          <Trash2 size={10} /> Remover Logo
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <InputGroup label="Nome da Loja (Usado se sem logo)" value={config.header.title} onChange={(v) => updateNestedConfig('header.title', v)} />
+                <InputGroup label="Subtítulo" value={config.header.subtitle} onChange={(v) => updateNestedConfig('header.subtitle', v)} />
+                <div className="pt-2 border-t border-white/20 mt-2">
+                  <InputGroup label="Texto do Rodapé (Direitos Autorais)" value={config.footerText} onChange={(v) => updateConfig({ ...config, footerText: v })} />
+                </div>
+              </div>
+
+              <InputGroup label="WhatsApp" value={config.whatsapp.phoneNumber} onChange={(v) => updateNestedConfig('whatsapp.phoneNumber', v)} />
+
+              {/* Tracking & Location Toggle */}
+              <div className="pt-2 border-t border-white/20">
+                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-wider">Funcionalidades Extras</label>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => toggleCard('tracking')}
+                    className={`w-full py-2 px-3 rounded-xl flex items-center justify-between text-xs font-bold transition-all ${hasTracking ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}
+                  >
+                    <span className="flex items-center gap-2">
+                      {hasTracking ? <MapPinOff size={14} /> : <MapPin size={14} />}
+                      Rastreio de Pedido
+                    </span>
+                    <span className="text-[10px] opacity-60 uppercase">{hasTracking ? 'Ativo' : 'Inativo'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => toggleCard('location')}
+                    className={`w-full py-2 px-3 rounded-xl flex items-center justify-between text-xs font-bold transition-all ${hasLocation ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}
+                  >
+                    <span className="flex items-center gap-2">
+                      {hasLocation ? <MapPinOff size={14} /> : <MapPin size={14} />}
+                      Mapa da Loja
+                    </span>
+                    <span className="text-[10px] opacity-60 uppercase">{hasLocation ? 'Ativo' : 'Inativo'}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-white/20">
+                <InputGroup label="Alterar PIN Admin" value={config.adminPin} onChange={(v) => updateConfig({ ...config, adminPin: v })} />
+              </div>
+            </div>
           )}
 
           {activeTab === 'home' && (
-             <div className="space-y-6">
-                <div>
-                   <h3 className="font-bold text-xs text-gray-800 mb-2">Banners da Home</h3>
-                   {config.categories.map((cat, index) => (
-                     <div key={cat.id} className="mb-2 p-2 bg-white/40 rounded-xl border border-white/50 flex items-center justify-between">
-                        <span className="text-xs font-bold text-gray-600">{cat.title}</span>
-                        <div className="flex gap-2">
-                          <label className="cursor-pointer text-blue-500">
-                             <ImageIcon size={14} />
-                             <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, (url) => updateNestedConfig(`categories.${index}.imageUrl`, url))} />
-                          </label>
-                          {cat.id !== 'tracking' && cat.id !== 'location' && (
-                             <button onClick={() => removeCategory(index)} className="text-red-400"><Trash2 size={14} /></button>
-                          )}
-                        </div>
-                     </div>
-                   ))}
-                   <button onClick={addCategory} className="w-full py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 mt-2">
-                     <Plus size={14} /> Nova Categoria
-                   </button>
-                </div>
-             </div>
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-bold text-xs text-gray-800 mb-2">Banners da Home</h3>
+                {config.categories.map((cat, index) => (
+                  <div key={cat.id} className="mb-2 p-2 bg-white/40 rounded-xl border border-white/50 flex items-center justify-between">
+                    <span className="text-xs font-bold text-gray-600">{cat.title}</span>
+                    <div className="flex gap-2">
+                      <label className="cursor-pointer text-blue-500">
+                        <ImageIcon size={14} />
+                        <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, (url) => updateNestedConfig(`categories.${index}.imageUrl`, url))} />
+                      </label>
+                      {cat.id !== 'tracking' && cat.id !== 'location' && (
+                        <button onClick={() => removeCategory(index)} className="text-red-400"><Trash2 size={14} /></button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <button onClick={addCategory} className="w-full py-2 bg-blue-50 text-blue-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 mt-2">
+                  <Plus size={14} /> Nova Categoria
+                </button>
+              </div>
+            </div>
           )}
 
           {activeTab === 'products' && (
-             <div className="space-y-4">
-                <div className="mb-4">
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Selecionar Categoria</label>
-                  <select 
-                    value={selectedCategoryIndex}
-                    onChange={(e) => setSelectedCategoryIndex(Number(e.target.value))}
-                    className="w-full bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs outline-none"
-                  >
-                    {config.categories.map((cat, i) => (
-                      <option key={cat.id} value={i}>{cat.title}</option>
-                    ))}
-                  </select>
-                </div>
+            <div className="space-y-4">
+              <div className="mb-4">
+                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Selecionar Categoria</label>
+                <select
+                  value={selectedCategoryIndex}
+                  onChange={(e) => setSelectedCategoryIndex(Number(e.target.value))}
+                  className="w-full bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs outline-none"
+                >
+                  {config.categories.map((cat, i) => (
+                    <option key={cat.id} value={i}>{cat.title}</option>
+                  ))}
+                </select>
+              </div>
 
-                <div className="space-y-3">
-                   {config.categories[selectedCategoryIndex]?.products.map((prod, pIndex) => (
-                     <div key={prod.id} className="bg-white/40 border border-white/50 rounded-xl p-3">
-                        <div className="flex gap-2 mb-2">
-                           <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0 relative group">
-                              <img src={prod.imageUrl} className="w-full h-full object-cover" />
-                              <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer text-white">
-                                <Upload size={12} />
-                                <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, (url) => updateProduct(selectedCategoryIndex, pIndex, 'imageUrl', url))} />
-                              </label>
-                           </div>
-                           <div className="flex-1 space-y-1">
-                              <input 
-                                value={prod.title} 
-                                onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'title', e.target.value)}
-                                className="w-full bg-transparent border-b border-gray-200 text-xs font-bold outline-none"
-                                placeholder="Nome do Produto"
-                              />
-                              <input 
-                                value={prod.price} 
-                                onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'price', e.target.value)}
-                                className="w-full bg-transparent border-b border-gray-200 text-xs text-green-600 outline-none"
-                                placeholder="Preço"
-                              />
-                           </div>
-                           <button onClick={() => removeProductFromCategory(selectedCategoryIndex, pIndex)} className="text-red-400 self-start">
-                             <Trash2 size={14} />
-                           </button>
-                        </div>
-                        <textarea 
-                          value={prod.description} 
-                          onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'description', e.target.value)}
-                          className="w-full bg-white/50 rounded-lg p-2 text-[10px] resize-none outline-none mb-2"
-                          placeholder="Descrição..."
-                          rows={2}
+              <div className="space-y-3">
+                {config.categories[selectedCategoryIndex]?.products.map((prod, pIndex) => (
+                  <div key={prod.id} className="bg-white/40 border border-white/50 rounded-xl p-3">
+                    <div className="flex gap-2 mb-2">
+                      <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0 relative group">
+                        <img src={prod.imageUrl} className="w-full h-full object-cover" />
+                        <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer text-white">
+                          <Upload size={12} />
+                          <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, (url) => updateProduct(selectedCategoryIndex, pIndex, 'imageUrl', url))} />
+                        </label>
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <input
+                          value={prod.title}
+                          onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'title', e.target.value)}
+                          className="w-full bg-transparent border-b border-gray-200 text-xs font-bold outline-none"
+                          placeholder="Nome do Produto"
                         />
-                        {/* Affiliate Link Input */}
-                        <div className="bg-blue-50/50 p-2 rounded-lg border border-blue-100">
-                           <div className="flex items-center gap-1 mb-1">
-                              <Link size={10} className="text-blue-500" />
-                              <label className="text-[9px] font-bold text-blue-600 uppercase">Link de Afiliado/Externo (Opcional)</label>
-                           </div>
-                           <input 
-                             value={prod.affiliateUrl || ''}
-                             onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'affiliateUrl', e.target.value)}
-                             placeholder="https://..."
-                             className="w-full bg-white border border-blue-100 rounded px-2 py-1 text-[10px] text-blue-800 outline-none"
-                           />
-                        </div>
-                     </div>
-                   ))}
+                        <input
+                          value={prod.price}
+                          onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'price', e.target.value)}
+                          className="w-full bg-transparent border-b border-gray-200 text-xs text-green-600 outline-none"
+                          placeholder="Preço"
+                        />
+                      </div>
+                      <button onClick={() => removeProductFromCategory(selectedCategoryIndex, pIndex)} className="text-red-400 self-start">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                    <textarea
+                      value={prod.description}
+                      onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'description', e.target.value)}
+                      className="w-full bg-white/50 rounded-lg p-2 text-[10px] resize-none outline-none mb-2"
+                      placeholder="Descrição..."
+                      rows={2}
+                    />
+                    {/* Affiliate Link Input */}
+                    <div className="bg-blue-50/50 p-2 rounded-lg border border-blue-100">
+                      <div className="flex items-center gap-1 mb-1">
+                        <Link size={10} className="text-blue-500" />
+                        <label className="text-[9px] font-bold text-blue-600 uppercase">Link de Afiliado/Externo (Opcional)</label>
+                      </div>
+                      <input
+                        value={prod.affiliateUrl || ''}
+                        onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'affiliateUrl', e.target.value)}
+                        placeholder="https://..."
+                        className="w-full bg-white border border-blue-100 rounded px-2 py-1 text-[10px] text-blue-800 outline-none"
+                      />
+                    </div>
+                  </div>
+                ))}
 
-                   <button 
-                     onClick={handleAddProduct}
-                     className="w-full py-3 bg-green-50 text-green-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-green-100 shadow-sm"
-                   >
-                     <Plus size={14} /> Adicionar Produto em {config.categories[selectedCategoryIndex]?.title}
-                   </button>
-                </div>
-             </div>
+                <button
+                  onClick={handleAddProduct}
+                  className="w-full py-3 bg-green-50 text-green-600 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-green-100 shadow-sm"
+                >
+                  <Plus size={14} /> Adicionar Produto em {config.categories[selectedCategoryIndex]?.title}
+                </button>
+              </div>
+            </div>
           )}
 
         </div>
-        
+
         {/* Footer */}
         <div className="p-4 border-t border-white/20 bg-white/10">
-          <button onClick={resetConfig} className="w-full flex items-center justify-center gap-2 text-red-500 text-xs font-bold opacity-60 hover:opacity-100"><RotateCcw size={12}/> Resetar App</button>
+          <button onClick={resetConfig} className="w-full flex items-center justify-center gap-2 text-red-500 text-xs font-bold opacity-60 hover:opacity-100"><RotateCcw size={12} /> Resetar App</button>
         </div>
       </div>
-      
-      <PaymentGateway 
-        isOpen={isPaymentOpen} 
+
+      <PaymentGateway
+        isOpen={isPaymentOpen}
         onClose={() => setIsPaymentOpen(false)}
         onSuccess={upgradeToPro}
         planName="Plano Pro"
@@ -1012,15 +1026,15 @@ const AdminPanel: React.FC = () => {
 // FAQ Accordion Component
 const FAQItem = ({ title, content }: { title: string, content: React.ReactNode }) => {
   const [open, setOpen] = useState(false);
-  
+
   return (
     <div className="bg-white/40 border border-white/50 rounded-xl overflow-hidden transition-all">
-      <button 
+      <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between p-3 text-left hover:bg-white/30"
       >
         <span className="text-xs font-bold text-gray-700">{title}</span>
-        {open ? <ChevronUp size={14} className="text-gray-400"/> : <ChevronDown size={14} className="text-gray-400"/>}
+        {open ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
       </button>
       {open && (
         <div className="px-3 pb-3 pt-0">
@@ -1034,9 +1048,9 @@ const FAQItem = ({ title, content }: { title: string, content: React.ReactNode }
 };
 
 const CheckIcon = ({ active }: { active: boolean }) => (
-  active ? 
-  <div className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center text-green-600"><Unlock size={10} /></div> : 
-  <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><Lock size={10} /></div>
+  active ?
+    <div className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center text-green-600"><Unlock size={10} /></div> :
+    <div className="w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><Lock size={10} /></div>
 );
 
 export default AdminPanel;
