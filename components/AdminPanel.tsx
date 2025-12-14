@@ -5,7 +5,8 @@ import { availableIcons } from './IconMapper';
 import { ProductItem } from '../types';
 import PaymentGateway from './PaymentGateway';
 import { uploadToR2, saveConfigToR2 } from '../services/r2';
-import { CloudUpload } from 'lucide-react';
+import { generateProductDescription } from '../services/ai';
+import { CloudUpload, Sparkles } from 'lucide-react';
 
 // Preset Themes Configuration
 const PRESET_THEMES = [
@@ -986,6 +987,29 @@ const AdminPanel: React.FC = () => {
                       </div>
                       <button onClick={() => removeProductFromCategory(selectedCategoryIndex, pIndex)} className="text-red-400 self-start">
                         <Trash2 size={14} />
+                      </button>
+                    </div>
+                    <div className="flex justify-end mb-1">
+                      <button
+                        onClick={async () => {
+                          if (!prod.title) return alert("Digite o nome do produto primeiro.");
+                          addToast('Criando mágica... ✨', 'info');
+                          try {
+                            const desc = await generateProductDescription(
+                              prod.title,
+                              prod.price,
+                              config.categories[selectedCategoryIndex].title
+                            );
+                            updateProduct(selectedCategoryIndex, pIndex, 'description', desc);
+                            addToast('Descrição gerada!', 'success');
+                          } catch (e) {
+                            addToast('Erro ao gerar descrição.', 'error');
+                          }
+                        }}
+                        className="text-[10px] text-purple-600 font-bold flex items-center gap-1 hover:bg-purple-50 px-2 py-1 rounded-full transition-colors"
+                        title="Gerar descrição com IA"
+                      >
+                        <Sparkles size={10} /> Mágica IA
                       </button>
                     </div>
                     <textarea

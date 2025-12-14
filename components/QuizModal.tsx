@@ -1,195 +1,150 @@
-import React, { useState } from 'react';
-import { X, Sparkles, ChevronRight, RotateCcw } from 'lucide-react';
+
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Sparkles, Send, Bot, User } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
+import { chatWithShopper, ChatMessage } from '../services/ai';
 
 interface QuizModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const QUESTIONS = [
-  {
-    id: 1,
-    question: "Como você está se sentindo hoje?",
-    options: ["Estressado e ansioso", "Sem energia", "Com insônia", "Apenas buscando paz"]
-  },
-  {
-    id: 2,
-    question: "Qual seu principal objetivo agora?",
-    options: ["Relaxar profundamente", "Aumentar foco", "Dormir melhor", "Cuidar da pele"]
-  },
-  {
-    id: 3,
-    question: "Qual tipo de aroma você prefere?",
-    options: ["Floral e doce", "Cítrico e fresco", "Amadeirado", "Herbal e mentolado"]
-  }
-];
-
 const QuizModal: React.FC<QuizModalProps> = ({ isOpen, onClose }) => {
-  const { config, addToCart } = useConfig();
-  const { quiz, theme } = config;
-  
-  const [step, setStep] = useState(0); // 0 = intro, 1..3 = questions, 4 = result
-  const [answers, setAnswers] = useState<string[]>([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { config } = useConfig();
+  const { theme } = config;
+
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Initialize chat when opened
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      setMessages([
+        { role: 'model', text: `Olá! Sou o Personal Shopper da ${config.header.title}. Como posso ajudar você a encontrar o look perfeito hoje?` }
+      ]);
+    }
+  }, [isOpen]);
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, isTyping]);
+
+  const handleSend = async () => {
+    if (!inputValue.trim()) return;
+
+    const userMsg = inputValue;
+    setInputValue('');
+
+    // Add User Message
+    const newHistory: ChatMessage[] = [...messages, { role: 'user', text: userMsg }];
+    setMessages(newHistory);
+    setIsTyping(true);
+
+    // Call AI
+    const catalogContext = JSON.stringify(config.categories);
+    const aiResponse = await chatWithShopper(messages, userMsg, catalogContext);
+
+    setIsTyping(false);
+    setMessages([...newHistory, { role: 'model', text: aiResponse }]);
+  };
 
   if (!isOpen) return null;
 
-  const handleStart = () => setStep(1);
-
-  const handleAnswer = (answer: string) => {
-    const newAnswers = [...answers, answer];
-    setAnswers(newAnswers);
-    
-    if (step < QUESTIONS.length) {
-      setStep(step + 1);
-    } else {
-      // Analyze
-      setIsAnalyzing(true);
-      setTimeout(() => {
-        setIsAnalyzing(false);
-        setStep(4);
-      }, 1500);
-    }
-  };
-
-  const handleReset = () => {
-    setStep(0);
-    setAnswers([]);
-  };
-
-  const handleAddToCart = () => {
-    addToCart({
-      productId: 'quiz-result',
-      title: config.hero.title, // In a real app, map logic to products
-      price: config.hero.price,
-      imageUrl: config.hero.imageUrl,
-      quantity: 1
-    });
-    onClose();
-    // Logic to open cart or show success toast handled by context/header
-  };
-
-  // Intro Screen
-  if (step === 0) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-        <div className="relative w-full max-w-sm bg-white rounded-3xl p-8 text-center animate-slide-up-panel" style={{ backgroundColor: theme.backgroundColor }}>
-          <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><X size={20}/></button>
-          
-          <div className="w-20 h-20 bg-gradient-to-tr from-terracotta to-sage rounded-full mx-auto mb-6 flex items-center justify-center text-4xl shadow-lg">
-            {quiz.emoji}
-          </div>
-          
-          <h2 className="text-2xl font-bold mb-3" style={{ color: theme.textColor }}>{quiz.title}</h2>
-          <p className="text-gray-500 mb-8 leading-relaxed">Responda 3 perguntas rápidas e descubra o produto ideal para elevar sua vibração hoje.</p>
-          
-          <button 
-            onClick={handleStart}
-            className="w-full font-bold py-4 rounded-xl2 shadow-md hover:shadow-lg transition-all active:scale-95 text-white flex items-center justify-center gap-2"
-            style={{ backgroundColor: theme.primaryColor }}
-          >
-            <Sparkles size={18} />
-            Começar Quiz
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Analyzing Screen
-  if (isAnalyzing) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-        <div className="relative w-full max-w-sm bg-white rounded-3xl p-12 text-center flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-gray-200 border-t-terracotta rounded-full animate-spin mb-4"></div>
-          <p className="font-medium text-gray-500 animate-pulse">Analisando suas respostas...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Result Screen
-  if (step === 4) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-        <div className="relative w-full max-w-sm bg-white rounded-3xl overflow-hidden animate-slide-up-panel" style={{ backgroundColor: theme.backgroundColor }}>
-          <div className="bg-gradient-to-br from-terracotta to-sage p-6 text-white text-center">
-            <Sparkles className="mx-auto mb-2 opacity-80" size={32} />
-            <h2 className="text-xl font-bold">Seu Match Perfeito!</h2>
-            <p className="text-white/80 text-sm">Baseado no seu perfil</p>
-          </div>
-          
-          <div className="p-6">
-            <div className="flex gap-4 mb-6">
-              <img src={config.hero.imageUrl} className="w-20 h-20 rounded-xl object-cover shadow-md" />
-              <div>
-                <h3 className="font-bold text-lg leading-tight mb-1" style={{ color: theme.textColor }}>{config.hero.title}</h3>
-                <p className="text-sm text-gray-500 mb-2">{config.hero.price}</p>
-                <div className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full inline-block font-bold">
-                  98% Compatível
-                </div>
-              </div>
-            </div>
-            
-            <p className="text-sm text-gray-500 mb-6 leading-relaxed bg-white/50 p-3 rounded-xl border border-white">
-              Este kit contém exatamente os elementos que você precisa para alcançar seus objetivos de bem-estar hoje.
-            </p>
-            
-            <button 
-              onClick={handleAddToCart}
-              className="w-full font-bold py-3.5 rounded-xl2 shadow-md hover:shadow-lg transition-all active:scale-95 text-white mb-3"
-              style={{ backgroundColor: theme.accentColor }}
-            >
-              Adicionar à Sacola
-            </button>
-            
-            <button 
-              onClick={handleReset}
-              className="w-full py-2 text-xs font-bold text-gray-400 hover:text-gray-600 flex items-center justify-center gap-1"
-            >
-              <RotateCcw size={12} />
-              Refazer Quiz
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Question Screen
-  const currentQuestion = QUESTIONS[step - 1];
-  
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-sm bg-white rounded-3xl p-6 animate-slide-up-panel" style={{ backgroundColor: theme.backgroundColor }}>
-         {/* Progress */}
-         <div className="flex gap-1 mb-6">
-           {QUESTIONS.map(q => (
-             <div key={q.id} className={`h-1.5 rounded-full flex-1 transition-all ${step >= q.id ? 'bg-terracotta' : 'bg-gray-200'}`}></div>
-           ))}
-         </div>
 
-         <h3 className="text-xl font-bold mb-6 pr-8" style={{ color: theme.textColor }}>
-           {currentQuestion.question}
-         </h3>
-         
-         <div className="space-y-3">
-           {currentQuestion.options.map((option, idx) => (
-             <button
-               key={idx}
-               onClick={() => handleAnswer(option)}
-               className="w-full text-left p-4 rounded-xl border border-transparent bg-white shadow-sm hover:border-terracotta hover:text-terracotta transition-all group flex items-center justify-between"
-             >
-               <span className="font-medium text-gray-600 group-hover:text-terracotta text-sm">{option}</span>
-               <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-terracotta" />
-             </button>
-           ))}
-         </div>
+      <div
+        className="relative w-full max-w-md bg-white rounded-3xl overflow-hidden flex flex-col h-[600px] shadow-2xl animate-fade-in"
+        style={{ backgroundColor: theme.backgroundColor }}
+      >
+        {/* Header */}
+        <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white/50 backdrop-blur-md sticky top-0 z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center shadow-md">
+              <Sparkles className="text-white w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-800 leading-tight">Personal Shopper</h3>
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span className="text-[10px] uppercase font-bold text-gray-400">Online Agora</span>
+              </div>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-full transition-colors">
+            <X size={20} className="text-gray-500" />
+          </button>
+        </div>
+
+        {/* Chat Area */}
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50"
+        >
+          {messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`flex items-end gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+            >
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm
+                  ${msg.role === 'user' ? 'bg-gray-200' : 'bg-white border border-purple-100 text-purple-600'}`}
+              >
+                {msg.role === 'user' ? <User size={14} className="text-gray-500" /> : <Bot size={16} />}
+              </div>
+
+              <div
+                className={`max-w-[80%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm
+                  ${msg.role === 'user'
+                    ? 'bg-blue-600 text-white rounded-br-none'
+                    : 'bg-white text-gray-700 border border-gray-100 rounded-bl-none'}`}
+              >
+                {msg.text}
+              </div>
+            </div>
+          ))}
+
+          {isTyping && (
+            <div className="flex items-end gap-2">
+              <div className="w-8 h-8 rounded-full bg-white border border-purple-100 text-purple-600 flex items-center justify-center shrink-0 shadow-sm">
+                <Bot size={16} />
+              </div>
+              <div className="bg-white p-3 rounded-2xl rounded-bl-none border border-gray-100 shadow-sm flex gap-1">
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-100"></span>
+                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce delay-200"></span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Input Area */}
+        <div className="p-4 bg-white border-t border-gray-100">
+          <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2 border border-transparent focus-within:border-blue-500 focus-within:bg-white transition-all shadow-inner">
+            <input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              placeholder="Ex: Estou procurando um vestido para festa..."
+              className="flex-1 bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400"
+            />
+            <button
+              onClick={handleSend}
+              disabled={!inputValue.trim() || isTyping}
+              className={`p-2 rounded-full transition-all ${inputValue.trim() ? 'bg-blue-600 text-white shadow-md transform hover:scale-105' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+            >
+              <Send size={16} />
+            </button>
+          </div>
+          <p className="text-[10px] text-center text-gray-400 mt-2">IA pode cometer erros. Verifique as informações.</p>
+        </div>
       </div>
     </div>
   );
