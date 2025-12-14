@@ -16,6 +16,7 @@ import SocialFooter from './components/SocialFooter';
 import CategoryView from './components/CategoryView';
 import ProductView from './components/ProductView';
 import ToastContainer from './components/ToastContainer';
+import { CorporateDashboard } from './components/CorporateDashboard';
 import { ConfigProvider, useConfig } from './contexts/ConfigContext';
 
 // Hook to detect offline status
@@ -140,6 +141,7 @@ const AppContent: React.FC = () => {
         <div className="p-6 md:p-8 lg:p-10 flex-grow flex flex-col">
           <Routes>
             <Route path="/" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
+            <Route path="/corporate" element={<CorporateDashboard />} />
             <Route path="/category/:categoryId" element={<CategoryRoute />} />
             <Route path="/product/:productId" element={<ProductRoute />} />
           </Routes>

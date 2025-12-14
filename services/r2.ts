@@ -1,5 +1,5 @@
 
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 
 const R2_ACCOUNT_ID = import.meta.env.VITE_R2_ACCOUNT_ID;
 const R2_ACCESS_KEY_ID = import.meta.env.VITE_R2_ACCESS_KEY_ID;
@@ -99,5 +99,30 @@ export const loadConfigFromR2 = async (storeId: string): Promise<any | null> => 
     } catch (error) {
         console.error("Erro ao carregar config do R2:", error);
         return null;
+    }
+};
+
+export const listAllStores = async (): Promise<string[]> => {
+    if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_BUCKET_NAME) {
+        throw new Error("Credenciais R2 incompletas.");
+    }
+
+    try {
+        const command = new ListObjectsV2Command({
+            Bucket: R2_BUCKET_NAME,
+            Prefix: 'config-',
+        });
+
+        const response = await r2Client.send(command);
+
+        if (!response.Contents) return [];
+
+        return response.Contents
+            .map(item => item.Key)
+            .filter((key): key is string => !!key)
+            .map(key => key.replace('config-', '').replace('.json', ''));
+    } catch (error) {
+        console.error("Erro ao listar lojas:", error);
+        return [];
     }
 };
