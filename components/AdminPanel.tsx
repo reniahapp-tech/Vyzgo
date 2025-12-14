@@ -4,7 +4,8 @@ import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus
 import { availableIcons } from './IconMapper';
 import { ProductItem } from '../types';
 import PaymentGateway from './PaymentGateway';
-import { uploadToR2 } from '../services/r2';
+import { uploadToR2, saveConfigToR2 } from '../services/r2';
+import { CloudUpload } from 'lucide-react';
 
 // Preset Themes Configuration
 const PRESET_THEMES = [
@@ -246,7 +247,7 @@ const WHATSAPP_LABELS = [
 ];
 
 const AdminPanel: React.FC = () => {
-  const { config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro } = useConfig();
+  const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro } = useConfig();
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
@@ -487,6 +488,22 @@ const AdminPanel: React.FC = () => {
               title="Logout"
             >
               <Lock size={16} />
+            </button>
+            <button
+              onClick={async () => {
+                if (confirm('Publicar alterações na nuvem?')) {
+                  try {
+                    await saveConfigToR2(storeId, config);
+                    addToast('Loja publicada com sucesso!', 'success');
+                  } catch (e) {
+                    addToast('Erro ao publicar.', 'error');
+                  }
+                }
+              }}
+              className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-md transition-colors"
+              title="Publicar Loja"
+            >
+              <CloudUpload size={18} />
             </button>
             <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-black/5 rounded-full"><X size={20} /></button>
           </div>

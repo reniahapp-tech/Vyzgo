@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { loadConfigFromR2 } from '../services/r2';
 import { AppConfig, CategoryItem, CartItem, ProductItem, Toast } from '../types';
 
 // SAAS CONFIGURATION
@@ -231,13 +232,22 @@ const parsePrice = (priceStr: string): number => {
 };
 
 const getStoreId = () => {
+  // SAAS LOGIC:
+  // 1. Check URL param ?store=xxx
   const params = new URLSearchParams(window.location.search);
   const queryStore = params.get('store');
-  if (queryStore && BASE_CONFIGS[queryStore]) return queryStore;
+  if (queryStore) return queryStore;
 
+  // 2. Check Subdomain store.domain.com
   const hostname = window.location.hostname;
-  const subdomain = hostname.split('.')[0];
-  if (subdomain && BASE_CONFIGS[subdomain]) return subdomain;
+  const parts = hostname.split('.');
+
+  // If localhost or simple domain, return demo
+  if (parts.length < 2 || hostname === 'localhost') return DEFAULT_STORE_ID;
+
+  // Assuming format: storename.domain.com
+  // We take the first part
+  if (parts[0] !== 'www') return parts[0];
 
   return DEFAULT_STORE_ID;
 };
@@ -298,6 +308,26 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   // currentView removed
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
+
+  // SAAS LOAD EFFECT
+  useEffect(() => {
+    const fetchRemoteConfig = async () => {
+      // If we already have a local config that matches this storeId, we might want to keep it
+      // OR we prefer the cloud truth. Let's prefer cloud truth but optimize.
+      setIsLoadingConfig(true);
+      const remoteConfig = await loadConfigFromR2(storeId);
+      if (remoteConfig) {
+        setConfig(prev => ({ ...prev, ...remoteConfig }));
+        // console.log("Config loaded from Cloud for", storeId);
+      } else {
+        // console.log("No remote config found, using default for", storeId);
+      }
+      setIsLoadingConfig(false);
+    };
+
+    fetchRemoteConfig();
+  }, [storeId]);
 
   useEffect(() => {
     const currentStore = getStoreId();
