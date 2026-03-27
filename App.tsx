@@ -21,6 +21,7 @@ import { CorporateDashboard } from './components/CorporateDashboard';
 import LandingPage from './components/LandingPage';
 import OnboardingWizard from './components/OnboardingWizard';
 import { ConfigProvider, useConfig } from './contexts/ConfigContext';
+import { PluginProvider } from './contexts/PluginContext';
 
 // Hook to detect offline status
 const useNetworkStatus = () => {
@@ -185,7 +186,9 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       <ConfigProvider>
-        <AppContent />
+        <PluginProvider>
+          <AppContent />
+        </PluginProvider>
       </ConfigProvider>
     </BrowserRouter>
   );

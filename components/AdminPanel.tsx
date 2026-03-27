@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useConfig } from '../contexts/ConfigContext';
-import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle } from 'lucide-react';
+import { usePlugins } from '../contexts/PluginContext';
+import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle, Puzzle } from 'lucide-react';
 import { availableIcons } from './IconMapper';
 import { ProductItem } from '../types';
 import PaymentGateway from './PaymentGateway';
@@ -249,12 +250,14 @@ const WHATSAPP_LABELS = [
 
 const AdminPanel: React.FC = () => {
   const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro, seedInitialData, clearDemoData, orders } = useConfig();
+  const { plugins, enablePlugin, disablePlugin, updatePluginConfig } = usePlugins();
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [pinInput, setPinInput] = useState('');
-  const [activeTab, setActiveTab] = useState<'themes' | 'branding' | 'home' | 'products' | 'plan' | 'social' | 'help' | 'orders'>('themes');
+  const [activeTab, setActiveTab] = useState<'themes' | 'branding' | 'home' | 'products' | 'plan' | 'social' | 'help' | 'orders' | 'modules'>('themes');
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
+  const [activePluginId, setActivePluginId] = useState<string | null>(null);
 
   // State for editable presets
   const [themesList, setThemesList] = useState(PRESET_THEMES);
@@ -522,6 +525,7 @@ const AdminPanel: React.FC = () => {
           {[
             { id: 'plan', icon: Crown, label: 'Plano', highlight: !isPro },
             { id: 'orders', icon: ClipboardList, label: 'Pedidos', badge: orders.length > 0 ? orders.filter(o => o.status === 'pending').length : 0 },
+            { id: 'modules', icon: Puzzle, label: 'Módulos', badge: plugins.filter(p => p.enabled).length > 0 ? plugins.filter(p => p.enabled).length : 0 },
             { id: 'help', icon: HelpCircle, label: 'Ajuda' },
             { id: 'themes', icon: Palette, label: 'Temas' },
             { id: 'branding', icon: Link, label: 'Marca' },
@@ -587,6 +591,71 @@ const AdminPanel: React.FC = () => {
                   title="Esqueci meu PIN"
                   content="O PIN padrão é '1234' (Demo) ou '0000' (Tech). Você pode alterá-lo na aba 'Marca' no final da página."
                 />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'modules' && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <Puzzle size={14} className="text-purple-500" />
+                <h3 className="text-xs font-bold text-gray-700 uppercase">Módulos do App</h3>
+                <span className="ml-auto text-[10px] bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full">
+                  {plugins.filter(p => p.enabled).length} ativo{plugins.filter(p => p.enabled).length !== 1 ? 's' : ''}
+                </span>
+              </div>
+              <p className="text-[10px] text-gray-400 leading-relaxed">
+                Módulos adicionam funcionalidades extras à sua vitrine sem alterar o código principal.
+              </p>
+
+              {/* Lista de plugins */}
+              {plugins.map(({ plugin, enabled, config: pConfig }) => (
+                <div key={plugin.id} className="bg-white/50 border border-white/60 rounded-xl overflow-hidden">
+                  <div className="flex items-center gap-3 p-3">
+                    <span className="text-2xl">{plugin.icon}</span>
+                    <div className="flex-1">
+                      <h4 className="text-xs font-bold text-gray-800">{plugin.name}</h4>
+                      <p className="text-[10px] text-gray-500 leading-tight">{plugin.description}</p>
+                      <p className="text-[9px] text-gray-400 mt-0.5">v{plugin.version}{plugin.author ? ` • ${plugin.author}` : ''}</p>
+                    </div>
+                    {/* Toggle ON/OFF */}
+                    <button
+                      onClick={() => enabled ? disablePlugin(plugin.id) : enablePlugin(plugin.id)}
+                      className={`text-3xl transition-colors ${enabled ? 'text-green-500' : 'text-gray-300'}`}
+                    >
+                      {enabled ? <ToggleRight size={36} /> : <ToggleLeft size={36} />}
+                    </button>
+                  </div>
+
+                  {/* Configuração do plugin (só se ativo e tiver AdminTab) */}
+                  {enabled && plugin.AdminTab && (
+                    <div className="border-t border-gray-100">
+                      <button
+                        onClick={() => setActivePluginId(activePluginId === plugin.id ? null : plugin.id)}
+                        className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-bold text-purple-600 hover:bg-purple-50 transition-colors"
+                      >
+                        <span>⚙️ Configurar módulo</span>
+                        {activePluginId === plugin.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                      </button>
+                      {activePluginId === plugin.id && (
+                        <div className="px-3 pb-3">
+                          <plugin.AdminTab
+                            config={pConfig}
+                            onConfigChange={(key, val) => updatePluginConfig(plugin.id, key, val)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Dica de criação */}
+              <div className="bg-purple-50 border border-purple-100 rounded-xl p-3 mt-2">
+                <p className="text-[10px] text-purple-700 leading-relaxed">
+                  💡 <strong>Quer criar um módulo?</strong> Veja o arquivo
+                  <code className="bg-purple-100 px-1 rounded ml-1">plugins/COMO_CRIAR_PLUGIN.md</code>
+                </p>
               </div>
             </div>
           )}
