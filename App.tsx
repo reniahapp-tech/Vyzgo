@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useParams, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useParams, useLocation, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import HeroCard from './components/HeroCard';
 import CategoryCard from './components/CategoryCard';
@@ -9,6 +9,7 @@ import WhatsAppButton from './components/WhatsAppButton';
 import AdminPanel from './components/AdminPanel';
 import ProductModal from './components/ProductModal';
 import CartModal from './components/CartModal';
+import CheckoutModal from './components/CheckoutModal';
 import QuizModal from './components/QuizModal';
 import TrackingModal from './components/TrackingModal';
 import LocationModal from './components/LocationModal';
@@ -17,6 +18,8 @@ import CategoryView from './components/CategoryView';
 import ProductView from './components/ProductView';
 import ToastContainer from './components/ToastContainer';
 import { CorporateDashboard } from './components/CorporateDashboard';
+import LandingPage from './components/LandingPage';
+import OnboardingWizard from './components/OnboardingWizard';
 import { ConfigProvider, useConfig } from './contexts/ConfigContext';
 
 // Hook to detect offline status
@@ -110,10 +113,19 @@ const ProductRoute = () => {
 
   if (!foundProduct) return <div className="p-10 text-center opacity-50">Produto não encontrado</div>;
 
-  // cast to any to avoid strict type check on location state if needed, or define interface
   const fromCategoryId = (location.state as any)?.fromCategoryId;
 
   return <ProductView product={foundProduct} fromCategoryId={fromCategoryId} />;
+};
+
+// Protected route — only accessible when admin is authenticated
+const ProtectedSetup: React.FC = () => {
+  const [isAuth] = useState(() => {
+    // Check if an admin session exists from sessionStorage
+    return sessionStorage.getItem('admin_auth') === 'true';
+  });
+  if (!isAuth) return <Navigate to="/" replace />;
+  return <OnboardingWizard />;
 };
 
 
@@ -140,19 +152,27 @@ const AppContent: React.FC = () => {
         {/* Main Content Area */}
         <div className="p-6 md:p-8 lg:p-10 flex-grow flex flex-col">
           <Routes>
-            <Route path="/" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
+                      <Route path="/" element={
+              ((window.location.hostname === 'agenciawint.com' || window.location.hostname === 'www.agenciawint.com')
+                && !new URLSearchParams(window.location.search).get('store'))
+                ? <LandingPage />
+                : <Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />
+            } />
+            <Route path="/demo" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
+            <Route path="/setup" element={<ProtectedSetup />} />
             <Route path="/corporate" element={<CorporateDashboard />} />
             <Route path="/category/:categoryId" element={<CategoryRoute />} />
             <Route path="/product/:productId" element={<ProductRoute />} />
           </Routes>
         </div>
 
-        {/* Global Modals & Overlays */}
+                {/* Global Modals & Overlays */}
         <ProductModal isOpen={isProductModalOpen} onClose={() => setIsProductModalOpen(false)} />
         <QuizModal isOpen={isQuizModalOpen} onClose={() => setIsQuizModalOpen(false)} />
         <TrackingModal />
         <LocationModal />
         <CartModal />
+        <CheckoutModal />
         <ToastContainer />
 
         <AdminPanel />

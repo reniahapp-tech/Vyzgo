@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadConfigFromR2 } from '../services/r2';
-import { AppConfig, CategoryItem, CartItem, ProductItem, Toast } from '../types';
+import { ProductService } from '../services/productService';
+import { AppConfig, CategoryItem, CartItem, ProductItem, Toast, Order } from '../types';
 
 // SAAS CONFIGURATION
 const DEFAULT_STORE_ID = 'demo';
@@ -12,7 +13,7 @@ const BASE_CONFIGS: Record<string, AppConfig> = {
     adminPin: '1234',
     storeMode: 'mixed',
     enableWhatsapp: true,
-    plan: 'free',
+    plan: 'pro',
     footerText: 'Vitrine App - Demonstração',
     theme: {
       backgroundColor: '#FDFBF7',
@@ -190,9 +191,11 @@ interface ConfigContextType {
   storeId: string;
   config: AppConfig;
   cart: CartItem[];
+  orders: Order[];
   isCartOpen: boolean;
+  isCheckoutOpen: boolean;
   isTrackingOpen: boolean;
-  isLocationOpen: boolean; // NEW
+  isLocationOpen: boolean;
 
   toasts: Toast[];
 
@@ -201,11 +204,15 @@ interface ConfigContextType {
   navigateProduct: (productId: string, fromCategoryId: string) => void;
 
   setIsCartOpen: (isOpen: boolean) => void;
+  setIsCheckoutOpen: (isOpen: boolean) => void;
   setIsTrackingOpen: (isOpen: boolean) => void;
-  setIsLocationOpen: (isOpen: boolean) => void; // NEW
+  setIsLocationOpen: (isOpen: boolean) => void;
   addToCart: (item: Omit<CartItem, 'id' | 'priceValue'>) => void;
   removeFromCart: (id: string) => void;
+  updateCartQuantity: (id: string, delta: number) => void;
+  clearCart: () => void;
   getCartTotal: () => number;
+  addOrder: (order: Order) => void;
 
   addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   removeToast: (id: string) => void;
@@ -216,9 +223,9 @@ interface ConfigContextType {
   removeCategory: (index: number) => void;
   addProductToCategory: (categoryIndex: number, product: ProductItem) => void;
   removeProductFromCategory: (categoryIndex: number, productIndex: number) => void;
-  updateProduct: (categoryIndex: number, productIndex: number, field: keyof ProductItem, value: string) => void;
-  resetConfig: () => void;
   upgradeToPro: () => void;
+  seedInitialData: () => void;
+  clearDemoData: () => void;
 }
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
@@ -233,6 +240,9 @@ const parsePrice = (priceStr: string): number => {
 
 const getStoreId = () => {
   // SAAS LOGIC:
+  // 0. Check for /demo route
+  if (window.location.pathname.startsWith('/demo')) return 'demo';
+
   // 1. Check URL param ?store=xxx
   const params = new URLSearchParams(window.location.search);
   const queryStore = params.get('store');
@@ -240,6 +250,10 @@ const getStoreId = () => {
 
   // 2. Check Subdomain store.domain.com
   const hostname = window.location.hostname;
+
+  // Explicit Root Domains (Production)
+  if (hostname === 'agenciawint.com' || hostname === 'www.agenciawint.com') return DEFAULT_STORE_ID;
+
   const parts = hostname.split('.');
 
   // If localhost or simple domain, return demo
@@ -255,7 +269,7 @@ const getStoreId = () => {
 export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const [storeId, setStoreId] = useState(getStoreId());
-  const storageKey = `app_config_${storeId}_v6`; // Bump version for footerText
+  const storageKey = `app_config_${storeId}_v7`; // Bump version for Pro enabling
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -302,11 +316,18 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   });
 
   const [cart, setCart] = useState<CartItem[]>([]);
+  const ordersStorageKey = `app_orders_${storeId}_v1`;
+  const [orders, setOrders] = useState<Order[]>(() => {
+    try {
+      const saved = localStorage.getItem(ordersStorageKey);
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
 
-  // currentView removed
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isLoadingConfig, setIsLoadingConfig] = useState(false);
 
@@ -355,7 +376,14 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setToasts(prev => prev.filter(t => t.id !== id));
   };
 
-  const navigateHome = () => navigate('/');
+  const navigateHome = () => {
+    const isRoot = window.location.hostname === 'agenciawint.com' || window.location.hostname === 'www.agenciawint.com';
+    if (window.location.pathname.startsWith('/demo') || (storeId === 'demo' && isRoot)) {
+      navigate('/demo');
+    } else {
+      navigate('/');
+    }
+  };
   const navigateCategory = (categoryId: string) => navigate(`/category/${categoryId}`);
   const navigateProduct = (productId: string, fromCategoryId: string) => navigate(`/product/${productId}`, { state: { fromCategoryId } });
 
@@ -373,8 +401,24 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setCart(prev => prev.filter(item => item.id !== id));
   };
 
+  const updateCartQuantity = (id: string, delta: number) => {
+    setCart(prev => prev
+      .map(item => item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item)
+    );
+  };
+
+  const clearCart = () => setCart([]);
+
   const getCartTotal = () => {
-    return cart.reduce((total, item) => total + item.priceValue, 0);
+    return cart.reduce((total, item) => total + item.priceValue * item.quantity, 0);
+  };
+
+  const addOrder = (order: Order) => {
+    setOrders(prev => {
+      const updated = [order, ...prev];
+      try { localStorage.setItem(ordersStorageKey, JSON.stringify(updated)); } catch {}
+      return updated;
+    });
   };
 
   const updateConfig = (newConfig: AppConfig) => setConfig(newConfig);
@@ -444,14 +488,48 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     addToast('Parabéns! Sua loja agora é PRO.', 'success');
   };
 
+  const seedInitialData = () => {
+    const demoProducts = ProductService.getDemoProducts();
+    const demoCategory: CategoryItem = {
+      id: 'demo-initial',
+      title: 'Produtos de Demonstração',
+      subtitle: 'Exemplos de produtos físicos e digitais',
+      iconKey: 'Package',
+      bgColor: '#F3F4F6',
+      iconColor: '#4B5563',
+      products: demoProducts
+    };
+
+    // Add as first category
+    setConfig(prev => ({
+      ...prev,
+      categories: [demoCategory, ...prev.categories]
+    }));
+    addToast('Dados de demonstração carregados com sucesso!');
+  };
+
+  const clearDemoData = () => {
+    setConfig(prev => {
+      const newCategories = prev.categories.map(cat => ({
+        ...cat,
+        products: ProductService.removeDemoProducts(cat.products)
+      })).filter(cat => cat.products.length > 0 || cat.id === 'tracking' || cat.id === 'location'); // Keep special cats
+
+      return { ...prev, categories: newCategories };
+    });
+    addToast('Dados de demonstração removidos.');
+  };
+
   return (
     <ConfigContext.Provider value={{
-      storeId, config, cart, isCartOpen, toasts, isTrackingOpen, isLocationOpen,
+      storeId, config, cart, orders, isCartOpen, isCheckoutOpen, toasts, isTrackingOpen, isLocationOpen,
       navigateHome, navigateCategory, navigateProduct,
-      setIsCartOpen, setIsTrackingOpen, setIsLocationOpen, addToCart, removeFromCart, getCartTotal,
+      setIsCartOpen, setIsCheckoutOpen, setIsTrackingOpen, setIsLocationOpen,
+      addToCart, removeFromCart, updateCartQuantity, clearCart, getCartTotal, addOrder,
       addToast, removeToast,
       updateConfig, updateNestedConfig, addCategory, removeCategory,
-      addProductToCategory, removeProductFromCategory, updateProduct, resetConfig, upgradeToPro
+      addProductToCategory, removeProductFromCategory, updateProduct, resetConfig, upgradeToPro,
+      seedInitialData, clearDemoData
     }}>
       {children}
     </ConfigContext.Provider>

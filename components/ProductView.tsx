@@ -1,5 +1,5 @@
-import React from 'react';
-import { ArrowLeft, MessageCircle, Check, ShoppingBag, ShieldCheck, ExternalLink, Info } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { ArrowLeft, MessageCircle, Check, ShoppingBag, ShieldCheck, ExternalLink, Info, Share2, AlertCircle } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
 import { ProductItem } from '../types';
 import ImageWithFallback from './ImageWithFallback';
@@ -10,8 +10,27 @@ interface ProductViewProps {
 }
 
 const ProductView: React.FC<ProductViewProps> = ({ product, fromCategoryId }) => {
-  const { config, navigateCategory, addToCart } = useConfig();
+  const { config, navigateCategory, addToCart, addToast } = useConfig();
   const { theme, whatsapp, storeMode, enableWhatsapp } = config;
+
+  // SEO: Update page title and meta description
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = `${product.title} — ${config.header.title}`;
+    // Update meta description
+    let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'description';
+      document.head.appendChild(meta);
+    }
+    const prevDesc = meta.content;
+    meta.content = product.description || `${product.title} por ${product.price} em ${config.header.title}`;
+    return () => {
+      document.title = prevTitle;
+      if (meta) meta.content = prevDesc;
+    };
+  }, [product, config]);
 
   // Direct WhatsApp Link for questions
   const encodedMessage = encodeURIComponent(
@@ -21,9 +40,26 @@ const ProductView: React.FC<ProductViewProps> = ({ product, fromCategoryId }) =>
 
   // Mode Logic
   const showCartButton = storeMode !== 'affiliate';
-  // If 'Store Only' mode, ignore affiliate link. 
-  // If 'Mixed' or 'Affiliate', allow affiliate link.
   const shouldUseAffiliateLink = (storeMode === 'mixed' || storeMode === 'affiliate') && product.affiliateUrl;
+
+  // Stock status
+  const isOutOfStock = product.stock === 0;
+
+  // Share product
+  const handleShare = async () => {
+    const shareData = { title: product.title, text: `${product.title} — ${product.price}`, url: window.location.href };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        addToast('Link copiado!', 'success');
+      }
+    } catch {
+      await navigator.clipboard.writeText(window.location.href);
+      addToast('Link copiado!', 'success');
+    }
+  };
 
   return (
     <div className="animate-fade-in flex flex-col h-full min-h-[80vh] md:justify-center">
@@ -62,12 +98,28 @@ const ProductView: React.FC<ProductViewProps> = ({ product, fromCategoryId }) =>
           </div>
 
           <div className="flex items-center gap-2 mb-6">
-             <span className="text-[10px] md:text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold flex items-center gap-1">
-               <Check size={12} /> Disponível
+             <span className={`text-[10px] md:text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1 ${
+               isOutOfStock
+                 ? 'bg-red-100 text-red-600'
+                 : 'bg-green-100 text-green-700'
+             }`}>
+               {isOutOfStock ? <AlertCircle size={12} /> : <Check size={12} />}
+               {isOutOfStock ? 'Esgotado' : 'Disponível'}
              </span>
-             <span className="text-[10px] md:text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-bold flex items-center gap-1">
-               <ShieldCheck size={12} /> Garantia
-             </span>
+             {!isOutOfStock && (
+               <span className="text-[10px] md:text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-bold flex items-center gap-1">
+                 <ShieldCheck size={12} /> Garantia
+               </span>
+             )}
+             {/* Share button */}
+             <button
+               onClick={handleShare}
+               className="ml-auto p-2 rounded-full bg-black/5 hover:bg-black/10 transition-colors"
+               title="Compartilhar produto"
+               style={{ color: theme.textColor }}
+             >
+               <Share2 size={16} />
+             </button>
           </div>
 
           <div className="w-full h-px bg-gray-100 mb-6 md:mb-8"></div>
@@ -82,22 +134,19 @@ const ProductView: React.FC<ProductViewProps> = ({ product, fromCategoryId }) =>
             
             {shouldUseAffiliateLink ? (
               /* AFFILIATE LINK BUTTON */
-              <a 
+              <a
                 href={product.affiliateUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full font-bold py-4 rounded-xl2 flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] hover:shadow-xl hover:brightness-110 hover:-translate-y-1"
-                style={{ 
-                  backgroundColor: theme.primaryColor, 
-                  color: '#FFFFFF' 
-                }}
+                style={{ backgroundColor: theme.primaryColor, color: '#FFFFFF' }}
               >
                 <ExternalLink size={20} />
                 Acessar Site Oficial
               </a>
             ) : showCartButton ? (
               /* CART BUTTON (If allowed by mode) */
-              <button 
+              <button
                 onClick={() => addToCart({
                   productId: product.id,
                   title: product.title,
@@ -105,14 +154,16 @@ const ProductView: React.FC<ProductViewProps> = ({ product, fromCategoryId }) =>
                   imageUrl: product.imageUrl,
                   quantity: 1
                 })}
-                className="w-full font-bold py-4 rounded-xl2 border-2 flex items-center justify-center gap-2 transition-all active:scale-[0.98] hover:bg-gray-50"
-                style={{ 
-                  borderColor: theme.primaryColor, 
-                  color: theme.primaryColor 
-                }}
+                disabled={isOutOfStock}
+                className={`w-full font-bold py-4 rounded-xl2 border-2 flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
+                  isOutOfStock
+                    ? 'opacity-40 cursor-not-allowed border-gray-200 text-gray-400'
+                    : 'hover:bg-gray-50'
+                }`}
+                style={isOutOfStock ? {} : { borderColor: theme.primaryColor, color: theme.primaryColor }}
               >
                 <ShoppingBag size={20} />
-                Adicionar à Sacola
+                {isOutOfStock ? 'Produto Esgotado' : 'Adicionar à Sacola'}
               </button>
             ) : (
               /* AFFILIATE MODE BUT NO LINK PROVIDED */

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { listAllStores, saveConfigToR2 } from '../services/r2';
 import { useConfig } from '../contexts/ConfigContext';
@@ -15,87 +14,150 @@ export const CorporateDashboard: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [newStoreId, setNewStoreId] = useState('');
     const [isCreating, setIsCreating] = useState(false);
+    const [viewMode, setViewMode] = useState<'master' | 'agency'>('agency');
+    const [agencyId, setAgencyId] = useState('');
 
     const handleLogin = () => {
         if (pin === MASTER_PIN) {
             setIsAuthenticated(true);
+            setViewMode('master');
+            loadStores();
+        } else if (pin.startsWith('agency-')) {
+            setIsAuthenticated(true);
+            setViewMode('agency');
+            setAgencyId(pin);
             loadStores();
         } else {
-            alert('PIN Mestre incorreto');
+            alert('Acesso negado. Use o Código da Agência ou PIN Mestre.');
         }
     };
 
     const loadStores = async () => {
         setIsLoading(true);
-        const list = await listAllStores();
-        setStores(list);
+        try {
+            const response = await fetch('/api/list-stores');
+            if (response.ok) {
+                const data = await response.json();
+                let allStores = data.stores as string[];
+
+                if (viewMode === 'agency') {
+                    allStores = allStores.filter(s => s.startsWith(agencyId + '-'));
+                }
+
+                setStores(allStores);
+            } else {
+                setStores([]);
+            }
+        } catch (e) {
+            setStores([]);
+        }
         setIsLoading(false);
     };
 
     const createStore = async () => {
         if (!newStoreId) return;
 
-        // Basic validation
-        const cleanId = newStoreId.toLowerCase().replace(/[^a-z0-9-]/g, '');
-        if (cleanId !== newStoreId) {
-            alert('Use apenas letras minúsculas, números e hífens.');
-            return;
+        let finalStoreId = newStoreId.toLowerCase().replace(/[^a-z0-9-]/g, '');
+
+        if (viewMode === 'agency') {
+            finalStoreId = `${agencyId}-${finalStoreId}`;
         }
 
-        if (stores.includes(cleanId)) {
+        if (stores.includes(finalStoreId)) {
             alert('ID da loja já existe.');
             return;
         }
 
-        if (!confirm(`Criar nova loja "${cleanId}"?`)) return;
+        if (!confirm(`Criar nova loja "${finalStoreId}"?`)) return;
 
         setIsCreating(true);
         try {
-            // Create a fresh config based on the current template or a default one
             const newConfig: AppConfig = {
-                ...config, // Clone current config as template
+                ...config,
                 header: {
                     ...config.header,
-                    title: `Nova Loja (${cleanId})`,
+                    title: `Nova Loja - ${finalStoreId}`,
                     subtitle: 'Configuração Inicial'
                 }
             };
 
-            await saveConfigToR2(cleanId, newConfig);
+            const response = await fetch('/api/create-store', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ storeId: finalStoreId, config: newConfig })
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Falha na API');
+            }
             alert('Loja criada com sucesso!');
             setNewStoreId('');
             loadStores();
-        } catch (error) {
-            alert('Erro ao criar loja.');
+        } catch (error: any) {
+            alert('Erro ao criar loja: ' + (error.message || JSON.stringify(error)));
             console.error(error);
         }
         setIsCreating(false);
     };
 
+    const renderHeader = () => (
+        <header className="flex justify-between items-center mb-10">
+            <div>
+                <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                    <Store className="text-blue-600" />
+                    {viewMode === 'agency' ? `Painel: ${agencyId}` : 'Painel Master'}
+                </h1>
+                <p className="text-gray-500 mt-2">
+                    {viewMode === 'agency'
+                        ? 'Gerencie suas franquias e clientes.'
+                        : 'Visão total do sistema (Super Admin).'}
+                </p>
+            </div>
+            <div className="flex gap-2">
+                <button
+                    onClick={() => { setIsAuthenticated(false); setPin(''); }}
+                    className="flex items-center gap-2 px-4 py-2 text-red-500 bg-white rounded-lg border border-red-100 hover:bg-red-50 transition"
+                >
+                    Sair
+                </button>
+                <button
+                    onClick={() => loadStores()}
+                    className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white rounded-lg border hover:bg-gray-50 transition"
+                >
+                    <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
+                    Atualizar
+                </button>
+            </div>
+        </header>
+    );
+
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-                <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+                <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-200">
                     <div className="flex justify-center mb-6">
                         <div className="p-3 bg-blue-100 rounded-full">
                             <Lock className="w-8 h-8 text-blue-600" />
                         </div>
                     </div>
-                    <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Acesso Corporativo</h2>
+                    <h2 className="text-2xl font-bold text-center mb-2 text-gray-800">Painel do Parceiro</h2>
+                    <p className="text-center text-gray-500 mb-6 text-sm">Digite seu Código de Agência ou PIN Mestre</p>
+
                     <input
                         type="password"
-                        placeholder="PIN Mestre"
+                        placeholder="Código de Acesso"
                         value={pin}
                         onChange={(e) => setPin(e.target.value)}
-                        className="w-full text-center text-3xl tracking-widest p-4 border rounded-xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="w-full text-center text-xl tracking-widest p-4 border rounded-xl mb-4 focus:ring-2 focus:ring-blue-500 outline-none uppercase"
                     />
                     <button
                         onClick={handleLogin}
-                        className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition"
+                        className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
                     >
-                        Entrar
+                        Acessar Painel
                     </button>
-                    <p className="text-center mt-4 text-xs text-gray-400">Ambiente seguro</p>
+                    <p className="text-center mt-4 text-xs text-gray-400">Ambiente Seguro | Vitrine SaaS</p>
                 </div>
             </div>
         );
@@ -104,22 +166,7 @@ export const CorporateDashboard: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-50 p-6 md:p-12">
             <div className="max-w-6xl mx-auto">
-                <header className="flex justify-between items-center mb-10">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                            <Store className="text-blue-600" />
-                            Painel Corporativo
-                        </h1>
-                        <p className="text-gray-500 mt-2">Gerencie todas as suas franquias em um só lugar.</p>
-                    </div>
-                    <button
-                        onClick={loadStores}
-                        className="flex items-center gap-2 px-4 py-2 text-gray-600 bg-white rounded-lg border hover:bg-gray-50 transition"
-                    >
-                        <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
-                        Atualizar Lista
-                    </button>
-                </header>
+                {renderHeader()}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Connection: Create New */}
@@ -136,14 +183,16 @@ export const CorporateDashboard: React.FC = () => {
                                         <input
                                             value={newStoreId}
                                             onChange={(e) => setNewStoreId(e.target.value)}
-                                            placeholder="ex: filial-centro"
+                                            placeholder={viewMode === 'agency' ? "ex: loja1" : "ex: cliente-x"}
                                             className="w-full p-3 bg-gray-50 border rounded-l-lg outline-none focus:ring-1 focus:ring-blue-500"
                                         />
                                         <span className="bg-gray-100 text-gray-500 p-3 border-y border-r rounded-r-lg select-none">
                                             .site
                                         </span>
                                     </div>
-                                    <p className="text-xs text-gray-400 mt-1">Apenas letras minúsculas e hífens.</p>
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        {viewMode === 'agency' ? `Será criado como: ${agencyId}-${newStoreId || '...'}` : 'ID único do sistema'}
+                                    </p>
                                 </div>
 
                                 <button
@@ -168,7 +217,7 @@ export const CorporateDashboard: React.FC = () => {
                             {isLoading ? (
                                 <div className="p-12 text-center text-gray-400">Carregando lojas...</div>
                             ) : stores.length === 0 ? (
-                                <div className="p-12 text-center text-gray-400">Nenhuma loja encontrada na nuvem.</div>
+                                <div className="p-12 text-center text-gray-400">Nenhuma loja encontrada.</div>
                             ) : (
                                 <ul className="divide-y divide-gray-100">
                                     {stores.map(store => (

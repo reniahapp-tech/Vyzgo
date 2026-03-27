@@ -4,9 +4,51 @@ export interface ProductItem {
   id: string;
   title: string;
   price: string;
+  priceValue?: number;      // Valor numérico, ex: 149.90
   description: string;
   imageUrl: string;
   affiliateUrl?: string;
+  is_demo?: boolean;
+  stock?: number | null;    // null = sem controle, 0 = esgotado, >0 = disponível
+}
+
+export type PaymentMethod = 'credit_card' | 'pix' | 'money';
+export type PaymentStatus = 'pending' | 'paid' | 'failed';
+export type DeliveryType = 'delivery' | 'pickup';
+export type OrderStatus = 'pending' | 'confirmed' | 'shipped' | 'cancelled';
+
+export interface PedidoOnline {
+  id: string;
+  items: CartItem[];
+  total: number;
+  customer: {
+    name: string;
+    phone: string;
+    address: string;
+  };
+  payment: {
+    method: PaymentMethod;
+    status: PaymentStatus;
+    transactionId?: string;
+  };
+  createdAt: string;
+}
+
+export interface CheckoutData {
+  customerName: string;
+  customerPhone: string;
+  deliveryType: DeliveryType;
+  address?: string;
+}
+
+export interface Order {
+  id: string;
+  storeId: string;
+  items: CartItem[];
+  total: number;
+  customer: CheckoutData;
+  status: OrderStatus;
+  createdAt: string;
 }
 
 export interface CategoryItem {
@@ -58,6 +100,7 @@ export interface AppConfig {
     accentColor: string;
     textColor: string;
   };
+  customDomain?: string; // New: White Label
   header: {
     title: string;
     subtitle: string;

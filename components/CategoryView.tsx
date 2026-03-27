@@ -1,5 +1,5 @@
-import React from 'react';
-import { ArrowLeft, ShoppingBag, ExternalLink } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { ArrowLeft, ShoppingBag, ExternalLink, AlertCircle } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
 import { CategoryItem } from '../types';
 
@@ -10,6 +10,13 @@ interface CategoryViewProps {
 const CategoryView: React.FC<CategoryViewProps> = ({ category }) => {
   const { config, navigateHome, navigateProduct, addToCart } = useConfig();
   const { theme, storeMode } = config;
+
+  // SEO: Update page title
+  useEffect(() => {
+    const prev = document.title;
+    document.title = `${category.title} — ${config.header.title}`;
+    return () => { document.title = prev; };
+  }, [category, config.header.title]);
 
   return (
     <div className="animate-fade-in">
@@ -65,8 +72,11 @@ const CategoryView: React.FC<CategoryViewProps> = ({ category }) => {
                   <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-50">
                     <span className="font-bold text-sm md:text-base" style={{ color: theme.primaryColor }}>{product.price}</span>
                     
-                    {/* Action Button: Cart or Link */}
-                    {showExternalIcon ? (
+                    {product.stock === 0 ? (
+                      <span className="text-[10px] font-bold bg-red-50 text-red-500 px-2 py-1 rounded-full flex items-center gap-1">
+                        <AlertCircle size={10} /> Esgotado
+                      </span>
+                    ) : showExternalIcon ? (
                        <button 
                          className="p-2 rounded-full text-white shadow-sm active:scale-95 bg-gray-800 hover:bg-black transition-colors"
                        >

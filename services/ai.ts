@@ -13,7 +13,7 @@ if (API_KEY) {
 
 export const generateProductDescription = async (name: string, price: string, category: string): Promise<string> => {
     if (!model) {
-        if (!API_KEY) throw new Error("Chave API do Gemini não configurada.");
+        if (!API_KEY) throw new Error("API Key não configurada (Build Env).");
         throw new Error("Modelo não inicializado.");
     }
 
@@ -33,9 +33,10 @@ export const generateProductDescription = async (name: string, price: string, ca
         const result = await model.generateContent(prompt);
         const response = await result.response;
         return response.text().trim();
-    } catch (error) {
+    } catch (error: any) {
         console.error("Erro na IA:", error);
-        throw new Error("Falha ao gerar descrição.");
+        // THROW THE REAL ERROR message to the UI
+        throw new Error(error.message || "Erro desconhecido na API Gemini");
     }
 };
 

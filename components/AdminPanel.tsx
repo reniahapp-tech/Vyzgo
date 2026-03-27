@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useConfig } from '../contexts/ConfigContext';
-import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal } from 'lucide-react';
+import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle } from 'lucide-react';
 import { availableIcons } from './IconMapper';
 import { ProductItem } from '../types';
 import PaymentGateway from './PaymentGateway';
@@ -9,7 +9,7 @@ import { generateProductDescription } from '../services/ai';
 import { CloudUpload, Sparkles } from 'lucide-react';
 
 // Preset Themes Configuration
-const PRESET_THEMES = [
+export const PRESET_THEMES = [
   {
     id: 'natura',
     name: 'Natura Original',
@@ -248,12 +248,12 @@ const WHATSAPP_LABELS = [
 ];
 
 const AdminPanel: React.FC = () => {
-  const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro } = useConfig();
+  const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro, seedInitialData, clearDemoData, orders } = useConfig();
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [pinInput, setPinInput] = useState('');
-  const [activeTab, setActiveTab] = useState<'themes' | 'branding' | 'home' | 'products' | 'plan' | 'social' | 'help'>('themes');
+  const [activeTab, setActiveTab] = useState<'themes' | 'branding' | 'home' | 'products' | 'plan' | 'social' | 'help' | 'orders'>('themes');
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
 
   // State for editable presets
@@ -292,9 +292,15 @@ const AdminPanel: React.FC = () => {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        addToast('Arquivo inválido! Selecione uma imagem (JPG, PNG, WEBP, etc).', 'error');
+        e.target.value = '';
+        return;
+      }
       // Limit 5MB for R2
       if (file.size > 5 * 1024 * 1024) {
-        alert("Imagem muito grande! Máximo 5MB.");
+        alert('Imagem muito grande! Máximo 5MB.');
         return;
       }
 
@@ -305,7 +311,7 @@ const AdminPanel: React.FC = () => {
         callback(url);
         addToast('Upload concluído!', 'success');
       } catch (error) {
-        console.error("R2 Upload failed, falling back to base64", error);
+        console.error('R2 Upload failed, falling back to base64', error);
         addToast('Erro no R2. Usando modo offline (limitado).', 'error');
 
         // Fallback to Base64
@@ -331,6 +337,7 @@ const AdminPanel: React.FC = () => {
     e.preventDefault();
     if (pinInput === config.adminPin) {
       setIsAuthenticated(true);
+      sessionStorage.setItem('admin_auth', 'true');
       setPinInput('');
       addToast('Modo Admin ativado!', 'success');
     } else {
@@ -514,6 +521,7 @@ const AdminPanel: React.FC = () => {
         <div className="flex p-2 gap-1 overflow-x-auto scrollbar-hide">
           {[
             { id: 'plan', icon: Crown, label: 'Plano', highlight: !isPro },
+            { id: 'orders', icon: ClipboardList, label: 'Pedidos', badge: orders.length > 0 ? orders.filter(o => o.status === 'pending').length : 0 },
             { id: 'help', icon: HelpCircle, label: 'Ajuda' },
             { id: 'themes', icon: Palette, label: 'Temas' },
             { id: 'branding', icon: Link, label: 'Marca' },
@@ -523,10 +531,17 @@ const AdminPanel: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex-1 py-2 px-3 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-white shadow-md text-gray-900 scale-105' : 'text-gray-500 hover:bg-white/30'
-                } ${tab.highlight ? 'text-yellow-600 bg-yellow-50' : ''}`}
+              className={`flex-1 py-2 px-3 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase transition-all whitespace-nowrap relative ${
+                activeTab === tab.id ? 'bg-white shadow-md text-gray-900 scale-105' : 'text-gray-500 hover:bg-white/30'
+              } ${(tab as any).highlight ? 'text-yellow-600 bg-yellow-50' : ''}`}
             >
-              <tab.icon size={18} className={tab.highlight ? 'fill-yellow-500 text-yellow-600' : ''} /> {tab.label}
+              <tab.icon size={18} className={(tab as any).highlight ? 'fill-yellow-500 text-yellow-600' : ''} />
+              {tab.label}
+              {(tab as any).badge > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold">
+                  {(tab as any).badge}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -573,6 +588,53 @@ const AdminPanel: React.FC = () => {
                   content="O PIN padrão é '1234' (Demo) ou '0000' (Tech). Você pode alterá-lo na aba 'Marca' no final da página."
                 />
               </div>
+            </div>
+          )}
+
+          {activeTab === 'orders' && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <ClipboardList size={14} className="text-gray-500" />
+                <h3 className="text-xs font-bold text-gray-700 uppercase">Histórico de Pedidos</h3>
+                <span className="ml-auto text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{orders.length} pedido{orders.length !== 1 ? 's' : ''}</span>
+              </div>
+
+              {orders.length === 0 ? (
+                <div className="text-center py-12 opacity-40">
+                  <Package size={40} className="mx-auto mb-3 text-gray-300" />
+                  <p className="text-xs font-medium text-gray-500">Nenhum pedido ainda.</p>
+                  <p className="text-[10px] text-gray-400 mt-1">Os pedidos aparecem aqui após o cliente finalizar.</p>
+                </div>
+              ) : (
+                orders.map(order => (
+                  <div key={order.id} className="bg-white/50 border border-white/60 rounded-xl p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono text-gray-400">{order.id}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                        order.status === 'confirmed' ? 'bg-blue-100 text-blue-700' :
+                        order.status === 'shipped' ? 'bg-green-100 text-green-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {order.status === 'pending' ? 'Pendente' :
+                         order.status === 'confirmed' ? 'Confirmado' :
+                         order.status === 'shipped' ? 'Enviado' : 'Cancelado'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-bold text-gray-800">{order.customer.customerName}</p>
+                        <p className="text-[10px] text-gray-500">{order.customer.deliveryType === 'delivery' ? `📦 ${order.customer.address}` : '🏪 Retirada'}</p>
+                      </div>
+                      <span className="text-sm font-bold text-green-600">R$ {order.total.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div className="text-[10px] text-gray-400">
+                      {order.items.map(i => `${i.quantity}x ${i.title}`).join(', ')}
+                    </div>
+                    <p className="text-[10px] text-gray-400">{new Date(order.createdAt).toLocaleString('pt-BR')}</p>
+                  </div>
+                ))
+              )}
             </div>
           )}
 
@@ -632,7 +694,8 @@ const AdminPanel: React.FC = () => {
                 </div>
               </div>
 
-              {/* DEVELOPER BYPASS */}
+          {/* DEVELOPER BYPASS — only in development */}
+              {import.meta.env.DEV && (
               <div className="mt-8 border-t border-dashed border-gray-300 pt-4">
                 <div className="flex items-center justify-center gap-2 mb-3 text-gray-400">
                   <Terminal size={12} />
@@ -659,6 +722,7 @@ const AdminPanel: React.FC = () => {
                   </button>
                 </div>
               </div>
+              )}
             </div>
           )}
 
@@ -832,6 +896,37 @@ const AdminPanel: React.FC = () => {
                 )}
               </div>
 
+              {/* CUSTOM DOMAIN CONFIGURATION */}
+              <div className={`bg-white/40 border border-white/50 rounded-xl p-3 mb-4 relative overflow-hidden ${!isPro ? 'opacity-60' : ''}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-bold text-gray-700 uppercase flex items-center gap-2">
+                    <Globe size={14} /> Domínio Personalizado (White Label)
+                    {!isPro && <Lock size={12} />}
+                  </h3>
+                  {isPro && <span className="text-[10px] bg-green-100 text-green-700 px-2 rounded-full font-bold">PRO</span>}
+                </div>
+
+                <div className="relative">
+                  <input
+                    value={config.customDomain || ''}
+                    onChange={(e) => updateConfig({ ...config, customDomain: e.target.value })}
+                    placeholder="ex: loja.suamarca.com"
+                    disabled={!isPro}
+                    className="w-full bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed"
+                  />
+                  {!isPro && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/10 backdrop-blur-[1px]">
+                      <button onClick={() => setIsPaymentOpen(true)} className="text-[10px] bg-black text-white px-3 py-1 rounded-full shadow-lg font-bold hover:scale-105 transition-transform">
+                        Desbloquear
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <p className="text-[9px] text-gray-500 mt-2 leading-relaxed">
+                  Para funcionar, configure um CNAME no seu provedor de domínio apontando para <b>cname.vitrine.ai</b>.
+                </p>
+              </div>
+
               {/* HEADER CONFIGURATION GROUP */}
               <div className="bg-white/40 border border-white/50 rounded-xl p-3">
                 <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
@@ -947,6 +1042,30 @@ const AdminPanel: React.FC = () => {
 
           {activeTab === 'products' && (
             <div className="space-y-4">
+              {/* Demo Tools */}
+              <div className="bg-purple-50 border border-purple-100 rounded-xl p-3">
+                <h3 className="text-xs font-bold text-purple-800 uppercase mb-2 flex items-center gap-2">
+                  <Sparkles size={14} /> Dados de Demonstração
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => {
+                      if (confirm('Isso irá adicionar produtos de exemplo. Continuar?')) seedInitialData();
+                    }}
+                    className="py-2 px-3 bg-white text-purple-700 text-xs font-bold rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Plus size={12} /> Carregar Demo
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm('Isso removerá os produtos de demonstração. Continuar?')) clearDemoData();
+                    }}
+                    className="py-2 px-3 bg-white text-red-600 text-xs font-bold rounded-lg border border-red-200 hover:bg-red-50 transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Trash2 size={12} /> Limpar Demo
+                  </button>
+                </div>
+              </div>
               <div className="mb-4">
                 <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Selecionar Categoria</label>
                 <select
@@ -1002,8 +1121,8 @@ const AdminPanel: React.FC = () => {
                             );
                             updateProduct(selectedCategoryIndex, pIndex, 'description', desc);
                             addToast('Descrição gerada!', 'success');
-                          } catch (e) {
-                            addToast('Erro ao gerar descrição.', 'error');
+                          } catch (e: any) {
+                            addToast(e.message || 'Erro ao gerar descrição.', 'error');
                           }
                         }}
                         className="text-[10px] text-purple-600 font-bold flex items-center gap-1 hover:bg-purple-50 px-2 py-1 rounded-full transition-colors"
