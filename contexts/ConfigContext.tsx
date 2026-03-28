@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useNavigate } from 'react-router-dom';
 import { loadConfigFromR2 } from '../services/r2';
 import { ProductService } from '../services/productService';
-import { AppConfig, CategoryItem, CartItem, ProductItem, Toast, Order } from '../types';
+import { AppConfig, CategoryItem, CartItem, ProductItem, Toast, Order, Coupon } from '../types';
 
 // SAAS CONFIGURATION
 const DEFAULT_STORE_ID = 'demo';
@@ -192,6 +192,8 @@ interface ConfigContextType {
   config: AppConfig;
   cart: CartItem[];
   orders: Order[];
+  coupons: Coupon[];
+  appliedCoupon: Coupon | null;
   isCartOpen: boolean;
   isCheckoutOpen: boolean;
   isTrackingOpen: boolean;
@@ -212,7 +214,12 @@ interface ConfigContextType {
   updateCartQuantity: (id: string, delta: number) => void;
   clearCart: () => void;
   getCartTotal: () => number;
+  getCartTotalWithDiscount: () => number;
   addOrder: (order: Order) => void;
+  applyCoupon: (code: string) => boolean;
+  removeCoupon: () => void;
+  saveCoupon: (coupon: Coupon) => void;
+  deleteCoupon: (code: string) => void;
 
   addToast: (message: string, type?: 'success' | 'error' | 'info') => void;
   removeToast: (id: string) => void;
@@ -323,6 +330,11 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       return saved ? JSON.parse(saved) : [];
     } catch { return []; }
   });
+  const couponsStorageKey = `app_coupons_${storeId}_v1`;
+  const [coupons, setCoupons] = useState<Coupon[]>(() => {
+    try { return JSON.parse(localStorage.getItem(couponsStorageKey) || '[]'); } catch { return []; }
+  });
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
@@ -417,6 +429,46 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     setOrders(prev => {
       const updated = [order, ...prev];
       try { localStorage.setItem(ordersStorageKey, JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  const getCartTotalWithDiscount = () => {
+    const total = getCartTotal();
+    if (!appliedCoupon) return total;
+    if (appliedCoupon.type === 'percent') return Math.max(0, total * (1 - appliedCoupon.value / 100));
+    return Math.max(0, total - appliedCoupon.value);
+  };
+
+  const applyCoupon = (code: string): boolean => {
+    const coupon = coupons.find(c =>
+      c.code.toUpperCase() === code.toUpperCase() &&
+      c.active &&
+      (!c.expiresAt || new Date(c.expiresAt) > new Date()) &&
+      (!c.maxUses || (c.usedCount || 0) < c.maxUses) &&
+      (!c.minOrder || getCartTotal() >= c.minOrder)
+    );
+    if (coupon) { setAppliedCoupon(coupon); return true; }
+    return false;
+  };
+
+  const removeCoupon = () => setAppliedCoupon(null);
+
+  const saveCoupon = (coupon: Coupon) => {
+    setCoupons(prev => {
+      const exists = prev.findIndex(c => c.code === coupon.code);
+      const updated = exists >= 0
+        ? prev.map((c, i) => i === exists ? coupon : c)
+        : [...prev, coupon];
+      try { localStorage.setItem(couponsStorageKey, JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  const deleteCoupon = (code: string) => {
+    setCoupons(prev => {
+      const updated = prev.filter(c => c.code !== code);
+      try { localStorage.setItem(couponsStorageKey, JSON.stringify(updated)); } catch {}
       return updated;
     });
   };
@@ -522,10 +574,13 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   return (
     <ConfigContext.Provider value={{
-      storeId, config, cart, orders, isCartOpen, isCheckoutOpen, toasts, isTrackingOpen, isLocationOpen,
+      storeId, config, cart, orders, coupons, appliedCoupon,
+      isCartOpen, isCheckoutOpen, toasts, isTrackingOpen, isLocationOpen,
       navigateHome, navigateCategory, navigateProduct,
       setIsCartOpen, setIsCheckoutOpen, setIsTrackingOpen, setIsLocationOpen,
-      addToCart, removeFromCart, updateCartQuantity, clearCart, getCartTotal, addOrder,
+      addToCart, removeFromCart, updateCartQuantity, clearCart,
+      getCartTotal, getCartTotalWithDiscount, addOrder,
+      applyCoupon, removeCoupon, saveCoupon, deleteCoupon,
       addToast, removeToast,
       updateConfig, updateNestedConfig, addCategory, removeCategory,
       addProductToCategory, removeProductFromCategory, updateProduct, resetConfig, upgradeToPro,

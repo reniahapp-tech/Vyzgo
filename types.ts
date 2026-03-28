@@ -1,15 +1,25 @@
 import { LucideIcon } from 'lucide-react';
 
+export interface ProductVariant {
+  id: string;
+  label: string;    // ex: 'Azul M', 'Vermelho G'
+  price?: string;   // preço override (opcional)
+  priceValue?: number;
+  stock?: number | null;
+}
+
 export interface ProductItem {
   id: string;
   title: string;
   price: string;
-  priceValue?: number;      // Valor numérico, ex: 149.90
+  priceValue?: number;
   description: string;
   imageUrl: string;
+  imageUrls?: string[];       // galeria: imagens adicionais
   affiliateUrl?: string;
   is_demo?: boolean;
-  stock?: number | null;    // null = sem controle, 0 = esgotado, >0 = disponível
+  stock?: number | null;
+  variants?: ProductVariant[]; // variantes de cor/tamanho/etc
 }
 
 export type PaymentMethod = 'credit_card' | 'pix' | 'money';
@@ -46,9 +56,22 @@ export interface Order {
   storeId: string;
   items: CartItem[];
   total: number;
+  discount?: number;        // valor do desconto aplicado
+  couponCode?: string;      // código do cupão usado
   customer: CheckoutData;
   status: OrderStatus;
   createdAt: string;
+}
+
+export interface Coupon {
+  code: string;             // ex: 'PROMO10'
+  type: 'percent' | 'fixed'; // % ou valor fixo
+  value: number;            // 10 = 10% ou R$10
+  minOrder?: number;        // pedido mínimo para usar
+  maxUses?: number;         // null = ilimitado
+  usedCount?: number;
+  expiresAt?: string;       // ISO date string
+  active: boolean;
 }
 
 export interface CategoryItem {

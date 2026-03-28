@@ -22,6 +22,7 @@ import LandingPage from './components/LandingPage';
 import OnboardingWizard from './components/OnboardingWizard';
 import { ConfigProvider, useConfig } from './contexts/ConfigContext';
 import { PluginProvider } from './contexts/PluginContext';
+import SearchBar from './components/SearchBar';
 
 // Hook to detect offline status
 const useNetworkStatus = () => {
@@ -54,6 +55,11 @@ const Home: React.FC<{ setIsProductModalOpen: (v: boolean) => void, setIsQuizMod
         {/* 1. Hero Card - Full Width (Span 2 on mobile, Span 4 on tablet) */}
         <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
           <HeroCard onClick={() => setIsProductModalOpen(true)} />
+        </div>
+
+        {/* SearchBar */}
+        <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '150ms' }}>
+          <SearchBar />
         </div>
 
         {/* 2. Categories Grid */}

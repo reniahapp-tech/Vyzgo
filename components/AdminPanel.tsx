@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useConfig } from '../contexts/ConfigContext';
 import { usePlugins } from '../contexts/PluginContext';
-import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle, Puzzle } from 'lucide-react';
+import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle, Puzzle, Tag } from 'lucide-react';
 import { availableIcons } from './IconMapper';
 import { ProductItem } from '../types';
 import PaymentGateway from './PaymentGateway';
@@ -249,15 +249,17 @@ const WHATSAPP_LABELS = [
 ];
 
 const AdminPanel: React.FC = () => {
-  const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro, seedInitialData, clearDemoData, orders } = useConfig();
+  const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro, seedInitialData, clearDemoData, orders, coupons, saveCoupon, deleteCoupon } = useConfig();
   const { plugins, enablePlugin, disablePlugin, updatePluginConfig } = usePlugins();
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [pinInput, setPinInput] = useState('');
-  const [activeTab, setActiveTab] = useState<'themes' | 'branding' | 'home' | 'products' | 'plan' | 'social' | 'help' | 'orders' | 'modules'>('themes');
+  const [activeTab, setActiveTab] = useState<'themes' | 'branding' | 'home' | 'products' | 'plan' | 'social' | 'help' | 'orders' | 'modules' | 'coupons'>('themes');
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
   const [activePluginId, setActivePluginId] = useState<string | null>(null);
+  // Coupon form state
+  const [couponForm, setCouponForm] = useState({ code: '', type: 'percent' as 'percent' | 'fixed', value: 10, minOrder: 0, active: true });
 
   // State for editable presets
   const [themesList, setThemesList] = useState(PRESET_THEMES);
@@ -291,37 +293,44 @@ const AdminPanel: React.FC = () => {
       return theme;
     }));
   };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, callback: (url: string) => void) => {
+  // Image upload with canvas compression
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, onUrl: (url: string) => void) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        addToast('Arquivo inválido! Selecione uma imagem (JPG, PNG, WEBP, etc).', 'error');
-        e.target.value = '';
-        return;
-      }
-      // Limit 5MB for R2
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Imagem muito grande! Máximo 5MB.');
-        return;
-      }
-
-      addToast('Iniciando upload...', 'info');
-
-      try {
-        const url = await uploadToR2(file);
-        callback(url);
-        addToast('Upload concluído!', 'success');
-      } catch (error) {
-        console.error('R2 Upload failed, falling back to base64', error);
-        addToast('Erro no R2. Usando modo offline (limitado).', 'error');
-
-        // Fallback to Base64
-        const reader = new FileReader();
-        reader.onloadend = () => callback(reader.result as string);
-        reader.readAsDataURL(file);
-      }
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      addToast('Apenas imagens são permitidas (JPG, PNG, WEBP).', 'error');
+      e.target.value = '';
+      return;
+    }
+    // Compress via canvas (max 800px wide, JPEG 82%)
+    const compress = (f: File): Promise<File> => new Promise(resolve => {
+      const img = new Image();
+      const objUrl = URL.createObjectURL(f);
+      img.onload = () => {
+        const MAX = 800;
+        let { width, height } = img;
+        if (width > MAX) { height = Math.round(height * MAX / width); width = MAX; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(blob => {
+          URL.revokeObjectURL(objUrl);
+          resolve(blob ? new File([blob], f.name, { type: 'image/jpeg' }) : f);
+        }, 'image/jpeg', 0.82);
+      };
+      img.src = objUrl;
+    });
+    addToast('Comprimindo e enviando...', 'info');
+    try {
+      const compressed = await compress(file);
+      const url = await uploadToR2(compressed);
+      onUrl(url);
+      addToast('Imagem enviada!', 'success');
+    } catch (error) {
+      addToast('Erro no upload. Usando fallback local.', 'error');
+      const reader = new FileReader();
+      reader.onloadend = () => onUrl(reader.result as string);
+      reader.readAsDataURL(file);
     }
   };
 
@@ -524,8 +533,9 @@ const AdminPanel: React.FC = () => {
         <div className="flex p-2 gap-1 overflow-x-auto scrollbar-hide">
           {[
             { id: 'plan', icon: Crown, label: 'Plano', highlight: !isPro },
-            { id: 'orders', icon: ClipboardList, label: 'Pedidos', badge: orders.length > 0 ? orders.filter(o => o.status === 'pending').length : 0 },
-            { id: 'modules', icon: Puzzle, label: 'Módulos', badge: plugins.filter(p => p.enabled).length > 0 ? plugins.filter(p => p.enabled).length : 0 },
+            { id: 'orders', icon: ClipboardList, label: 'Pedidos', badge: orders.filter(o => o.status === 'pending').length || 0 },
+            { id: 'coupons', icon: Tag, label: 'Cupons' },
+            { id: 'modules', icon: Puzzle, label: 'Módulos', badge: plugins.filter(p => p.enabled).length || 0 },
             { id: 'help', icon: HelpCircle, label: 'Ajuda' },
             { id: 'themes', icon: Palette, label: 'Temas' },
             { id: 'branding', icon: Link, label: 'Marca' },
@@ -592,6 +602,104 @@ const AdminPanel: React.FC = () => {
                   content="O PIN padrão é '1234' (Demo) ou '0000' (Tech). Você pode alterá-lo na aba 'Marca' no final da página."
                 />
               </div>
+            </div>
+          )}
+
+          {activeTab === 'coupons' && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <Tag size={14} className="text-yellow-500" />
+                <h3 className="text-xs font-bold text-gray-700 uppercase">Cupons de Desconto</h3>
+                <span className="ml-auto text-[10px] bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full">
+                  {coupons.filter(c => c.active).length} ativo{coupons.filter(c => c.active).length !== 1 ? 's' : ''}
+                </span>
+              </div>
+
+              {/* Form para criar cupom */}
+              <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-3 space-y-2">
+                <h4 className="text-[10px] font-bold text-yellow-800 uppercase">Criar Cupom</h4>
+                <input
+                  type="text" placeholder="Código (ex: PROMO10)" value={couponForm.code}
+                  onChange={e => setCouponForm(f => ({ ...f, code: e.target.value.toUpperCase() }))}
+                  className="w-full bg-white border border-yellow-200 rounded-xl px-3 py-2 text-sm font-mono outline-none focus:ring-2 focus:ring-yellow-300"
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[9px] font-bold text-gray-500 uppercase">Tipo</label>
+                    <select
+                      value={couponForm.type}
+                      onChange={e => setCouponForm(f => ({ ...f, type: e.target.value as 'percent' | 'fixed' }))}
+                      className="w-full bg-white border border-gray-200 rounded-xl px-2 py-2 text-xs outline-none"
+                    >
+                      <option value="percent">% Desconto</option>
+                      <option value="fixed">R$ Fixo</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-bold text-gray-500 uppercase">Valor</label>
+                    <input
+                      type="number" min={1} value={couponForm.value}
+                      onChange={e => setCouponForm(f => ({ ...f, value: Number(e.target.value) }))}
+                      className="w-full bg-white border border-gray-200 rounded-xl px-2 py-2 text-xs outline-none"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[9px] font-bold text-gray-500 uppercase">Pedido Mínimo (R$) — 0 = sem mínimo</label>
+                  <input
+                    type="number" min={0} value={couponForm.minOrder}
+                    onChange={e => setCouponForm(f => ({ ...f, minOrder: Number(e.target.value) }))}
+                    className="w-full bg-white border border-gray-200 rounded-xl px-2 py-2 text-xs outline-none"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    if (!couponForm.code.trim()) { addToast('Digite um código de cupom.', 'error'); return; }
+                    saveCoupon({
+                      code: couponForm.code,
+                      type: couponForm.type,
+                      value: couponForm.value,
+                      minOrder: couponForm.minOrder || undefined,
+                      active: true,
+                      usedCount: 0
+                    });
+                    setCouponForm({ code: '', type: 'percent', value: 10, minOrder: 0, active: true });
+                    addToast(`Cupom ${couponForm.code} salvo!`, 'success');
+                  }}
+                  className="w-full py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-xs font-bold transition-colors"
+                >
+                  + Criar Cupom
+                </button>
+              </div>
+
+              {/* Lista de cupons */}
+              {coupons.length === 0 ? (
+                <p className="text-[10px] text-gray-400 text-center py-4">Nenhum cupom criado ainda.</p>
+              ) : coupons.map(coupon => (
+                <div key={coupon.code} className="bg-white/50 border border-white/60 rounded-xl p-3 flex items-center gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-mono font-bold text-gray-800">{coupon.code}</span>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${coupon.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        {coupon.active ? 'ATIVO' : 'INATIVO'}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-gray-500 mt-0.5">
+                      {coupon.type === 'percent' ? `${coupon.value}% off` : `R$ ${coupon.value.toFixed(2)} off`}
+                      {coupon.minOrder ? ` • Mín. R$ ${coupon.minOrder}` : ''}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => saveCoupon({ ...coupon, active: !coupon.active })}
+                    className={`text-2xl transition-colors ${coupon.active ? 'text-green-500' : 'text-gray-300'}`}
+                  >
+                    {coupon.active ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
+                  </button>
+                  <button onClick={() => deleteCoupon(coupon.code)} className="text-red-400 hover:text-red-600">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 
@@ -1207,6 +1315,21 @@ const AdminPanel: React.FC = () => {
                       placeholder="Descrição..."
                       rows={2}
                     />
+                    {/* Stock field */}
+                    <div className="flex items-center gap-2 mt-2 p-2 bg-orange-50 border border-orange-100 rounded-lg">
+                      <Package size={10} className="text-orange-500 shrink-0" />
+                      <label className="text-[9px] font-bold text-orange-700 uppercase flex-1">Estoque</label>
+                      <input
+                        type="number"
+                        value={prod.stock ?? ''}
+                        placeholder="∞"
+                        min={0}
+                        onChange={e => updateProduct(selectedCategoryIndex, pIndex, 'stock', e.target.value === '' ? null : Number(e.target.value))}
+                        className="w-20 bg-white border border-orange-200 rounded px-2 py-1 text-[10px] text-center outline-none"
+                      />
+                      {prod.stock === 0 && <span className="text-[9px] font-bold text-red-500">Esgotado</span>}
+                    </div>
+
                     {/* Affiliate Link Input */}
                     <div className="bg-blue-50/50 p-2 rounded-lg border border-blue-100">
                       <div className="flex items-center gap-1 mb-1">
