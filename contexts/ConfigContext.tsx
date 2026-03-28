@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useNavigate } from 'react-router-dom';
 import { loadConfigFromR2 } from '../services/r2';
 import { ProductService } from '../services/productService';
+import { StoreService, StoreData } from '../services/storeService';
+import { useAuth } from './AuthContext';
 import { AppConfig, CategoryItem, CartItem, ProductItem, Toast, Order, Coupon } from '../types';
 
 // SAAS CONFIGURATION
@@ -233,6 +235,10 @@ interface ConfigContextType {
   upgradeToPro: () => void;
   seedInitialData: () => void;
   clearDemoData: () => void;
+  
+  isLoadingStore: boolean;
+  isNotFound: boolean;
+  saveStoreToCloud: () => Promise<void>;
 }
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
@@ -246,32 +252,15 @@ const parsePrice = (priceStr: string): number => {
 };
 
 const getStoreId = () => {
-  // SAAS LOGIC:
-  // 0. Check for /demo route
   if (window.location.pathname.startsWith('/demo')) return 'demo';
-
-  // 1. Check URL param ?store=xxx
   const params = new URLSearchParams(window.location.search);
   const queryStore = params.get('store');
   if (queryStore) return queryStore;
-
-  // 2. Check Subdomain store.domain.com
-  const hostname = window.location.hostname;
-
-  // Explicit Root Domains (Production)
-  if (hostname === 'agenciawint.com' || hostname === 'www.agenciawint.com') return DEFAULT_STORE_ID;
-
-  const parts = hostname.split('.');
-
-  // If localhost or simple domain, return demo
-  if (parts.length < 2 || hostname === 'localhost') return DEFAULT_STORE_ID;
-
-  // Assuming format: storename.domain.com
-  // We take the first part
-  if (parts[0] !== 'www') return parts[0];
-
-  return DEFAULT_STORE_ID;
+  
+  return window.location.hostname; // Hostname é a chave para o multitenant
 };
+
+const INITIAL_CONFIG: AppConfig = BASE_CONFIGS['demo'];
 
 export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -339,44 +328,60 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
-
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
+  
+  const [isLoadingStore, setIsLoadingStore] = useState(true);
+  const [isNotFound, setIsNotFound] = useState(false);
+  const [storeData, setStoreData] = useState<StoreData | null>(null);
+  const { user } = useAuth();
 
-  // SAAS LOAD EFFECT
+  // EFETUA O LOAD DA LOJA VIA SUPABASE
   useEffect(() => {
-    const fetchRemoteConfig = async () => {
-      // If we already have a local config that matches this storeId, we might want to keep it
-      // OR we prefer the cloud truth. Let's prefer cloud truth but optimize.
-      setIsLoadingConfig(true);
-      const remoteConfig = await loadConfigFromR2(storeId);
-      if (remoteConfig) {
-        setConfig(prev => ({ ...prev, ...remoteConfig }));
-        // console.log("Config loaded from Cloud for", storeId);
-      } else {
-        // console.log("No remote config found, using default for", storeId);
+    const loadStore = async () => {
+      setIsLoadingStore(true);
+      const hostname = window.location.hostname;
+      
+      // Se estiver em localhost ou rota demo, usamos o demo padrão
+      if (hostname === 'localhost' || window.location.pathname.startsWith('/demo')) {
+        setStoreId('demo');
+        setConfig(BASE_CONFIGS['demo']);
+        setIsLoadingStore(false);
+        return;
       }
-      setIsLoadingConfig(false);
+
+      try {
+        const data = await StoreService.getStoreByHostname(hostname);
+        if (data) {
+          setStoreData(data);
+          setStoreId(data.slug);
+          setConfig(data.config);
+          setIsNotFound(false);
+        } else {
+          setIsNotFound(true);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar loja:", err);
+        setIsNotFound(true);
+      } finally {
+        setIsLoadingStore(false);
+      }
     };
 
-    fetchRemoteConfig();
-  }, [storeId]);
-
-  useEffect(() => {
-    const currentStore = getStoreId();
-    if (currentStore !== storeId) {
-      setStoreId(currentStore);
-      window.location.reload();
-    }
+    loadStore();
   }, []);
 
-  useEffect(() => {
+  const saveStoreToCloud = async () => {
+    if (!user || !storeData) return;
     try {
-      localStorage.setItem(storageKey, JSON.stringify(config));
-    } catch (e) {
-      console.error("Failed to save config", e);
+      await StoreService.saveStore({
+        ...storeData,
+        config: config
+      });
+      addToast('Alterações salvas na nuvem!', 'success');
+    } catch (err) {
+      addToast('Erro ao salvar no servidor.', 'error');
     }
-  }, [config, storageKey]);
+  };
 
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     const id = Date.now().toString();
@@ -584,7 +589,8 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       addToast, removeToast,
       updateConfig, updateNestedConfig, addCategory, removeCategory,
       addProductToCategory, removeProductFromCategory, updateProduct, resetConfig, upgradeToPro,
-      seedInitialData, clearDemoData
+      seedInitialData, clearDemoData,
+      isLoadingStore, isNotFound, saveStoreToCloud
     }}>
       {children}
     </ConfigContext.Provider>

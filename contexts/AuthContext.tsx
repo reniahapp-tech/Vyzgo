@@ -11,15 +11,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, signInWithGoogle, signOut as supabaseSignOut } from '../services/supabase';
+import { StoreService } from '../services/storeService';
 
 // ── Tipos ────────────────────────────────────────────────────
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
-  signIn: () => Promise<void>;
   signOut: () => Promise<void>;
-  isAdmin: boolean; // true quando o usuário está autenticado
+  isAdmin: boolean;
+  hasStore: boolean;
+  refreshStoreStatus: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,6 +28,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasStore, setHasStore] = useState(false);
+
+  const refreshStoreStatus = async () => {
+    if (!user) {
+      setHasStore(false);
+      return;
+    }
+    const store = await StoreService.getStoreByOwner(user.id);
+    setHasStore(!!store);
+  };
 
   useEffect(() => {
     // Pega a sessão atual ao montar
@@ -55,6 +64,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (user) refreshStoreStatus();
+  }, [user]);
+
   const signIn = async () => {
     await signInWithGoogle();
   };
@@ -69,9 +82,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       user,
       session,
       loading,
-      signIn,
       signOut,
       isAdmin: !!user,
+      hasStore,
+      refreshStoreStatus
     }}>
       {children}
     </AuthContext.Provider>

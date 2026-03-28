@@ -129,26 +129,57 @@ const ProductRoute = () => {
 
 // Protected route — only accessible when admin is authenticated
 const ProtectedSetup: React.FC = () => {
-  const { isAdmin, loading } = useAuth();
+  const { isAdmin, loading, hasStore } = useAuth();
   
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-    </div>
-  );
-
+  if (loading) return <FullScreenLoader />;
   if (!isAdmin) return <Navigate to="/" replace />;
+  
+  // Se já tem uma loja e não está na rota de edição (futuro), 
+  // poderíamos redirecionar para o painel, mas por enquanto o wizard é o setup inicial.
   return <OnboardingWizard />;
 };
 
+const FullScreenLoader = () => (
+  <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50">
+    <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin mb-4"></div>
+    <p className="text-sm font-bold text-gray-500 animate-pulse">Carregando Vitrine...</p>
+  </div>
+);
+
+const StoreNotFound = () => (
+  <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-white">
+    <div className="w-24 h-24 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-6 text-4xl">
+      🏝️
+    </div>
+    <h1 className="text-2xl font-black text-gray-800 mb-2">Vitrine não encontrada</h1>
+    <p className="text-gray-500 max-w-xs mb-8">
+      Este endereço não parece estar vinculado a nenhuma loja ativa no momento.
+    </p>
+    <a href="/demo" className="px-6 py-3 bg-gray-900 text-white rounded-2xl font-bold shadow-xl hover:scale-105 transition-transform">
+      Ver Demonstração
+    </a>
+  </div>
+);
+
 
 const AppContent: React.FC = () => {
-  const { config } = useConfig();
+  const { config, isLoadingStore, isNotFound, storeId } = useConfig();
+  const { isAdmin, hasStore, loading: authLoading } = useAuth();
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
 
   // Initialize Network Listener
   useNetworkStatus();
+
+  if (isLoadingStore || authLoading) return <FullScreenLoader />;
+
+  // Se o hostname não existe e não é a landing page oficial
+  const isLandingPage = (window.location.hostname === 'agenciawint.com' || window.location.hostname === 'www.agenciawint.com') 
+                        && !new URLSearchParams(window.location.search).get('store');
+  
+  if (isNotFound && !isLandingPage && storeId !== 'demo' && !window.location.pathname.startsWith('/auth')) {
+    return <StoreNotFound />;
+  }
 
   return (
     <div
@@ -166,8 +197,7 @@ const AppContent: React.FC = () => {
         <div className="p-6 md:p-8 lg:p-10 flex-grow flex flex-col">
           <Routes>
                       <Route path="/" element={
-              ((window.location.hostname === 'agenciawint.com' || window.location.hostname === 'www.agenciawint.com')
-                && !new URLSearchParams(window.location.search).get('store'))
+              isLandingPage
                 ? <LandingPage />
                 : <Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />
             } />

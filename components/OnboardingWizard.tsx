@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { useConfig } from '../contexts/ConfigContext';
 import { useNavigate } from 'react-router-dom';
-import { Store, Link, ShoppingBag, ArrowRight, Check, Sparkles, Smartphone, Palette, Type } from 'lucide-react';
+import { Store, Link, ShoppingBag, ArrowRight, Check, Sparkles, Smartphone, Palette, Type, Globe, Loader2 } from 'lucide-react';
+import { StoreService } from '../services/storeService';
+import { useAuth } from '../contexts/AuthContext';
 import { PRESET_THEMES } from './AdminPanel';
 
 const OnboardingWizard: React.FC = () => {
-    const { config, updateConfig } = useConfig();
+    const { config, updateConfig, saveStoreToCloud } = useConfig();
+    const { user, refreshStoreStatus } = useAuth();
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
+    const [isSaving, setIsSaving] = useState(false);
+    const [slugError, setSlugError] = useState('');
 
     // Local state for the wizard to avoid flickering global config immediately
     const [localConfig, setLocalConfig] = useState({
@@ -15,18 +20,39 @@ const OnboardingWizard: React.FC = () => {
         subtitle: config.header.subtitle,
         storeMode: config.storeMode,
         whatsapp: config.whatsapp.phoneNumber,
-        themeId: 'natura'
+        themeId: 'natura',
+        slug: ''
     });
 
-    const totalSteps = 5;
+    const totalSteps = 6; // Adicionamos 1 passo para o Slug
 
     const nextStep = () => setStep(s => Math.min(s + 1, totalSteps));
     const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
-    const handleFinish = () => {
+    const checkSlug = async () => {
+        if (!localConfig.slug) {
+            setSlugError('O endereço da loja é obrigatório.');
+            return;
+        }
+        if (localConfig.slug.length < 3) {
+            setSlugError('Mínimo 3 caracteres.');
+            return;
+        }
+        const isAvailable = await StoreService.isSlugAvailable(localConfig.slug);
+        if (isAvailable) {
+            setSlugError('');
+            nextStep();
+        } else {
+            setSlugError('Este endereço já está em uso.');
+        }
+    };
+
+    const handleFinish = async () => {
+        if (!user) return;
+        setIsSaving(true);
         const selectedTheme = PRESET_THEMES.find(t => t.id === localConfig.themeId);
 
-        updateConfig({
+        const newFullConfig = {
             ...config,
             header: { ...config.header, title: localConfig.title, subtitle: localConfig.subtitle },
             storeMode: localConfig.storeMode,
@@ -35,9 +61,31 @@ const OnboardingWizard: React.FC = () => {
                 theme: { ...config.theme, ...selectedTheme.config.theme },
                 quiz: { ...config.quiz, bgColor: selectedTheme.config.quiz.bgColor }
             } : {})
-        });
+        };
 
-        navigate('/');
+        try {
+            await StoreService.saveStore({
+                owner_id: user.id,
+                slug: localConfig.slug.toLowerCase().trim(),
+                config: newFullConfig,
+                is_active: true
+            });
+            
+            await refreshStoreStatus();
+            updateConfig(newFullConfig);
+            
+            // Redireciona para o novo subdomínio se possível, ou apenas limpa
+            const hostname = window.location.hostname;
+            if (hostname.includes('vitrine.ai')) {
+                window.location.href = `https://${localConfig.slug}.vitrine.ai`;
+            } else {
+                navigate('/');
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     // Mock Themes for display if we can't import easily yet
@@ -127,8 +175,44 @@ const OnboardingWizard: React.FC = () => {
                         </div>
                     )}
 
-                    {/* STEP 3: MODE */}
+                    {/* STEP 3: SLUG (Subdomain) */}
                     {step === 3 && (
+                        <div className="animate-in fade-in slide-in-from-right-8 duration-300">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                                <Globe className="text-green-500" /> Escolha seu endereço
+                            </h2>
+                            <p className="text-gray-500 mb-8">Como os clientes vão acessar sua vitrine.</p>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl">
+                                    <span className="text-sm font-bold text-gray-400">vitrine.ai/</span>
+                                    <input
+                                        value={localConfig.slug}
+                                        onChange={(e) => setLocalConfig({ ...localConfig, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
+                                        placeholder="nome-da-sua-loja"
+                                        className="flex-1 bg-transparent text-xl font-bold outline-none focus:text-green-600"
+                                        autoFocus
+                                    />
+                                </div>
+                                {slugError && <p className="text-xs font-bold text-red-500 ml-2">{slugError}</p>}
+                                <p className="text-[10px] text-gray-400 ml-2 uppercase tracking-wider">Use apenas letras, números e hífens.</p>
+                            </div>
+
+                            <div className="flex justify-between mt-12">
+                                <button onClick={prevStep} className="text-gray-400 hover:text-gray-600 font-bold">Voltar</button>
+                                <button
+                                    onClick={checkSlug}
+                                    disabled={!localConfig.slug || localConfig.slug.length < 3}
+                                    className="bg-green-600 text-white font-bold py-3 px-8 rounded-full hover:bg-green-700 disabled:opacity-50 transition-all flex items-center gap-2"
+                                >
+                                    Verificar Disponibilidade
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* STEP 4: MODE */}
+                    {step === 4 && (
                         <div className="animate-in fade-in slide-in-from-right-8 duration-300">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
                                 <Store className="text-purple-500" /> Como você quer vender?
@@ -194,8 +278,8 @@ const OnboardingWizard: React.FC = () => {
                         </div>
                     )}
 
-                    {/* STEP 4: THEME */}
-                    {step === 4 && (
+                    {/* STEP 5: THEME */}
+                    {step === 5 && (
                         <div className="animate-in fade-in slide-in-from-right-8 duration-300">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
                                 <Palette className="text-pink-500" /> Escolha seu estilo
@@ -239,8 +323,8 @@ const OnboardingWizard: React.FC = () => {
                         </div>
                     )}
 
-                    {/* STEP 5: WHATSAPP */}
-                    {step === 5 && (
+                    {/* STEP 6: WHATSAPP */}
+                    {step === 6 && (
                         <div className="animate-in fade-in slide-in-from-right-8 duration-300">
                             <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
                                 <Smartphone className="text-green-500" /> Seu WhatsApp
@@ -273,10 +357,10 @@ const OnboardingWizard: React.FC = () => {
                                 <button onClick={prevStep} className="text-gray-400 hover:text-gray-600 font-bold">Voltar</button>
                                 <button
                                     onClick={handleFinish}
-                                    disabled={localConfig.whatsapp.length < 10}
-                                    className="bg-green-600 text-white font-bold py-4 px-10 rounded-full hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                                    disabled={localConfig.whatsapp.length < 10 || isSaving}
+                                    className="bg-green-600 text-white font-bold py-4 px-10 rounded-full hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center gap-2"
                                 >
-                                    Finalizar e Ver Loja 🎉
+                                    {isSaving ? <Loader2 className="animate-spin" /> : 'Finalizar e Criar Loja 🎉'}
                                 </button>
                             </div>
                         </div>

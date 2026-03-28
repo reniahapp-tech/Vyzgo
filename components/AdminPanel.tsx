@@ -3,7 +3,7 @@ import { useConfig } from '../contexts/ConfigContext';
 import { usePlugins } from '../contexts/PluginContext';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from './AuthModal';
-import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle, Puzzle, Tag, LogOut, User as UserIcon } from 'lucide-react';
+import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle, Puzzle, Tag, LogOut, User as UserIcon, Save } from 'lucide-react';
 import { availableIcons } from './IconMapper';
 import { ProductItem } from '../types';
 import PaymentGateway from './PaymentGateway';
@@ -251,7 +251,7 @@ const WHATSAPP_LABELS = [
 ];
 
 const AdminPanel: React.FC = () => {
-  const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro, seedInitialData, clearDemoData, orders, coupons, saveCoupon, deleteCoupon } = useConfig();
+  const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro, seedInitialData, clearDemoData, orders, coupons, saveCoupon, deleteCoupon, saveStoreToCloud, isLoadingStore } = useConfig();
   const { plugins, enablePlugin, disablePlugin, updatePluginConfig } = usePlugins();
   const { isAdmin, user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -437,17 +437,21 @@ const AdminPanel: React.FC = () => {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40" onClick={() => setIsOpen(false)} />
-      <div className="fixed inset-y-4 right-4 w-96 rounded-3xl bg-white/70 backdrop-blur-2xl border border-white/40 shadow-2xl z-50 flex flex-col overflow-hidden animate-in slide-in-from-right duration-500 ease-out">
-
+      <div className="fixed inset-0 bg-white/20 backdrop-blur-xl z-50 flex flex-col animate-in slide-in-from-bottom-4 duration-300">
         {/* Header */}
-        <div className="p-5 border-b border-white/20 flex items-center justify-between bg-white/10">
-          <h2 className="font-bold text-lg flex items-center gap-2 text-gray-800">
-            <span className="bg-gradient-to-r from-terracotta to-sage bg-clip-text text-transparent">Admin</span> Studio
-            {!isPro && <span className="text-[10px] bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full uppercase">Free</span>}
+        <div className="bg-white/40 backdrop-blur-md border-b border-white/20 p-4 flex items-center justify-between sticky top-0 z-10">
+          <h2 className="font-bold text-gray-800 flex items-center gap-2">
+            <span className="p-2 bg-gray-900 text-white rounded-xl"><Settings size={18} /></span>
+            Painel de Gestão
             {isPro && <span className="text-[10px] bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full uppercase font-bold flex items-center gap-1"><Crown size={10} /> Pro</span>}
           </h2>
           <div className="flex items-center gap-2">
+            <button
+              onClick={saveStoreToCloud}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl text-xs font-bold hover:bg-green-700 transition-all shadow-lg active:scale-95"
+            >
+              <Save size={16} /> Salvar na Nuvem
+            </button>
             <div className="hidden md:flex flex-col items-end mr-2">
               <span className="text-[10px] font-bold text-gray-700">{user?.user_metadata?.full_name || 'Lojista'}</span>
               <span className="text-[8px] text-gray-400">{user?.email}</span>
@@ -1025,6 +1029,22 @@ const AdminPanel: React.FC = () => {
 
               {/* CUSTOM DOMAIN CONFIGURATION */}
               <div className={`bg-white/40 border border-white/50 rounded-xl p-3 mb-4 relative overflow-hidden ${!isPro ? 'opacity-60' : ''}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-bold text-gray-700 uppercase flex items-center gap-2">
+                    <Globe size={14} /> Endereço da Loja (Subdomínio)
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-[10px] font-bold text-gray-400">vitrine.ai/</span>
+                  <input
+                    value={storeId}
+                    onChange={(e) => {/* Slug logic needs careful handling in ConfigContext */}}
+                    placeholder="ex: minha-loja"
+                    disabled={true} // For now, read-only from Supabase
+                    className="flex-1 bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs outline-none opacity-60"
+                  />
+                </div>
+
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xs font-bold text-gray-700 uppercase flex items-center gap-2">
                     <Globe size={14} /> Domínio Personalizado (White Label)
