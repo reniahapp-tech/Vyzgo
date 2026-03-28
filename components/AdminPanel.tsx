@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useConfig } from '../contexts/ConfigContext';
 import { usePlugins } from '../contexts/PluginContext';
-import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle, Puzzle, Tag } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import AuthModal from './AuthModal';
+import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle, Puzzle, Tag, LogOut, User as UserIcon } from 'lucide-react';
 import { availableIcons } from './IconMapper';
 import { ProductItem } from '../types';
 import PaymentGateway from './PaymentGateway';
@@ -251,10 +253,9 @@ const WHATSAPP_LABELS = [
 const AdminPanel: React.FC = () => {
   const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro, seedInitialData, clearDemoData, orders, coupons, saveCoupon, deleteCoupon } = useConfig();
   const { plugins, enablePlugin, disablePlugin, updatePluginConfig } = usePlugins();
+  const { isAdmin, user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
-  const [pinInput, setPinInput] = useState('');
   const [activeTab, setActiveTab] = useState<'themes' | 'branding' | 'home' | 'products' | 'plan' | 'social' | 'help' | 'orders' | 'modules' | 'coupons'>('themes');
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
   const [activePluginId, setActivePluginId] = useState<string | null>(null);
@@ -345,19 +346,6 @@ const AdminPanel: React.FC = () => {
     addProductToCategory(selectedCategoryIndex, newProduct);
   };
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (pinInput === config.adminPin) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('admin_auth', 'true');
-      setPinInput('');
-      addToast('Modo Admin ativado!', 'success');
-    } else {
-      addToast('PIN incorreto', 'error');
-      setPinInput('');
-    }
-  };
-
   // Helper to check if Tracking/Location is active
   const hasTracking = config.categories.some(c => c.id === 'tracking');
   const hasLocation = config.categories.some(c => c.id === 'location');
@@ -410,7 +398,7 @@ const AdminPanel: React.FC = () => {
         title="Admin Panel"
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-terracotta/20 to-sage/20 rounded-full animate-spin-slow opacity-50 blur-md"></div>
-        {isAuthenticated ? (
+        {isAdmin ? (
           <Unlock size={24} className="relative z-10 text-green-700" />
         ) : (
           <Settings size={24} className="relative z-10 text-gray-800" />
@@ -420,50 +408,8 @@ const AdminPanel: React.FC = () => {
   }
 
   // 2. Login Screen (if not authenticated)
-  if (!isAuthenticated) {
-    return (
-      <>
-        <div className="fixed inset-0 bg-black/10 backdrop-blur-[2px] z-40" onClick={() => setIsOpen(false)} />
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in zoom-in-95 duration-200">
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 w-full max-w-xs border border-white">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-bold text-lg text-gray-800 flex items-center gap-2">
-                <Lock size={18} /> Acesso Restrito
-              </h2>
-              <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-black/5 rounded-full"><X size={20} /></button>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="text-center mb-2">
-                <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center text-3xl mb-2 shadow-inner">
-                  🔐
-                </div>
-                <p className="text-sm text-gray-500">Digite o PIN do proprietário.</p>
-              </div>
-
-              <input
-                type="password"
-                autoFocus
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={pinInput}
-                onChange={(e) => setPinInput(e.target.value)}
-                placeholder="PIN"
-                className="w-full text-center text-2xl font-bold tracking-widest py-3 rounded-xl bg-white border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                maxLength={6}
-              />
-
-              <button
-                type="submit"
-                className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-colors"
-              >
-                Entrar
-              </button>
-            </form>
-          </div>
-        </div>
-      </>
-    );
+  if (!isAdmin) {
+    return <AuthModal isOpen={isOpen} onClose={() => setIsOpen(false)} />;
   }
 
   // 3. Admin Dashboard (Authenticated)
@@ -502,12 +448,16 @@ const AdminPanel: React.FC = () => {
             {isPro && <span className="text-[10px] bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full uppercase font-bold flex items-center gap-1"><Crown size={10} /> Pro</span>}
           </h2>
           <div className="flex items-center gap-2">
+            <div className="hidden md:flex flex-col items-end mr-2">
+              <span className="text-[10px] font-bold text-gray-700">{user?.user_metadata?.full_name || 'Lojista'}</span>
+              <span className="text-[8px] text-gray-400">{user?.email}</span>
+            </div>
             <button
-              onClick={() => { setIsAuthenticated(false); setIsOpen(false); }}
-              className="p-2 hover:bg-red-50 text-red-500 rounded-full"
-              title="Logout"
+              onClick={() => { signOut(); setIsOpen(false); addToast('Até logo!', 'info'); }}
+              className="p-2 hover:bg-red-50 text-red-500 rounded-full transition-colors"
+              title="Sair"
             >
-              <Lock size={16} />
+              <LogOut size={16} />
             </button>
             <button
               onClick={async () => {
@@ -598,8 +548,8 @@ const AdminPanel: React.FC = () => {
                   content="O plano Pro desbloqueia funcionalidades avançadas como modos exclusivos de loja, remoção de limites e controle total sobre o botão flutuante do WhatsApp."
                 />
                 <FAQItem
-                  title="Esqueci meu PIN"
-                  content="O PIN padrão é '1234' (Demo) ou '0000' (Tech). Você pode alterá-lo na aba 'Marca' no final da página."
+                  title="Fiz login, e agora?"
+                  content="Agora você está autenticado com sua conta Google. Seu acesso é protegido e você pode gerenciar todas as configurações da sua loja com segurança."
                 />
               </div>
             </div>
@@ -1187,7 +1137,7 @@ const AdminPanel: React.FC = () => {
               </div>
 
               <div className="pt-2 border-t border-white/20">
-                <InputGroup label="Alterar PIN Admin" value={config.adminPin} onChange={(v) => updateConfig({ ...config, adminPin: v })} />
+                <p className="text-[9px] text-gray-400 text-center">Configurações de marca e operação da loja pública.</p>
               </div>
             </div>
           )}

@@ -22,7 +22,9 @@ import LandingPage from './components/LandingPage';
 import OnboardingWizard from './components/OnboardingWizard';
 import { ConfigProvider, useConfig } from './contexts/ConfigContext';
 import { PluginProvider } from './contexts/PluginContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import SearchBar from './components/SearchBar';
+import AuthCallback from './components/AuthCallback';
 
 // Hook to detect offline status
 const useNetworkStatus = () => {
@@ -127,11 +129,15 @@ const ProductRoute = () => {
 
 // Protected route — only accessible when admin is authenticated
 const ProtectedSetup: React.FC = () => {
-  const [isAuth] = useState(() => {
-    // Check if an admin session exists from sessionStorage
-    return sessionStorage.getItem('admin_auth') === 'true';
-  });
-  if (!isAuth) return <Navigate to="/" replace />;
+  const { isAdmin, loading } = useAuth();
+  
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  );
+
+  if (!isAdmin) return <Navigate to="/" replace />;
   return <OnboardingWizard />;
 };
 
@@ -170,6 +176,7 @@ const AppContent: React.FC = () => {
             <Route path="/corporate" element={<CorporateDashboard />} />
             <Route path="/category/:categoryId" element={<CategoryRoute />} />
             <Route path="/product/:productId" element={<ProductRoute />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
           </Routes>
         </div>
 
@@ -191,11 +198,13 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <ConfigProvider>
-        <PluginProvider>
-          <AppContent />
-        </PluginProvider>
-      </ConfigProvider>
+      <AuthProvider>
+        <ConfigProvider>
+          <PluginProvider>
+            <AppContent />
+          </PluginProvider>
+        </ConfigProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 };
