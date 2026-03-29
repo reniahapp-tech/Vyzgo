@@ -178,14 +178,6 @@ const AppContent: React.FC = () => {
   const rawPath = window.location.pathname.toLowerCase().replace(/\/$/, "");
   const normalizedPath = rawPath === "" ? "/" : rawPath;
   
-  console.log("DEBUG VyGo Routing:", { 
-    hostname, 
-    host: window.location.host,
-    pathname: window.location.pathname,
-    normalizedPath, 
-    user: !!user 
-  });
-
   const isAppDomain = hostname === 'app.vyzgo.com' || hostname.startsWith('localhost');
   const isLandingPage = (hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com' || hostname === 'vitrinebio.vercel.app') 
                         && !new URLSearchParams(window.location.search).get('store')
