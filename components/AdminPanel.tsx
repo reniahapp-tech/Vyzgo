@@ -253,7 +253,7 @@ const WHATSAPP_LABELS = [
 const AdminPanel: React.FC = () => {
   const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro, seedInitialData, clearDemoData, orders, coupons, saveCoupon, deleteCoupon, saveStoreToCloud, isLoadingStore } = useConfig();
   const { plugins, enablePlugin, disablePlugin, updatePluginConfig } = usePlugins();
-  const { isAdmin, user, signOut } = useAuth();
+  const { isAdmin, user, signOut, hasStore, isActive } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'themes' | 'branding' | 'home' | 'products' | 'plan' | 'social' | 'help' | 'orders' | 'modules' | 'coupons'>('themes');
@@ -410,6 +410,37 @@ const AdminPanel: React.FC = () => {
   // 2. Login Screen (if not authenticated)
   if (!isAdmin) {
     return <AuthModal isOpen={isOpen} onClose={() => setIsOpen(false)} />;
+  }
+
+  // 2.1 License Check (if store is not active/paid)
+  if (hasStore && !isActive) {
+    return (
+      <div className="fixed inset-0 bg-white/20 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center border border-red-50 animate-in zoom-in-95 duration-300">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
+            <AlertTriangle size={40} />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Pagamento Pendente</h2>
+          <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+            Sua vitrine está temporariamente desativada. Regularize seu plano para voltar a gerenciar seus produtos e receber pedidos.
+          </p>
+          <div className="space-y-3">
+            <button 
+              onClick={() => window.open('https://wa.me/5588997380123?text=Quero+ativar+minha+vitrine', '_blank')}
+              className="w-full py-4 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-700 transition-all shadow-lg shadow-green-100"
+            >
+              Falar com Suporte
+            </button>
+            <button 
+              onClick={() => { signOut(); setIsOpen(false); }}
+              className="w-full py-3 text-gray-400 text-xs font-bold hover:text-gray-600 transition-colors"
+            >
+              Sair da conta
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // 3. Admin Dashboard (Authenticated)

@@ -39,7 +39,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           </p>
 
           <button
-            onClick={() => signIn()}
+            onClick={async () => {
+              try {
+                await signIn();
+              } catch (e: any) {
+                console.error(e);
+              }
+            }}
             disabled={loading}
             className="w-full flex items-center justify-center gap-3 py-3.5 px-6 bg-white border-2 border-gray-100 rounded-2xl font-bold text-gray-700 hover:bg-gray-50 active:scale-[0.98] transition-all shadow-sm group disabled:opacity-50"
           >

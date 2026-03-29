@@ -15,9 +15,14 @@ import { StoreService } from '../services/storeService';
 
 // ── Tipos ────────────────────────────────────────────────────
 interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+  signIn: () => Promise<void>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
   hasStore: boolean;
+  isActive: boolean;
   refreshStoreStatus: () => Promise<void>;
 }
 
@@ -29,6 +34,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasStore, setHasStore] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   const refreshStoreStatus = async () => {
     if (!user) {
@@ -37,6 +43,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     const store = await StoreService.getStoreByOwner(user.id);
     setHasStore(!!store);
+    setIsActive(store?.is_active ?? false);
   };
 
   useEffect(() => {
@@ -85,6 +92,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       signOut,
       isAdmin: !!user,
       hasStore,
+      isActive,
       refreshStoreStatus
     }}>
       {children}
