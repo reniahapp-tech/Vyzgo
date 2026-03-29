@@ -175,8 +175,18 @@ const AppContent: React.FC = () => {
   if (isLoadingStore || authLoading) return <FullScreenLoader />;
 
   const hostname = window.location.hostname;
+  const rawPath = window.location.pathname.toLowerCase().replace(/\/$/, "");
+  const normalizedPath = rawPath === "" ? "/" : rawPath;
+  
+  console.log("DEBUG VyGo Routing:", { 
+    hostname, 
+    host: window.location.host,
+    pathname: window.location.pathname,
+    normalizedPath, 
+    user: !!user 
+  });
+
   const isAppDomain = hostname === 'app.vyzgo.com' || hostname.startsWith('localhost');
-  const normalizedPath = window.location.pathname.toLowerCase().replace(/\/$/, "");
   const isLandingPage = (hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com' || hostname === 'vitrinebio.vercel.app') 
                         && !new URLSearchParams(window.location.search).get('store')
                         && (normalizedPath === "" || normalizedPath === "/" || normalizedPath === "/index.html");
