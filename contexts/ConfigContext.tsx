@@ -24,10 +24,10 @@ const BASE_CONFIGS: Record<string, AppConfig> = {
       textColor: '#1A2E22',
     },
     header: {
-      title: 'Boutique Elegance',
-      subtitle: 'Moda que inspira você',
-      logoUrl: '',
-      avatarUrl: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?q=80&w=300&auto=format&fit=crop',
+      title: 'VyzGo',
+      subtitle: 'Sua vitrine digital inteligente',
+      logoUrl: '/logo-main.png',
+      avatarUrl: '/logo-icon.png',
       showStatus: true,
     },
     hero: {
