@@ -51,12 +51,9 @@ const AuthPage: React.FC = () => {
       <div className="w-full max-w-[450px] bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.05)] overflow-hidden border border-gray-100 flex flex-col">
         {/* Header Section */}
         <div className="pt-12 pb-8 px-10 text-center">
-          <div className="flex items-center justify-center mx-auto mb-6 transition-transform duration-500 hover:scale-105">
-            <img src="/logo-main.png" alt="VyzGo Logo" className="h-16 w-auto object-contain" />
+          <div className="flex items-center justify-center mx-auto mb-4 transition-transform duration-500 hover:scale-110">
+            <img src="/logo-main.png" alt="VyzGo Logo" className="h-20 w-auto object-contain" />
           </div>
-          
-          <h1 className="text-3xl font-black text-gray-900 mb-2">VyzGo</h1>
-          <p className="text-gray-500 font-medium">A plataforma para sua vitrine digital</p>
         </div>
 
         {/* Content Section */}
