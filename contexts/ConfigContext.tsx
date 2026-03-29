@@ -348,7 +348,9 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       }
 
       // 0. Detecta se é a Landing Page de Vendas (vyzgo.com ou www.vyzgo.com)
-      const isRoot = hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com' || hostname === 'vitrinebio.vercel.app'; // Mantendo compatibilidade temporária
+      const isApp = hostname === 'app.vyzgo.com';
+      const isRoot = hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com' || hostname === 'vitrinebio.vercel.app' || isApp;
+      
       if (isRoot) {
         setIsLoadingStore(false);
         return;

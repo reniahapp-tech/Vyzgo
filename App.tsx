@@ -173,8 +173,9 @@ const AppContent: React.FC = () => {
 
   if (isLoadingStore || authLoading) return <FullScreenLoader />;
 
-  // Se o hostname não existe e não é a landing page oficial
-  const isLandingPage = (window.location.hostname === 'vyzgo.com' || window.location.hostname === 'www.vyzgo.com' || window.location.hostname === 'agenciawint.com' || window.location.hostname === 'vitrinebio.vercel.app') 
+  const hostname = window.location.hostname;
+  const isAppDomain = hostname === 'app.vyzgo.com' || hostname.startsWith('localhost');
+  const isLandingPage = (hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com' || hostname === 'vitrinebio.vercel.app') 
                         && !new URLSearchParams(window.location.search).get('store');
   
   if (isLandingPage) {
@@ -185,7 +186,7 @@ const AppContent: React.FC = () => {
     );
   }
 
-  if (isNotFound && storeId !== 'demo' && !window.location.pathname.startsWith('/auth')) {
+  if (isNotFound && !isLandingPage && !isAppDomain && storeId !== 'demo' && !window.location.pathname.startsWith('/auth')) {
     return <StoreNotFound />;
   }
 
