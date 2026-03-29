@@ -174,7 +174,7 @@ const AppContent: React.FC = () => {
   if (isLoadingStore || authLoading) return <FullScreenLoader />;
 
   // Se o hostname não existe e não é a landing page oficial
-  const isLandingPage = (window.location.hostname === 'vyzgo.com' || window.location.hostname === 'www.vyzgo.com' || window.location.hostname === 'agenciawint.com') 
+  const isLandingPage = (window.location.hostname === 'vyzgo.com' || window.location.hostname === 'www.vyzgo.com' || window.location.hostname === 'agenciawint.com' || window.location.hostname === 'vitrinebio.vercel.app') 
                         && !new URLSearchParams(window.location.search).get('store');
   
   if (isNotFound && !isLandingPage && storeId !== 'demo' && !window.location.pathname.startsWith('/auth')) {

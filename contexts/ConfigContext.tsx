@@ -348,7 +348,7 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       }
 
       // 0. Detecta se é a Landing Page de Vendas (vyzgo.com ou www.vyzgo.com)
-      const isRoot = hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com'; // Mantendo compatibilidade temporária
+      const isRoot = hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com' || hostname === 'vitrinebio.vercel.app'; // Mantendo compatibilidade temporária
       if (isRoot) {
         setIsLoadingStore(false);
         return;
@@ -399,7 +399,7 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   };
 
   const navigateHome = () => {
-    const isRoot = window.location.hostname === 'vyzgo.com' || window.location.hostname === 'www.vyzgo.com';
+    const isRoot = window.location.hostname === 'vyzgo.com' || window.location.hostname === 'www.vyzgo.com' || window.location.hostname === 'vitrinebio.vercel.app';
     if (window.location.pathname.startsWith('/demo') || (storeId === 'demo' && isRoot)) {
       navigate('/demo');
     } else {
