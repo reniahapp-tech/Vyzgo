@@ -133,7 +133,7 @@ const ProtectedSetup: React.FC = () => {
   const { isAdmin, loading, hasStore } = useAuth();
   
   if (loading) return <FullScreenLoader />;
-  if (!isAdmin) return <Navigate to="/" replace />;
+  if (!isAdmin) return <Navigate to="/login" replace />;
   
   // Se já tem uma loja e não está na rota de edição (futuro), 
   // poderíamos redirecionar para o painel, mas por enquanto o wizard é o setup inicial.
@@ -214,6 +214,7 @@ const AppContent: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
             <Route path="/demo" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
+            <Route path="/login" element={<AuthPage />} />
             <Route path="/setup" element={<ProtectedSetup />} />
             <Route path="/corporate" element={<CorporateDashboard />} />
             <Route path="/category/:categoryId" element={<CategoryRoute />} />
