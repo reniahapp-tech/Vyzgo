@@ -177,7 +177,8 @@ const AppContent: React.FC = () => {
   const hostname = window.location.hostname;
   const isAppDomain = hostname === 'app.vyzgo.com' || hostname.startsWith('localhost');
   const isLandingPage = (hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com' || hostname === 'vitrinebio.vercel.app') 
-                        && !new URLSearchParams(window.location.search).get('store');
+                        && !new URLSearchParams(window.location.search).get('store')
+                        && (window.location.pathname === '/' || window.location.pathname === '/index.html');
   
   if (isLandingPage) {
     return (
