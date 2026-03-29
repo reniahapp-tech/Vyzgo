@@ -20,9 +20,8 @@ const LandingPage: React.FC = () => {
             {/* 1. NAVBAR - Sticky & Glassmorphism */}
             <nav className="fixed top-0 left-0 w-full z-50 bg-black/80 backdrop-blur-lg border-b border-white/10">
                 <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-2 font-bold text-xl md:text-2xl tracking-tight">
-                        <Layers className="text-purple-500" />
-                        <span>VyzGo</span>
+                    <div className="flex items-center transition-transform hover:scale-105">
+                        <img src="/logo-main.png" alt="VyzGo" className="h-8 md:h-10 w-auto object-contain brightness-0 invert" />
                     </div>
 
                     {/* Desktop Links */}
