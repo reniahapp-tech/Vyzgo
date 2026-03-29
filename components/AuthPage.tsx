@@ -34,7 +34,13 @@ const AuthPage: React.FC = () => {
       }
       // O redirect é feito pelo AuthContext/App.tsx ao detectar o novo usuário
     } catch (err: any) {
-      setError(err.message || 'Erro ao processar autenticação');
+      if (err.message === 'Email not confirmed') {
+        setError('Por favor, verifique seu e-mail e clique no link de confirmação antes de entrar.');
+      } else if (err.message === 'Invalid login credentials') {
+        setError('E-mail ou senha incorretos. Verifique suas credenciais.');
+      } else {
+        setError(err.message || 'Erro ao processar autenticação');
+      }
     } finally {
       setAuthLoading(false);
     }
