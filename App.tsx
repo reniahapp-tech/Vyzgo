@@ -177,7 +177,15 @@ const AppContent: React.FC = () => {
   const isLandingPage = (window.location.hostname === 'vyzgo.com' || window.location.hostname === 'www.vyzgo.com' || window.location.hostname === 'agenciawint.com' || window.location.hostname === 'vitrinebio.vercel.app') 
                         && !new URLSearchParams(window.location.search).get('store');
   
-  if (isNotFound && !isLandingPage && storeId !== 'demo' && !window.location.pathname.startsWith('/auth')) {
+  if (isLandingPage) {
+    return (
+      <Routes>
+        <Route path="*" element={<LandingPage />} />
+      </Routes>
+    );
+  }
+
+  if (isNotFound && storeId !== 'demo' && !window.location.pathname.startsWith('/auth')) {
     return <StoreNotFound />;
   }
 
@@ -196,11 +204,7 @@ const AppContent: React.FC = () => {
         {/* Main Content Area */}
         <div className="p-6 md:p-8 lg:p-10 flex-grow flex flex-col">
           <Routes>
-                      <Route path="/" element={
-              isLandingPage
-                ? <LandingPage />
-                : <Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />
-            } />
+            <Route path="/" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
             <Route path="/demo" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
             <Route path="/setup" element={<ProtectedSetup />} />
             <Route path="/corporate" element={<CorporateDashboard />} />
