@@ -12,7 +12,6 @@ const DEFAULT_STORE_ID = 'demo';
 const BASE_CONFIGS: Record<string, AppConfig> = {
   // GENERIC TEMPLATE (Default)
   demo: {
-    adminPin: '1234',
     storeMode: 'mixed',
     enableWhatsapp: true,
     plan: 'pro',
@@ -119,7 +118,6 @@ const BASE_CONFIGS: Record<string, AppConfig> = {
   },
   // TECH EXAMPLE
   tech: {
-    adminPin: '0000',
     storeMode: 'store',
     enableWhatsapp: true,
     plan: 'pro',

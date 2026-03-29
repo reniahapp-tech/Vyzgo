@@ -111,7 +111,6 @@ export type StoreMode = 'mixed' | 'store' | 'affiliate';
 export type PlanType = 'free' | 'pro';
 
 export interface AppConfig {
-  adminPin: string;
   storeMode: StoreMode;
   enableWhatsapp: boolean;
   plan: PlanType;
