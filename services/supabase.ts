@@ -32,7 +32,36 @@ export const signInWithGoogle = async () => {
     if (error) throw error;
   } catch (err: any) {
     console.error('Google Auth Error:', err);
-    alert('Erro ao iniciar login: ' + (err.message || JSON.stringify(err)));
+    throw err;
+  }
+};
+
+/** Login com E-mail e Senha. */
+export const signInWithEmail = async (email: string, password: string) => {
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+    return data;
+  } catch (err: any) {
+    console.error('Email Sign In Error:', err);
+    throw err;
+  }
+};
+
+/** Cadastro com E-mail e Senha. */
+export const signUpWithEmail = async (email: string, password: string) => {
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    if (error) throw error;
+    return data;
+  } catch (err: any) {
+    console.error('Email Sign Up Error:', err);
     throw err;
   }
 };

@@ -19,6 +19,7 @@ import ProductView from './components/ProductView';
 import ToastContainer from './components/ToastContainer';
 import { CorporateDashboard } from './components/CorporateDashboard';
 import LandingPage from './components/LandingPage';
+import AuthPage from './components/AuthPage';
 import OnboardingWizard from './components/OnboardingWizard';
 import { ConfigProvider, useConfig } from './contexts/ConfigContext';
 import { PluginProvider } from './contexts/PluginContext';
@@ -164,7 +165,7 @@ const StoreNotFound = () => (
 
 const AppContent: React.FC = () => {
   const { config, isLoadingStore, isNotFound, storeId } = useConfig();
-  const { isAdmin, hasStore, loading: authLoading } = useAuth();
+  const { user, isAdmin, hasStore, loading: authLoading } = useAuth();
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
 
@@ -184,6 +185,11 @@ const AppContent: React.FC = () => {
         <Route path="*" element={<LandingPage />} />
       </Routes>
     );
+  }
+
+  // Se estiver no domínio do app e não estiver logado, mostra a AuthPage
+  if (isAppDomain && !user) {
+    return <AuthPage />;
   }
 
   if (isNotFound && !isLandingPage && !isAppDomain && storeId !== 'demo' && !window.location.pathname.startsWith('/auth')) {

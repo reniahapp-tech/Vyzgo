@@ -10,7 +10,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase, signInWithGoogle, signOut as supabaseSignOut } from '../services/supabase';
+import { supabase, signInWithGoogle, signOut as supabaseSignOut, signInWithEmail as authSignInWithEmail, signUpWithEmail as authSignUpWithEmail } from '../services/supabase';
 import { StoreService } from '../services/storeService';
 
 // ── Tipos ────────────────────────────────────────────────────
@@ -19,6 +19,8 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<any>;
+  signUpWithEmail: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
   hasStore: boolean;
@@ -79,6 +81,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await signInWithGoogle();
   };
 
+  const signInWithEmail = async (email: string, password: string) => {
+    return await authSignInWithEmail(email, password);
+  };
+
+  const signUpWithEmail = async (email: string, password: string) => {
+    return await authSignUpWithEmail(email, password);
+  };
+
   const signOut = async () => {
     await supabaseSignOut();
     sessionStorage.removeItem('admin_auth');
@@ -89,6 +99,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       user,
       session,
       loading,
+      signIn,
+      signInWithEmail,
+      signUpWithEmail,
       signOut,
       isAdmin: !!user,
       hasStore,
