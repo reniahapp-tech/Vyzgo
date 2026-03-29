@@ -194,10 +194,6 @@ const AppContent: React.FC = () => {
     );
   }
 
-  // Se estiver no domínio do app e não estiver logado, mostra a AuthPage
-  if (isAppDomain && !user) {
-    return <AuthPage />;
-  }
 
   if (isNotFound && !isLandingPage && !isAppDomain && storeId !== 'demo' && !window.location.pathname.startsWith('/auth')) {
     return <StoreNotFound />;
