@@ -15,7 +15,7 @@ const BASE_CONFIGS: Record<string, AppConfig> = {
     storeMode: 'mixed',
     enableWhatsapp: true,
     plan: 'pro',
-    footerText: 'Vitrine App - Demonstração',
+    footerText: 'VyzGo - Demonstração',
     theme: {
       backgroundColor: '#FDFBF7',
       primaryColor: '#C27B63',
@@ -347,6 +347,13 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         return;
       }
 
+      // 0. Detecta se é a Landing Page de Vendas (vyzgo.com ou www.vyzgo.com)
+      const isRoot = hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com'; // Mantendo compatibilidade temporária
+      if (isRoot) {
+        setIsLoadingStore(false);
+        return;
+      }
+
       try {
         const data = await StoreService.getStoreByHostname(hostname);
         if (data) {
@@ -392,7 +399,7 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   };
 
   const navigateHome = () => {
-    const isRoot = window.location.hostname === 'agenciawint.com' || window.location.hostname === 'www.agenciawint.com';
+    const isRoot = window.location.hostname === 'vyzgo.com' || window.location.hostname === 'www.vyzgo.com';
     if (window.location.pathname.startsWith('/demo') || (storeId === 'demo' && isRoot)) {
       navigate('/demo');
     } else {

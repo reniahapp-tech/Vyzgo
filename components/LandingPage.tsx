@@ -22,7 +22,7 @@ const LandingPage: React.FC = () => {
                 <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
                     <div className="flex items-center gap-2 font-bold text-xl md:text-2xl tracking-tight">
                         <Layers className="text-purple-500" />
-                        <span>Vitrine.AI</span>
+                        <span>VyzGo</span>
                     </div>
 
                     {/* Desktop Links */}
@@ -34,7 +34,7 @@ const LandingPage: React.FC = () => {
                     </div>
 
                     {/* CTA Desktop */}
-                    <a href="/corporate" className="hidden md:inline-flex items-center justify-center px-6 py-2.5 bg-white text-black font-bold rounded-full text-sm hover:bg-gray-200 transition-all transform hover:scale-105">
+                    <a href="https://app.vyzgo.com" className="hidden md:inline-flex items-center justify-center px-6 py-2.5 bg-white text-black font-bold rounded-full text-sm hover:bg-gray-200 transition-all transform hover:scale-105">
                         Criar Grátis
                     </a>
 
@@ -50,7 +50,7 @@ const LandingPage: React.FC = () => {
                         <a href="#features" className="py-2 text-lg text-gray-300 font-medium" onClick={() => setIsMenuOpen(false)}>Funcionalidades</a>
                         <a href="#demo" className="py-2 text-lg text-gray-300 font-medium" onClick={() => setIsMenuOpen(false)}>Demonstração</a>
                         <a href="#pricing" className="py-2 text-lg text-gray-300 font-medium" onClick={() => setIsMenuOpen(false)}>Preços</a>
-                        <a href="/corporate" className="mt-4 w-full py-4 bg-purple-600 text-white font-bold rounded-xl text-center" onClick={() => setIsMenuOpen(false)}>
+                        <a href="https://app.vyzgo.com" className="mt-4 w-full py-4 bg-purple-600 text-white font-bold rounded-xl text-center" onClick={() => setIsMenuOpen(false)}>
                             Começar Agora
                         </a>
                     </div>
@@ -79,7 +79,7 @@ const LandingPage: React.FC = () => {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full max-w-lg mx-auto">
-                    <a href="/corporate" className="flex-1 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-bold text-lg transition-all shadow-lg shadow-purple-900/30 flex items-center justify-center gap-2">
+                    <a href="https://app.vyzgo.com" className="flex-1 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-full font-bold text-lg transition-all shadow-lg shadow-purple-900/30 flex items-center justify-center gap-2">
                         <Zap size={20} fill="currentColor" />
                         Criar Minha Bio
                     </a>
@@ -204,7 +204,7 @@ const LandingPage: React.FC = () => {
                                 <li className="flex items-center gap-3 text-sm text-gray-300"><CheckCircle size={16} className="text-green-500" /> 15 Produtos</li>
                                 <li className="flex items-center gap-3 text-sm text-gray-300"><CheckCircle size={16} className="text-green-500" /> Integração WhatsApp</li>
                             </ul>
-                            <a href="/corporate" className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-bold text-center transition-colors">
+                            <a href="https://app.vyzgo.com" className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-bold text-center transition-colors">
                                 Começar Grátis
                             </a>
                         </div>
@@ -238,8 +238,8 @@ const LandingPage: React.FC = () => {
                     {[
                         { q: "Preciso pagar comissão sobre as vendas?", a: "Não! No plano Grátis e Pro, 100% do valor da venda vai direto para você. Não cobramos taxas sobre transações." },
                         { q: "Como funciona a integração com WhatsApp?", a: "Quando o cliente finaliza o pedido, o sistema gera, automaticamente, uma mensagem pronta com a lista de itens, total e endereço, e abre o seu WhatsApp para enviar." },
-                        { q: "Posso usar meu próprio domínio?", a: "Sim! No plano Pro você pode conectar seu domínio (ex: sualoja.com) em vez de usar vitrine.ai/sualoja." },
-                        { q: "O que é o Modo Híbrido?", a: "É a capacidade exclusiva do Vitrine.AI de permitir que você venda produtos próprios (físicos) e produtos de afiliado (links externos) na mesma página, sem confundir o cliente." }
+                        { q: "Posso usar meu próprio domínio?", a: "Sim! No plano Pro você pode conectar seu domínio (ex: sualoja.com) em vez de usar sualoja.vyzgo.com." },
+                        { q: "O que é o Modo Híbrido?", a: "É a capacidade exclusiva do VyzGo de permitir que você venda produtos próprios (físicos) e produtos de afiliado (links externos) na mesma página, sem confundir o cliente." }
                     ].map((item, i) => (
                         <div key={i} className="border border-zinc-800 rounded-2xl bg-zinc-900/30 overflow-hidden">
                             <button
@@ -265,7 +265,7 @@ const LandingPage: React.FC = () => {
                     <Instagram className="hover:text-purple-500 cursor-pointer transition-colors" />
                     <MessageCircle className="hover:text-green-500 cursor-pointer transition-colors" />
                 </div>
-                <p className="mb-2">&copy; {new Date().getFullYear()} Vitrine.AI Tecnologia Ltda.</p>
+                <p className="mb-2">&copy; {new Date().getFullYear()} VyzGo Tecnologia Ltda.</p>
                 <div className="flex justify-center gap-4 text-xs">
                     <a href="#" className="hover:underline">Termos de Uso</a>
                     <a href="#" className="hover:underline">Privacidade</a>

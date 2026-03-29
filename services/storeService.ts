@@ -23,22 +23,30 @@ export const StoreService = {
    * Busca os dados de uma loja pelo slug (subdomínio) ou domínio customizado
    */
   async getStoreByHostname(hostname: string): Promise<StoreData | null> {
-    // 1. Tenta buscar por domínio customizado exato
-    let { data, error } = await supabase
-      .from('stores')
-      .select('*')
-      .eq('custom_domain', hostname)
-      .eq('is_active', true)
-      .single();
-
-    if (data) return data;
-
-    // 2. Se não achou, tenta extrair o slug do subdomínio
-    // Ex: loja1.vitrine.com -> slug = loja1
+    // 0. Ignora o subdomínio 'app' pois ele é reservado para o Painel/Onboarding
     const parts = hostname.split('.');
-    if (parts.length >= 2) {
+    const isVyzgo = hostname.includes('vyzgo.com');
+    
+    if (isVyzgo && parts[0] === 'app') {
+      return null;
+    }
+
+    // 1. Tenta buscar por domínio customizado exato (se não for vyzgo.com)
+    if (!isVyzgo) {
+      let { data } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('custom_domain', hostname)
+        .eq('is_active', true)
+        .single();
+
+      if (data) return data;
+    }
+
+    // 2. Se for subdomínio *.vyzgo.com, extrair o slug
+    if (isVyzgo && parts.length >= 2) {
       const slug = parts[0];
-      if (slug !== 'www') {
+      if (slug !== 'www' && slug !== 'app') {
         const { data: slugData } = await supabase
           .from('stores')
           .select('*')

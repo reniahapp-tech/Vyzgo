@@ -157,7 +157,7 @@ export const CorporateDashboard: React.FC = () => {
                     >
                         Acessar Painel
                     </button>
-                    <p className="text-center mt-4 text-xs text-gray-400">Ambiente Seguro | Vitrine SaaS</p>
+                    <p className="text-center mt-4 text-xs text-gray-400">Ambiente Seguro | VyzGo SaaS</p>
                 </div>
             </div>
         );

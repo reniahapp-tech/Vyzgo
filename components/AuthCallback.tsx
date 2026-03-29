@@ -8,17 +8,23 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
+  const { hasStore, loading } = useAuth();
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN') {
+    // Escuta a mudança de estado, mas como o AuthProvider já cuida do carregamento, 
+    // podemos agir quando o loading do Auth terminar.
+    if (!loading) {
+      if (!hasStore) {
+        navigate('/setup');
+      } else {
         navigate('/');
       }
-    });
-  }, [navigate]);
+    }
+  }, [loading, hasStore, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">

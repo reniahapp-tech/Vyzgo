@@ -76,8 +76,8 @@ const OnboardingWizard: React.FC = () => {
             
             // Redireciona para o novo subdomínio se possível, ou apenas limpa
             const hostname = window.location.hostname;
-            if (hostname.includes('vitrine.ai')) {
-                window.location.href = `https://${localConfig.slug}.vitrine.ai`;
+            if (hostname.includes('vyzgo.com')) {
+                window.location.href = `https://${localConfig.slug}.vyzgo.com`;
             } else {
                 navigate('/');
             }
@@ -185,7 +185,7 @@ const OnboardingWizard: React.FC = () => {
 
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl">
-                                    <span className="text-sm font-bold text-gray-400">vitrine.ai/</span>
+                                    <span className="text-sm font-bold text-gray-400">vyzgo.com/</span>
                                     <input
                                         value={localConfig.slug}
                                         onChange={(e) => setLocalConfig({ ...localConfig, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
@@ -349,7 +349,7 @@ const OnboardingWizard: React.FC = () => {
                             <div className="bg-green-50 p-4 rounded-xl border border-green-100 mb-8 flex gap-3">
                                 <Check className="text-green-600 shrink-0" size={20} />
                                 <p className="text-sm text-green-800">
-                                    Tudo pronto! Ao clicar em finalizar, sua loja estará configurada e pronta para receber produtos.
+                                    Tudo pronto! Ao clicar em finalizar, sua loja VyzGo estará configurada e pronta para receber produtos.
                                 </p>
                             </div>
 

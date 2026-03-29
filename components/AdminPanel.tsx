@@ -552,7 +552,7 @@ const AdminPanel: React.FC = () => {
             <div className="space-y-4">
               <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
                 <h3 className="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
-                  <BookOpen size={16} /> Bem-vindo ao Vitrine
+                  <BookOpen size={16} /> Bem-vindo ao VyzGo
                 </h3>
                 <p className="text-xs text-blue-600 leading-relaxed mb-3">
                   Este é seu painel de controle. Aqui você pode personalizar toda a aparência e funcionamento da sua loja virtual sem precisar de código.
@@ -581,6 +581,10 @@ const AdminPanel: React.FC = () => {
                 <FAQItem
                   title="Como funciona o Plano Pro?"
                   content="O plano Pro desbloqueia funcionalidades avançadas como modos exclusivos de loja, remoção de limites e controle total sobre o botão flutuante do WhatsApp."
+                />
+                <FAQItem
+                  title="Como funciona a marca VyzGo?"
+                  content="No plano Pro, você tem total autonomia para remover a marca VyzGo e usar seu próprio domínio customizado."
                 />
                 <FAQItem
                   title="Fiz login, e agora?"

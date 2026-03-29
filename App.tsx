@@ -142,7 +142,7 @@ const ProtectedSetup: React.FC = () => {
 const FullScreenLoader = () => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-stone-50">
     <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin mb-4"></div>
-    <p className="text-sm font-bold text-gray-500 animate-pulse">Carregando Vitrine...</p>
+    <p className="text-sm font-bold text-gray-500 animate-pulse">Carregando VyzGo...</p>
   </div>
 );
 
@@ -151,7 +151,7 @@ const StoreNotFound = () => (
     <div className="w-24 h-24 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-6 text-4xl">
       🏝️
     </div>
-    <h1 className="text-2xl font-black text-gray-800 mb-2">Vitrine não encontrada</h1>
+    <h1 className="text-2xl font-black text-gray-800 mb-2">VyzGo não encontrada</h1>
     <p className="text-gray-500 max-w-xs mb-8">
       Este endereço não parece estar vinculado a nenhuma loja ativa no momento.
     </p>
@@ -174,7 +174,7 @@ const AppContent: React.FC = () => {
   if (isLoadingStore || authLoading) return <FullScreenLoader />;
 
   // Se o hostname não existe e não é a landing page oficial
-  const isLandingPage = (window.location.hostname === 'agenciawint.com' || window.location.hostname === 'www.agenciawint.com') 
+  const isLandingPage = (window.location.hostname === 'vyzgo.com' || window.location.hostname === 'www.vyzgo.com' || window.location.hostname === 'agenciawint.com') 
                         && !new URLSearchParams(window.location.search).get('store');
   
   if (isNotFound && !isLandingPage && storeId !== 'demo' && !window.location.pathname.startsWith('/auth')) {
