@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  VITRINE APP — SUPABASE CLIENT
+ *  VyzGo — SUPABASE CLIENT
  *  Arquivo: services/supabase.ts
  * ============================================================
  */

@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
           registerType: 'autoUpdate',
           includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
           manifest: {
-            name: 'Vitrine App',
+            name: 'VyzGo',
             short_name: 'Vitrine',
             description: 'Sua loja digital profissional',
             theme_color: '#C27B63',
