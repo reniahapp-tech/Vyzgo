@@ -176,10 +176,16 @@ const AppContent: React.FC = () => {
 
   const hostname = window.location.hostname;
   const isAppDomain = hostname === 'app.vyzgo.com' || hostname.startsWith('localhost');
+  const normalizedPath = window.location.pathname.toLowerCase().replace(/\/$/, "");
   const isLandingPage = (hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com' || hostname === 'vitrinebio.vercel.app') 
                         && !new URLSearchParams(window.location.search).get('store')
-                        && (window.location.pathname === '/' || window.location.pathname === '/index.html');
+                        && (normalizedPath === "" || normalizedPath === "/" || normalizedPath === "/index.html");
   
+  // Força a AuthPage se o caminho for /login ou se for o domínio do app sem usuário
+  if (normalizedPath === '/login' || (isAppDomain && !user)) {
+    return <AuthPage />;
+  }
+
   if (isLandingPage) {
     return (
       <Routes>
