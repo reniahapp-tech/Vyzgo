@@ -21,7 +21,7 @@ const LandingPage: React.FC = () => {
             <nav className="fixed top-0 left-0 w-full z-50 bg-black/80 backdrop-blur-lg border-b border-white/10">
                 <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
                     <div className="flex items-center transition-transform hover:scale-105">
-                        <img src="/logo-main.png" alt="VyzGo" className="h-8 md:h-10 w-auto object-contain brightness-0 invert" />
+                        <img src="/logo-main.png" alt="VyzGo" className="h-10 md:h-14 w-auto object-contain brightness-0 invert" />
                     </div>
 
                     {/* Desktop Links */}
@@ -260,6 +260,9 @@ const LandingPage: React.FC = () => {
 
             {/* 7. FOOTER */}
             <footer className="py-12 bg-black border-t border-zinc-900 text-center text-gray-600 text-sm">
+                <div className="flex justify-center mb-8">
+                    <img src="/logo-main.png" alt="VyzGo" className="h-8 w-auto object-contain brightness-0 invert opacity-50 hover:opacity-100 transition-opacity" />
+                </div>
                 <div className="flex items-center justify-center gap-6 mb-8">
                     <Instagram className="hover:text-purple-500 cursor-pointer transition-colors" />
                     <MessageCircle className="hover:text-green-500 cursor-pointer transition-colors" />
