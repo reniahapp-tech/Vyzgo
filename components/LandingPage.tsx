@@ -261,7 +261,7 @@ const LandingPage: React.FC = () => {
             {/* 7. FOOTER */}
             <footer className="py-12 bg-black border-t border-zinc-900 text-center text-gray-600 text-sm">
                 <div className="flex justify-center mb-6">
-                    <img src="/logo-main.png" alt="VyzGo" className="h-10 w-auto object-contain brightness-0 invert" />
+                    <img src="/logo-icon.png" alt="VyzGo Icon" className="h-12 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity" />
                 </div>
                 <div className="flex items-center justify-center gap-6 mb-8">
                     <Instagram className="hover:text-purple-500 cursor-pointer transition-colors" />
