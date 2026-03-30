@@ -114,7 +114,13 @@ const BASE_CONFIGS: Record<string, AppConfig> = {
       instagram: 'boutique.elegance',
       facebook: 'boutiqueelegance',
       tiktok: ''
-    }
+    },
+    banners: [
+      'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=1000',
+      'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1000',
+      'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1000'
+    ],
+    featuredProductIds: ['l1', 'l2', 'a1']
   },
   // TECH EXAMPLE
   tech: {

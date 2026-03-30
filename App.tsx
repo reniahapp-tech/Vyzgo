@@ -47,6 +47,9 @@ const useNetworkStatus = () => {
   }, []); // Empty dependency array = run once on mount
 };
 
+import FeaturedCarousel from './components/FeaturedCarousel';
+import StoreMap from './components/StoreMap';
+
 const Home: React.FC<{ setIsProductModalOpen: (v: boolean) => void, setIsQuizModalOpen: (v: boolean) => void }> = ({ setIsProductModalOpen, setIsQuizModalOpen }) => {
   const { config } = useConfig();
 
@@ -56,35 +59,52 @@ const Home: React.FC<{ setIsProductModalOpen: (v: boolean) => void, setIsQuizMod
         <Header />
       </div>
 
-      <main className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        {/* 1. Hero Card - Full Width (Span 2 on mobile, Span 4 on tablet) */}
+      <main className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+        {/* 1. Hero Card - Multi-Banner Carousel */}
         <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
           <HeroCard onClick={() => setIsProductModalOpen(true)} />
         </div>
 
-        {/* SearchBar */}
+        {/* 2. Featured Products - Carousel */}
         <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '150ms' }}>
+          <FeaturedCarousel />
+        </div>
+
+        {/* SearchBar */}
+        <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '200ms' }}>
           <SearchBar />
         </div>
 
-        {/* 2. Categories Grid */}
-        {config.categories.map((item, index) => (
-          <div
-            key={item.id}
-            className="col-span-1 animate-fade-in"
-            style={{ animationDelay: `${200 + (index * 50)}ms` }}
-          >
-            <CategoryCard item={item} />
-          </div>
-        ))}
+        {/* 3. Categories Grid */}
+        <div className="col-span-2 md:col-span-4 mt-2">
+           <h3 className="text-xl font-black uppercase tracking-tight mb-4 flex items-center gap-2">
+             Categorias
+           </h3>
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+             {config.categories.map((item, index) => (
+               <div
+                 key={item.id}
+                 className="col-span-1 animate-fade-in"
+                 style={{ animationDelay: `${250 + (index * 50)}ms` }}
+               >
+                 <CategoryCard item={item} />
+               </div>
+             ))}
+           </div>
+        </div>
 
-        {/* 3. Content Card (Quiz) - Full Width on Mobile, Span 4 on tablet (or 2 if we had another card) */}
+        {/* 4. Store Map */}
         <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '400ms' }}>
+          <StoreMap />
+        </div>
+
+        {/* 5. Content Card (Quiz) */}
+        <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '450ms' }}>
           <ContentCard onClick={() => setIsQuizModalOpen(true)} />
         </div>
       </main>
 
-      <div className="mt-6 md:mt-10 animate-fade-in" style={{ animationDelay: '500ms' }}>
+      <div className="mt-8 md:mt-12 animate-fade-in" style={{ animationDelay: '500ms' }}>
         <WhatsAppButton />
       </div>
 
@@ -92,8 +112,8 @@ const Home: React.FC<{ setIsProductModalOpen: (v: boolean) => void, setIsQuizMod
         <SocialFooter />
       </div>
 
-      {/* Footer note (only on home) */}
-      <div className="mt-2 text-center opacity-40 text-sm font-medium pb-4 animate-fade-in" style={{ animationDelay: '600ms' }}>
+      {/* Footer note */}
+      <div className="mt-4 text-center opacity-40 text-[10px] uppercase font-black tracking-widest pb-6 animate-fade-in" style={{ animationDelay: '600ms' }}>
         <p>{config.footerText}</p>
       </div>
     </>

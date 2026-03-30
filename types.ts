@@ -138,6 +138,8 @@ export interface AppConfig {
     buttonText: string;
     imageUrl: string;
   };
+  banners?: string[]; // Moved to root for easier access
+  featuredProductIds?: string[]; // IDs of products to show in featured section
   categories: CategoryItem[];
   quiz: {
     title: string;
