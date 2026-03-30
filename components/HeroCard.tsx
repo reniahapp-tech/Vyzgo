@@ -11,8 +11,19 @@ const HeroCard: React.FC<HeroCardProps> = ({ onClick }) => {
   const { config } = useConfig();
   const { hero, theme, banners } = config;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const bannerList = banners && banners.length > 0 ? banners : [hero.imageUrl];
+
+  React.useEffect(() => {
+    if (bannerList.length <= 1 || isPaused) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % bannerList.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [bannerList.length, isPaused]);
 
   const nextBanner = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -27,6 +38,8 @@ const HeroCard: React.FC<HeroCardProps> = ({ onClick }) => {
   return (
     <div 
       onClick={onClick}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
       className="relative overflow-hidden rounded-xl2 h-72 md:h-96 group cursor-pointer shadow-lg shadow-gray-200/50 transition-all hover:shadow-xl w-full"
     >
       {/* Background Image with Safety Shield */}

@@ -81,7 +81,9 @@ const Home: React.FC<{ setIsProductModalOpen: (v: boolean) => void, setIsQuizMod
              Categorias
            </h3>
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-             {config.categories.map((item, index) => (
+             {config.categories
+               .filter(item => item.id !== 'location') // Removendo "Nossa Loja" das categorias
+               .map((item, index) => (
                <div
                  key={item.id}
                  className="col-span-1 animate-fade-in"
@@ -96,11 +98,6 @@ const Home: React.FC<{ setIsProductModalOpen: (v: boolean) => void, setIsQuizMod
         {/* 4. Store Map */}
         <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '400ms' }}>
           <StoreMap />
-        </div>
-
-        {/* 5. Content Card (Quiz) */}
-        <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '450ms' }}>
-          <ContentCard onClick={() => setIsQuizModalOpen(true)} />
         </div>
       </main>
 
