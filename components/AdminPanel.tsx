@@ -486,17 +486,46 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             </div>
             <div>
               <h2 className="text-xl font-black text-gray-800 tracking-tight">VyzGo Painel</h2>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Configurações da sua Vitrine</p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">Configurações da sua Vitrine</p>
+                {storeId === 'demo' && (
+                  <span className="flex items-center gap-1 text-[8px] font-black bg-yellow-400 text-black px-1.5 py-0.5 rounded uppercase animate-pulse">
+                     <AlertTriangle size={8} /> Modo Demo
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-4">
+            <a 
+              href={storeId === 'demo' ? '/demo' : `/v/${storeId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-xl text-[10px] md:text-xs font-black hover:bg-blue-100 transition-all border border-blue-100 shadow-sm active:scale-95"
+            >
+              <ExternalLink size={14} />
+              <span className="hidden sm:inline">Ver Minha Vitrine</span>
+              <span className="sm:hidden">Ver Loja</span>
+            </a>
+
+            <div className="h-8 w-[1px] bg-gray-100 mx-1 hidden md:block" />
+
+            <button
+               onClick={() => { signOut(); setIsOpen(false); }}
+               className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-500 rounded-xl text-[10px] md:text-xs font-black hover:bg-red-100 transition-all border border-red-100 active:scale-95"
+               title="Sair da conta"
+            >
+              <LogOut size={14} />
+              <span className="hidden md:inline">Sair</span>
+            </button>
+
             {!isStandalone && (
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-3 hover:bg-gray-100 rounded-2xl transition-colors text-gray-400 hover:text-black"
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-black"
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             )}
           </div>
@@ -535,6 +564,23 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
+          
+          {storeId === 'demo' && (
+            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-100 rounded-2xl flex items-start gap-4 animate-in slide-in-from-top-2 duration-500">
+              <div className="w-10 h-10 bg-yellow-400 text-black rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                <AlertTriangle size={20} />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-xs font-black text-yellow-800 uppercase tracking-tight mb-1">Atenção: Modo de Demonstração Ativo</h4>
+                <p className="text-[10px] text-yellow-700 leading-relaxed">
+                  Você está visualizando a vitrine de exemplo. Qualquer alteração feita aqui é <b>compartilhada com outros usuários</b> e pode ser resetada a qualquer momento. Para ter sua própria vitrine exclusiva, faça login ou crie sua conta.
+                </p>
+                <div className="flex gap-3 mt-3">
+                   <button onClick={() => window.location.href = '/'} className="text-[10px] font-black text-yellow-800 underline decoration-yellow-300 hover:decoration-yellow-500 transition-all">Criar Minha Própria Vitrine</button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {activeTab === 'help' && (
             <div className="space-y-4">
