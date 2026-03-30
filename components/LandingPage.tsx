@@ -38,12 +38,11 @@ const LandingPage: React.FC = () => {
                         <a href="#integrations" className="hover:text-purple-400 transition-colors">Integração</a>
                         <a href="#pricing" className="hover:text-purple-400 transition-colors">Planos</a>
                         <a href="#faq" className="hover:text-purple-400 transition-colors">FAQ</a>
-                        <a href="https://app.vyzgo.com/login" className="hover:text-purple-400 transition-colors">Acessar Vitrine</a>
                     </div>
 
                     {/* CTA Desktop */}
                     <a href="https://app.vyzgo.com" className="hidden md:inline-flex items-center justify-center px-8 py-3 bg-indigo-600 text-white font-black rounded-full text-sm hover:translate-y-[-2px] hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 transition-all uppercase tracking-wider">
-                        Começar Agora
+                        Acessar
                     </a>
 
                     {/* Mobile Menu Button */}
@@ -58,9 +57,8 @@ const LandingPage: React.FC = () => {
                         <a href="#features" className="py-2 text-lg text-gray-300 font-medium" onClick={() => setIsMenuOpen(false)}>Recursos</a>
                         <a href="#integrations" className="py-2 text-lg text-gray-300 font-medium" onClick={() => setIsMenuOpen(false)}>Integração</a>
                         <a href="#pricing" className="py-2 text-lg text-gray-300 font-medium" onClick={() => setIsMenuOpen(false)}>Planos</a>
-                        <a href="https://app.vyzgo.com/login" className="py-2 text-lg text-gray-300 font-medium" onClick={() => setIsMenuOpen(false)}>Acessar Vitrine</a>
                         <a href="https://app.vyzgo.com" className="mt-4 w-full py-4 bg-indigo-600 text-white font-bold rounded-xl text-center" onClick={() => setIsMenuOpen(false)}>
-                            Começar Agora
+                            Acessar
                         </a>
                     </div>
                 )}
