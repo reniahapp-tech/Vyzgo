@@ -3,10 +3,14 @@ import { useConfig } from '../contexts/ConfigContext';
 import { 
   Users, Store, Activity, Settings, Plus, Search, 
   ExternalLink, Shield, BarChart3, Globe, Package,
-  TrendingUp, AlertCircle, CheckCircle2
+  TrendingUp, AlertCircle, CheckCircle2, LogOut, UserPlus
 } from 'lucide-react';
 
-export const SuperAdminDashboard: React.FC = () => {
+interface SuperAdminDashboardProps {
+    onLogout: () => void;
+}
+
+export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({ onLogout }) => {
     const { addToast } = useConfig();
     const [stats, setStats] = useState({
         totalStores: 0,
@@ -74,9 +78,17 @@ export const SuperAdminDashboard: React.FC = () => {
                     <div className="flex items-center gap-3">
                         <button 
                             onClick={loadGlobalState}
-                            className="p-3 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all text-gray-500"
+                            className="p-3 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all text-gray-400"
+                            title="Atualizar Dados"
                         >
                             <Activity size={20} />
+                        </button>
+                        <button 
+                            onClick={onLogout}
+                            className="p-3 bg-white border border-gray-200 rounded-2xl hover:bg-red-50 transition-all text-gray-400 hover:text-red-600"
+                            title="Sair do Painel"
+                        >
+                            <LogOut size={20} />
                         </button>
                         <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:scale-[1.02] active:scale-[0.98] transition-all">
                             <Plus size={20} />
@@ -185,7 +197,22 @@ export const SuperAdminDashboard: React.FC = () => {
                                                     </span>
                                                 </td>
                                                 <td className="px-8 py-5 text-right space-x-2">
-                                                    <button className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"><ExternalLink size={18} /></button>
+                                                    <button 
+                                                        onClick={() => {
+                                                            const agencyPrefix = store.split('-')[0];
+                                                            if (agencyPrefix.startsWith('agency')) {
+                                                                localStorage.setItem('vyzgo_corporate_session', JSON.stringify({ mode: 'agency', id: agencyPrefix }));
+                                                                window.location.reload();
+                                                            } else {
+                                                                addToast('Esta loja não pertence a uma agência.', 'info');
+                                                            }
+                                                        }}
+                                                        className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                                                        title="Acessar como Agência"
+                                                    >
+                                                        <UserPlus size={18} />
+                                                    </button>
+                                                    <button className="p-2 text-gray-400 hover:text-gray-900 transition-colors"><ExternalLink size={18} /></button>
                                                     <button className="p-2 text-gray-400 hover:text-gray-900 transition-colors"><Settings size={18} /></button>
                                                 </td>
                                             </tr>
@@ -210,9 +237,19 @@ export const SuperAdminDashboard: React.FC = () => {
                                 <HealthItem label="Auth Engine" status="operational" />
                                 <HealthItem label="Gemini AI" status="operational" />
                             </div>
-                            <div className="mt-8 p-4 bg-indigo-800/50 rounded-2xl border border-indigo-700/50">
-                                <p className="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-1">Último Backup</p>
-                                <p className="text-sm font-medium">Hoje às 04:00 (Sucesso)</p>
+                        </div>
+
+                        {/* Global Feature Flags */}
+                        <div className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-sm">
+                            <h3 className="text-xl font-black text-gray-800 mb-6 flex items-center gap-2">
+                                <Settings className="text-indigo-600" />
+                                Plugins Globais
+                            </h3>
+                            <div className="space-y-4">
+                                <PluginToggle label="IA Copywriter" enabled={true} />
+                                <PluginToggle label="WhatsApp Bot" enabled={true} />
+                                <PluginToggle label="Multi-Moeda" enabled={false} />
+                                <PluginToggle label="Relatórios Avançados" enabled={true} />
                             </div>
                         </div>
 
@@ -236,18 +273,40 @@ export const SuperAdminDashboard: React.FC = () => {
 };
 
 // Sub-components
-const StatCard = ({ title, value, icon, trend, color }: any) => (
-    <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm hover:translate-y-[-4px] transition-all cursor-default">
-        <div className="flex justify-between items-start mb-4">
-            <div className={`p-3 bg-${color}-50 rounded-2xl`}>{icon}</div>
-            <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${color === 'green' ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-400'}`}>
-                {trend}
-            </span>
-        </div>
-        <div className="text-3xl font-black text-gray-900 tracking-tight">{value}</div>
-        <div className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">{title}</div>
-    </div>
+const MiniChart = ({ color }: { color: string }) => (
+    <svg viewBox="0 0 100 40" className="w-full h-8 mt-2">
+        <path 
+            d="M0 35 Q 20 10, 40 30 T 80 15 T 100 25" 
+            fill="none" 
+            stroke={`var(--chart-color, ${color})`} 
+            strokeWidth="3" 
+            strokeLinecap="round" 
+        />
+    </svg>
 );
+
+const StatCard = ({ title, value, icon, trend, color }: any) => {
+    const colorMap: any = {
+        blue: '#2563eb',
+        indigo: '#4f46e5',
+        green: '#16a34a',
+        orange: '#ea580c'
+    };
+    
+    return (
+        <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm hover:translate-y-[-4px] transition-all cursor-default group">
+            <div className="flex justify-between items-start mb-4">
+                <div className={`p-3 bg-${color}-50 rounded-2xl group-hover:scale-110 transition-transform`}>{icon}</div>
+                <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${color === 'green' ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-400'}`}>
+                    {trend}
+                </span>
+            </div>
+            <div className="text-3xl font-black text-gray-900 tracking-tight">{value}</div>
+            <div className="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">{title}</div>
+            <MiniChart color={colorMap[color]} />
+        </div>
+    );
+};
 
 const HealthItem = ({ label, status }: any) => (
     <div className="flex items-center justify-between">
@@ -255,6 +314,15 @@ const HealthItem = ({ label, status }: any) => (
         <span className="text-xs font-black text-green-400 flex items-center gap-2">
             <CheckCircle2 size={14} /> {status}
         </span>
+    </div>
+);
+
+const PluginToggle = ({ label, enabled }: { label: string, enabled: boolean }) => (
+    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100">
+        <span className="text-xs font-bold text-gray-700 uppercase tracking-widest">{label}</span>
+        <div className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${enabled ? 'bg-indigo-600' : 'bg-gray-300'}`}>
+            <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${enabled ? 'right-1' : 'left-1'}`} />
+        </div>
     </div>
 );
 

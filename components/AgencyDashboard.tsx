@@ -3,25 +3,65 @@ import { useConfig } from '../contexts/ConfigContext';
 import { 
   Store, Plus, ExternalLink, RefreshCw, 
   Layout, Palette, Settings, Users,
-  Globe, MessageCircle, BarChart, ShieldCheck
+  Globe, MessageCircle, BarChart, ShieldCheck, LogOut
 } from 'lucide-react';
 
 interface AgencyDashboardProps {
     agencyId: string;
+    onLogout: () => void;
 }
 
-export const AgencyDashboard: React.FC<AgencyDashboardProps> = ({ agencyId }) => {
+// Real Agency Configurations Mapping
+const AGENCY_CONFIGS: Record<string, any> = {
+    'agency-vyzgo': {
+        name: 'VYZGO OFICIAL',
+        primaryColor: '#4f46e5',
+        logo: '/logo-main.png',
+        plan: 'PLATINUM'
+    },
+    'agency-wint': {
+        name: 'WINT DIGITAL',
+        primaryColor: '#0ea5e9',
+        logo: 'https://api.dicebear.com/7.x/initials/svg?seed=WD&backgroundColor=0ea5e9',
+        plan: 'GOLD'
+    },
+    'agency-mauro': {
+        name: 'MAURO SOLUTIONS',
+        primaryColor: '#10b981',
+        logo: 'https://api.dicebear.com/7.x/initials/svg?seed=MS&backgroundColor=10b981',
+        plan: 'PREMIUM'
+    }
+};
+
+const MiniAreaChart = ({ color }: { color: string }) => (
+    <svg viewBox="0 0 100 40" className="w-full h-12 mt-2 opacity-50">
+        <path 
+            d="M0 40 Q 25 35, 50 20 T 100 10" 
+            fill="none" 
+            stroke={color} 
+            strokeWidth="3" 
+            strokeLinecap="round" 
+        />
+        <path 
+            d="M0 40 Q 25 35, 50 20 T 100 10 L 100 40 L 0 40 Z" 
+            fill={color} 
+            fillOpacity="0.1" 
+        />
+    </svg>
+);
+
+export const AgencyDashboard: React.FC<AgencyDashboardProps> = ({ agencyId, onLogout }) => {
     const { addToast, config } = useConfig();
     const [stores, setStores] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [newStoreSlug, setNewStoreSlug] = useState('');
     const [isCreating, setIsCreating] = useState(false);
 
-    // Simulated Agency Branding (in a real app, this would come from a DB)
-    const agencyBranding = {
-        name: agencyId.replace('agency-', '').toUpperCase() + ' DIGITAL',
-        primaryColor: '#4f46e5', // Indigo
-        logo: '/logo-main.png'
+    const agencyBranding = AGENCY_CONFIGS[agencyId] || {
+        name: agencyId.replace('agency-', '').toUpperCase() + ' PARTNER',
+        primaryColor: '#6366f1',
+        logo: `https://api.dicebear.com/7.x/initials/svg?seed=${agencyId}&backgroundColor=6366f1`,
+        plan: 'START'
     };
 
     useEffect(() => {
@@ -103,6 +143,13 @@ export const AgencyDashboard: React.FC<AgencyDashboardProps> = ({ agencyId }) =>
                             <Settings size={18} />
                             Configurações
                         </button>
+                        <button 
+                            onClick={onLogout}
+                            className="p-2.5 bg-white border border-gray-200 rounded-2xl text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                            title="Sair do Painel"
+                        >
+                            <LogOut size={20} />
+                        </button>
                     </div>
                 </header>
 
@@ -111,13 +158,19 @@ export const AgencyDashboard: React.FC<AgencyDashboardProps> = ({ agencyId }) =>
                     <div className="lg:col-span-2 space-y-8">
                         {/* Summary Cards */}
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
+                            <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total de Clientes</p>
                                 <p className="text-3xl font-black text-gray-900">{stores.length}</p>
+                                <MiniAreaChart color={agencyBranding.primaryColor} />
                             </div>
-                            <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
+                            <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Status do Plano</p>
-                                <p className="text-xl font-black text-green-600 uppercase">Premium ILIMITADO</p>
+                                <p className="text-xl font-black text-green-600 uppercase">{agencyBranding.plan} ILIMITADO</p>
+                                <div className="mt-4 flex gap-1">
+                                    {[1,2,3,4,5].map(i => <div key={i} className="h-1.5 flex-grow bg-green-100 rounded-full overflow-hidden">
+                                        <div className="h-full bg-green-500 w-full animate-pulse" style={{ animationDelay: `${i*200}ms` }} />
+                                    </div>)}
+                                </div>
                             </div>
                         </div>
 
@@ -142,7 +195,10 @@ export const AgencyDashboard: React.FC<AgencyDashboardProps> = ({ agencyId }) =>
                                                 {store.split('-').pop()?.substring(0, 1)}
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-gray-800">{store.split('-').pop()}</h4>
+                                                <div className="flex items-center gap-2">
+                                                    <h4 className="font-bold text-gray-800">{store.split('-').pop()}</h4>
+                                                    <span className="text-[9px] font-black bg-green-100 text-green-600 px-1.5 py-0.5 rounded-md uppercase tracking-tighter">Ativo</span>
+                                                </div>
                                                 <p className="text-xs text-gray-400 font-medium">{store}.vyzgo.com</p>
                                             </div>
                                         </div>

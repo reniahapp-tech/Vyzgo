@@ -26,6 +26,8 @@ import { PluginProvider } from './contexts/PluginContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import SearchBar from './components/SearchBar';
 import AuthCallback from './components/AuthCallback';
+import TermsOfUse from './components/TermsOfUse';
+import PrivacyPolicy from './components/PrivacyPolicy';
 
 // Hook to detect offline status
 const useNetworkStatus = () => {
@@ -235,6 +237,8 @@ const AppContent: React.FC = () => {
               <Route path="/category/:categoryId" element={<CategoryRoute />} />
               <Route path="/product/:productId" element={<ProductRoute />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/terms" element={<TermsOfUse />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
             </Routes>
           )}
         </div>

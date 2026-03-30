@@ -11,25 +11,52 @@ export const CorporateDashboard: React.FC = () => {
     const [viewMode, setViewMode] = useState<'master' | 'agency' | null>(null);
     const [agencyId, setAgencyId] = useState('');
 
+    // Load from session
+    React.useEffect(() => {
+        const savedSession = localStorage.getItem('vyzgo_corporate_session');
+        if (savedSession) {
+            const { mode, id } = JSON.parse(savedSession);
+            setIsAuthenticated(true);
+            setViewMode(mode);
+            setAgencyId(id || '');
+        }
+    }, []);
+
     const handleLogin = () => {
+        let mode: 'master' | 'agency' | null = null;
+        let id = '';
+
         if (pin === MASTER_PIN) {
-            setIsAuthenticated(true);
-            setViewMode('master');
+            mode = 'master';
         } else if (pin.startsWith('agency-')) {
+            mode = 'agency';
+            id = pin;
+        }
+
+        if (mode) {
             setIsAuthenticated(true);
-            setViewMode('agency');
-            setAgencyId(pin);
+            setViewMode(mode);
+            setAgencyId(id);
+            localStorage.setItem('vyzgo_corporate_session', JSON.stringify({ mode, id }));
         } else {
             alert('Acesso negado. Use o Código da Agência ou PIN Mestre.');
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('vyzgo_corporate_session');
+        setIsAuthenticated(false);
+        setViewMode(null);
+        setAgencyId('');
+        setPin('');
+    };
+
     if (isAuthenticated) {
         if (viewMode === 'master') {
-            return <SuperAdminDashboard />;
+            return <SuperAdminDashboard onLogout={handleLogout} />;
         }
         if (viewMode === 'agency') {
-            return <AgencyDashboard agencyId={agencyId} />;
+            return <AgencyDashboard agencyId={agencyId} onLogout={handleLogout} />;
         }
     }
 
