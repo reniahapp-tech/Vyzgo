@@ -198,16 +198,9 @@ const AppContent: React.FC = () => {
     );
   }
 
-  // 2. DASHBOARD DO LOJISTA (app.vyzgo.com)
-  if (isAppDashboard && !pathname.startsWith('/v/')) {
-    return (
-      <Routes>
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/login" element={<AuthPage />} />
-        <Route path="/" element={<CorporateDashboard />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    );
+  // Força a AuthPage se for o domínio do app e o usuário NÃO estiver logado
+  if (isAppDashboard && !user && !pathname.startsWith('/auth')) {
+    return <AuthPage />;
   }
 
   if (isNotFound && !isLandingPage && !isAppDashboard && storeId !== 'demo' && !window.location.pathname.startsWith('/auth')) {
