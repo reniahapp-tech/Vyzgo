@@ -243,6 +243,7 @@ interface ConfigContextType {
   isLoadingStore: boolean;
   isNotFound: boolean;
   saveStoreToCloud: () => Promise<void>;
+  updateStoreSlug: (newSlug: string) => Promise<boolean>;
 }
 
 const ConfigContext = createContext<ConfigContextType | undefined>(undefined);
@@ -405,6 +406,41 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       addToast('Alterações salvas na nuvem!', 'success');
     } catch (err) {
       addToast('Erro ao salvar no servidor.', 'error');
+    }
+  };
+
+  const updateStoreSlug = async (newSlug: string) => {
+    if (!user || !storeData) return false;
+    
+    const cleanSlug = newSlug.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if (!cleanSlug || cleanSlug.length < 3) {
+      addToast('O subdomínio deve ter pelo menos 3 caracteres e usar apenas letras minúsculas, números e hífens.', 'error');
+      return false;
+    }
+    
+    if (cleanSlug === storeData.slug) return true;
+
+    try {
+      const isAvailable = await StoreService.isSlugAvailable(cleanSlug, storeData.id);
+      if (!isAvailable) {
+        addToast('Este subdomínio já está em uso. Tente outro.', 'error');
+        return false;
+      }
+
+      await StoreService.saveStore({
+        ...storeData,
+        slug: cleanSlug,
+        config: config
+      });
+      
+      setStoreData(prev => prev ? { ...prev, slug: cleanSlug } : null);
+      setStoreId(cleanSlug);
+      addToast('Domínio alterado com sucesso! Seus links antigos não funcionarão mais.', 'success');
+      return true;
+    } catch (err) {
+      console.error(err);
+      addToast('Erro ao alterar o domínio.', 'error');
+      return false;
     }
   };
 
@@ -615,7 +651,7 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       updateConfig, updateNestedConfig, addCategory, removeCategory,
       addProductToCategory, removeProductFromCategory, updateProduct, resetConfig, upgradeToPro,
       seedInitialData, clearDemoData,
-      isLoadingStore, isNotFound, saveStoreToCloud
+      isLoadingStore, isNotFound, saveStoreToCloud, updateStoreSlug
     }}>
       {children}
     </ConfigContext.Provider>

@@ -4,7 +4,7 @@ import { usePlugins } from '../contexts/PluginContext';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from './AuthModal';
 import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle, Puzzle, Tag, LogOut, User as UserIcon, Save, ArrowRight } from 'lucide-react';
-import { availableIcons } from './IconMapper';
+import { availableIcons, DynamicIcon } from './IconMapper';
 import { ProductItem } from '../types';
 import PaymentGateway from './PaymentGateway';
 import { uploadToR2, saveConfigToR2 } from '../services/r2';
@@ -251,7 +251,7 @@ const WHATSAPP_LABELS = [
 ];
 
 const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false }) => {
-  const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro, seedInitialData, clearDemoData, orders, coupons, saveCoupon, deleteCoupon, saveStoreToCloud, isLoadingStore } = useConfig();
+  const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro, seedInitialData, clearDemoData, orders, coupons, saveCoupon, deleteCoupon, saveStoreToCloud, isLoadingStore, updateStoreSlug } = useConfig();
   const { plugins, enablePlugin, disablePlugin, updatePluginConfig } = usePlugins();
   const { isAdmin, user, signOut, hasStore, isActive } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -261,6 +261,10 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
   const [activePluginId, setActivePluginId] = useState<string | null>(null);
   // Coupon form state
   const [couponForm, setCouponForm] = useState({ code: '', type: 'percent' as 'percent' | 'fixed', value: 10, minOrder: 0, active: true });
+  
+  const [newSubdomain, setNewSubdomain] = useState(storeId);
+  const [isChangingSubdomain, setIsChangingSubdomain] = useState(false);
+  React.useEffect(() => { setNewSubdomain(storeId); }, [storeId]);
 
   // State for editable presets
   const [themesList, setThemesList] = useState(PRESET_THEMES);
@@ -1105,10 +1109,44 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                     <Globe size={14} className="text-blue-500" /> Endereço da Loja (Subdomínio)
                   </h3>
                 </div>
-                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 mb-6">
-                  <div className="flex-1 flex items-center bg-gray-100 border border-gray-200 rounded-2xl px-4 py-3 text-sm shadow-inner group">
-                    <span className="flex-1 text-gray-700 font-black text-right pr-1 tracking-tight">{storeId}</span>
-                    <span className="font-black text-gray-400">.vyzgo.com</span>
+                <div className="flex flex-col md:flex-row items-stretch md:items-start gap-4 mb-6">
+                  <div className="flex-1 flex flex-col gap-2">
+                    <div className="flex items-center bg-gray-100 border border-gray-200 rounded-2xl px-4 py-3 text-sm shadow-inner group focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
+                      <input
+                        value={newSubdomain}
+                        onChange={(e) => setNewSubdomain(e.target.value)}
+                        disabled={storeId === 'demo' || isChangingSubdomain}
+                        className="flex-1 text-gray-700 font-black text-right pr-1 tracking-tight bg-transparent outline-none w-full"
+                      />
+                      <span className="font-black text-gray-400">.vyzgo.com</span>
+                    </div>
+                    {newSubdomain !== storeId && (
+                      <div className="bg-red-50 border border-red-200 rounded-xl p-3 animate-in slide-in-from-top-2">
+                        <p className="text-[10px] text-red-600 font-bold mb-2 flex items-center gap-1">
+                          <AlertTriangle size={12} /> Atenção: Mudar o endereço quebra links antigos.
+                        </p>
+                        <div className="flex gap-2">
+                          <button 
+                            disabled={isChangingSubdomain}
+                            onClick={async () => {
+                              setIsChangingSubdomain(true);
+                              await updateStoreSlug(newSubdomain);
+                              setIsChangingSubdomain(false);
+                            }}
+                            className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-red-700 transition"
+                          >
+                            {isChangingSubdomain ? 'Alterando...' : 'Confirmar Mudança'}
+                          </button>
+                          <button 
+                            disabled={isChangingSubdomain}
+                            onClick={() => setNewSubdomain(storeId)}
+                            className="bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-gray-50 transition"
+                          >
+                            Desfazer
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-col gap-2">
                     <a 
@@ -1342,21 +1380,26 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
               {/* CATEGORIES SECTION */}
               <div>
                 <h3 className="font-black text-xs text-gray-800 mb-2 uppercase tracking-tight">Categorias & Navegação</h3>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {config.categories.map((cat, index) => (
-                    <div key={cat.id} className="p-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{cat.iconKey === 'Star' ? '⭐' : cat.iconKey === 'Package' ? '📦' : '📁'}</span>
-                          <span className="text-xs font-bold text-gray-700">{cat.title}</span>
+                    <div key={cat.id} className="p-4 bg-white rounded-2xl border border-gray-200 shadow-sm relative group">
+                      <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-500">
+                            <DynamicIcon iconKey={cat.iconKey} size={16} />
+                          </div>
+                          <span className="text-xs font-black text-gray-800 uppercase tracking-tight">{cat.title}</span>
+                          {cat.id === 'tracking' || cat.id === 'location' ? (
+                            <span className="text-[8px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold uppercase">Sistema</span>
+                          ) : null}
                         </div>
                         <div className="flex gap-2">
                           {cat.id !== 'tracking' && cat.id !== 'location' && (
-                            <button onClick={() => removeCategory(index)} className="text-red-400 hover:text-red-500"><Trash2 size={14} /></button>
+                            <button onClick={() => removeCategory(index)} className="text-gray-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50"><Trash2 size={14} /></button>
                           )}
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                          <InputGroup label="Título" value={cat.title} onChange={(v) => {
                             const newCats = [...config.categories];
                             newCats[index].title = v;
@@ -1367,6 +1410,23 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                             newCats[index].subtitle = v;
                             updateConfig({ ...config, categories: newCats });
                          }} />
+                         <div className="mb-3">
+                            <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-wider">Ícone</label>
+                            <div className="relative">
+                               <select
+                                  value={cat.iconKey}
+                                  onChange={(e) => {
+                                      const newCats = [...config.categories];
+                                      newCats[index].iconKey = e.target.value;
+                                      updateConfig({ ...config, categories: newCats });
+                                  }}
+                                  className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none shadow-inner appearance-none pr-8"
+                               >
+                                  {availableIcons.map(icon => <option key={icon} value={icon}>{icon}</option>)}
+                               </select>
+                               <ChevronDown size={14} className="absolute right-3 top-2.5 text-gray-400 pointer-events-none" />
+                            </div>
+                         </div>
                       </div>
                     </div>
                   ))}
@@ -1404,17 +1464,29 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                   </button>
                 </div>
               </div>
-              <div className="mb-4">
-                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Selecionar Categoria</label>
-                <select
-                  value={selectedCategoryIndex}
-                  onChange={(e) => setSelectedCategoryIndex(Number(e.target.value))}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none shadow-inner"
-                >
+              <div className="mb-6">
+                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2">Navegar por Categoria</label>
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
                   {config.categories.map((cat, i) => (
-                    <option key={cat.id} value={i}>{cat.title}</option>
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategoryIndex(i)}
+                      className={`flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
+                        selectedCategoryIndex === i 
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-105' 
+                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      <DynamicIcon iconKey={cat.iconKey} size={14} />
+                      {cat.title}
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
+                        selectedCategoryIndex === i ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
+                      }`}>
+                        {cat.products.length}
+                      </span>
+                    </button>
                   ))}
-                </select>
+                </div>
               </div>
 
               <div className="space-y-3">
