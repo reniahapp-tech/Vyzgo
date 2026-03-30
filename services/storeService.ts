@@ -62,6 +62,20 @@ export const StoreService = {
   },
 
   /**
+   * Busca os dados de uma loja explicitamente pelo slug 
+   */
+  async getStoreBySlug(slug: string): Promise<StoreData | null> {
+    const { data } = await supabase
+      .from('stores')
+      .select('*')
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single();
+    
+    return data || null;
+  },
+
+  /**
    * Busca a loja de um proprietário específico (usado no Admin)
    */
   async getStoreByOwner(ownerId: string): Promise<StoreData | null> {

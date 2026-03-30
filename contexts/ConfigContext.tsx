@@ -358,8 +358,19 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       setIsLoadingStore(true);
       const hostname = window.location.hostname;
       
-      // Se estiver em localhost ou rota demo, usamos o demo padrão
-      if (hostname === 'localhost' || window.location.pathname.startsWith('/demo')) {
+      const queryStore = new URLSearchParams(window.location.search).get('store');
+      
+      // Se for a rota demo explícita, usamos o demo padrão
+      if (window.location.pathname.startsWith('/demo')) {
+        setStoreId('demo');
+        setConfig(BASE_CONFIGS['demo']);
+        setIsLoadingStore(false);
+        return;
+      }
+      
+      // Se estiver em localhost e pediu explicito outra store, pegaremos do Supabase (abaixo).
+      // Se não, forçamos demo.
+      if (hostname === 'localhost' && (!queryStore || queryStore === 'demo')) {
         setStoreId('demo');
         setConfig(BASE_CONFIGS['demo']);
         setIsLoadingStore(false);
@@ -376,7 +387,13 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       }
 
       try {
-        const data = await StoreService.getStoreByHostname(hostname);
+        let data = null;
+        if (hostname === 'localhost' && queryStore) {
+          data = await StoreService.getStoreBySlug(queryStore);
+        } else {
+          data = await StoreService.getStoreByHostname(hostname);
+        }
+        
         if (data) {
           setStoreData(data);
           setStoreId(data.slug);
