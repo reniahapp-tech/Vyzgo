@@ -3,7 +3,7 @@ import { useConfig } from '../contexts/ConfigContext';
 import { usePlugins } from '../contexts/PluginContext';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from './AuthModal';
-import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle, Puzzle, Tag, LogOut, User as UserIcon, Save } from 'lucide-react';
+import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle, Puzzle, Tag, LogOut, User as UserIcon, Save, ArrowRight } from 'lucide-react';
 import { availableIcons } from './IconMapper';
 import { ProductItem } from '../types';
 import PaymentGateway from './PaymentGateway';
