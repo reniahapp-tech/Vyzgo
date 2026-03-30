@@ -27,7 +27,7 @@ const LandingPage: React.FC = () => {
             
             {/* 1. NAVIGATION - Premium Glassmorphism */}
             <nav className="fixed top-0 left-0 w-full z-50 bg-black/80 backdrop-blur-lg border-b border-white/10">
-                <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between font-sans">
+                <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
                     <div className="flex items-center transition-transform hover:scale-105">
                         <img src="/logo-main.png" alt="VyzGo" className="h-10 md:h-14 w-auto object-contain brightness-0 invert" />
                     </div>
@@ -104,11 +104,11 @@ const LandingPage: React.FC = () => {
                     {/* Right Side: Proportional Image */}
                     <div className="lg:w-2/5 relative">
                         <div className="absolute -inset-10 bg-indigo-500/10 blur-[100px] rounded-full"></div>
-                        <div className="relative rounded-[40px] overflow-hidden border border-white/10 shadow-3xl transform border-indigo-500/20 group hover:scale-[1.01] transition-transform duration-700">
+                        <div className="relative rounded-[40px] overflow-hidden border border-white/10 shadow-3xl transform border-indigo-500/20 group hover:scale-[1.01] transition-transform duration-700 max-w-[400px] mx-auto lg:ml-auto">
                             <img 
                                 src="/hero_lifestyle.png" 
                                 alt="Empreendedor VyzGo" 
-                                className="w-full h-auto object-cover scale-110"
+                                className="w-full h-auto object-cover"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/80 via-transparent to-transparent"></div>
                         </div>
@@ -305,7 +305,7 @@ const LandingPage: React.FC = () => {
                                 <div className="mb-14">
                                     <span className="text-[12px] font-black tracking-[0.4em] text-gray-500 uppercase">Valor Único Mensal</span>
                                     <div className="text-7xl md:text-8xl font-black mt-6 text-white tracking-tighter">R$ 29,90</div>
-                                    <p className="text-indigo-400 text-xl mt-6 font-black uppercase italic">Zéro Taxas Por Venda</p>
+                                    <p className="text-indigo-400 text-xl mt-6 font-black uppercase italic">Zero Taxas Por Venda</p>
                                     <p className="text-gray-500 text-lg mt-2 font-medium">O lucro é 100% seu. Nós cobramos apenas pela tecnologia.</p>
                                 </div>
 
