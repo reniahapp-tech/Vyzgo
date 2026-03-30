@@ -1081,12 +1081,12 @@ const AdminPanel: React.FC = () => {
                     <span className="font-bold text-gray-400">.vyzgo.com</span>
                   </div>
                   <a 
-                    href={`/v/${storeId}`} 
+                    href={`https://${storeId}.vyzgo.com`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="bg-black text-white px-4 py-2 rounded-xl text-[10px] font-bold flex items-center gap-2 hover:bg-gray-800 transition-colors shadow-sm"
                   >
-                    <ArrowRight size={14} /> Ver Loja
+                    <ArrowRight size={14} /> Ver Loja (Subdomínio)
                   </a>
                 </div>
 
