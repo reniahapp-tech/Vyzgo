@@ -18,6 +18,7 @@ const AuthPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -30,16 +31,23 @@ const AuthPage: React.FC = () => {
         await signInWithEmail(email, password);
       } else {
         await signUpWithEmail(email, password);
-        alert('Cadastro realizado! Se necessário, verifique seu e-mail para confirmar a conta.');
+        setSuccess('Conta criada com sucesso! Por favor, verifique seu e-mail para confirmar seu cadastro.');
+        setError(null);
       }
-      // O redirect é feito pelo AuthContext/App.tsx ao detectar o novo usuário
     } catch (err: any) {
-      if (err.message === 'Email not confirmed') {
+      setSuccess(null);
+      const msg = err.message || '';
+      
+      if (msg.includes('Email not confirmed')) {
         setError('Por favor, verifique seu e-mail e clique no link de confirmação antes de entrar.');
-      } else if (err.message === 'Invalid login credentials') {
+      } else if (msg.includes('Invalid login credentials')) {
         setError('E-mail ou senha incorretos. Verifique suas credenciais.');
+      } else if (msg.includes('rate limit') || msg.includes('20 seconds')) {
+        setError('Por segurança, aguarde alguns segundos antes de tentar novamente.');
+      } else if (msg.includes('User already registered')) {
+        setError('Este e-mail já está cadastrado. Tente fazer login.');
       } else {
-        setError(err.message || 'Erro ao processar autenticação');
+        setError(msg || 'Erro ao processar autenticação');
       }
     } finally {
       setAuthLoading(false);
@@ -109,6 +117,10 @@ const AuthPage: React.FC = () => {
             </div>
 
             {error && <p className="text-xs font-bold text-red-500 bg-red-50 p-3 rounded-xl border border-red-100">{error}</p>}
+            {success && <p className="text-xs font-bold text-green-600 bg-green-50 p-4 rounded-xl border border-green-100 flex items-center gap-2">
+              <ShieldCheck size={18} />
+              {success}
+            </p>}
 
             <button 
               type="submit"
