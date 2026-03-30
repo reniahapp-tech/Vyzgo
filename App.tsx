@@ -199,7 +199,7 @@ const AppContent: React.FC = () => {
   }
 
   // Força a AuthPage se for o domínio do app e o usuário NÃO estiver logado
-  if (isAppDashboard && !user && !pathname.startsWith('/auth')) {
+  if (isAppDashboard && !user && !pathname.startsWith('/auth') && pathname !== '/corporate') {
     return <AuthPage />;
   }
 
