@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { LogIn, Mail, Lock, ArrowRight, UserPlus, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const AuthPage: React.FC = () => {
   const { signIn, signInWithEmail, signUpWithEmail, loading } = useAuth();
@@ -161,7 +161,7 @@ const AuthPage: React.FC = () => {
         <div className="bg-gray-50 py-6 px-10 text-center border-t border-gray-100">
           <p className="text-xs text-gray-400 font-medium">
             Ao continuar, você concorda com nossos <br/> 
-            <span className="text-gray-600 underline cursor-pointer">Termos de Uso</span> e <span className="text-gray-600 underline cursor-pointer">Privacidade</span>.
+            <Link to="/terms" className="text-gray-600 underline hover:text-gray-800 transition-colors">Termos de Uso</Link> e <Link to="/privacy" className="text-gray-600 underline hover:text-gray-800 transition-colors">Privacidade</Link>.
           </p>
         </div>
       </div>

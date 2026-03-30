@@ -597,14 +597,38 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   const removeProductFromCategory = (categoryIndex: number, productIndex: number) => {
     const newCategories = [...config.categories];
+    const product = newCategories[categoryIndex].products[productIndex];
+    
+    // Deleta o arquivo físico do Supabase Storage
+    if (product.imageUrl && product.imageUrl.includes('supabase.co')) {
+      const pathMatches = product.imageUrl.match(/vitrine-media\/(uploads\/.*)/);
+      if (pathMatches && pathMatches[1]) {
+        import('../services/supabase').then(({ supabase }) => {
+           supabase.storage.from('vitrine-media').remove([pathMatches[1]]).catch(console.error);
+        });
+      }
+    }
+
     newCategories[categoryIndex].products.splice(productIndex, 1);
     setConfig({ ...config, categories: newCategories });
   };
 
   const updateProduct = (categoryIndex: number, productIndex: number, field: keyof ProductItem, value: string) => {
     const newCategories = [...config.categories];
+    const product = newCategories[categoryIndex].products[productIndex];
+
+    // Se estiver sobre-escrevendo a imagem com uma nova, limpa a antiga do Supabase
+    if (field === 'imageUrl' && value !== product.imageUrl && product.imageUrl.includes('supabase.co')) {
+      const pathMatches = product.imageUrl.match(/vitrine-media\/(uploads\/.*)/);
+      if (pathMatches && pathMatches[1]) {
+        import('../services/supabase').then(({ supabase }) => {
+           supabase.storage.from('vitrine-media').remove([pathMatches[1]]).catch(console.error);
+        });
+      }
+    }
+
     newCategories[categoryIndex].products[productIndex] = {
-      ...newCategories[categoryIndex].products[productIndex],
+      ...product,
       [field]: value
     };
     setConfig({ ...config, categories: newCategories });

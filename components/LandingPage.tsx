@@ -16,7 +16,7 @@ const LandingPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-indigo-500/30 overflow-x-hidden font-['Inter',sans-serif]">
+        <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-indigo-500/30 overflow-x-hidden font-['Inter',sans-serif] pb-24 md:pb-0">
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
                 
@@ -150,6 +150,80 @@ const LandingPage: React.FC = () => {
                 </div>
             </section>
 
+            {/* 2.8 THE NEW WEAPONS (Video & Deep Links) */}
+            <section className="py-24 md:py-32 bg-[#0A0A0A] border-b border-white/5 relative overflow-hidden">
+                {/* Background glow */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 blur-[120px] rounded-full pointer-events-none"></div>
+                
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="text-center mb-20">
+                        <h2 className="text-3xl md:text-6xl font-black mb-6 tracking-tighter uppercase italic">O Futuro das Vendas.</h2>
+                        <p className="text-gray-400 text-lg md:text-xl font-medium max-w-2xl mx-auto">Vender online mudou. Pare de usar ferramentas do passado e adote o que realmente converte hoje.</p>
+                    </div>
+
+                    <div className="flex flex-col gap-12 max-w-5xl mx-auto">
+                        
+                        {/* Weapon 1: Video Commerce */}
+                        <div className="flex flex-col md:flex-row items-stretch bg-neutral-900 border border-white/5 rounded-[40px] overflow-hidden group hover:border-purple-500/30 transition-colors shadow-2xl">
+                            <div className="md:w-1/2 p-10 md:p-14 flex flex-col justify-center">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold uppercase tracking-widest mb-6 self-start">
+                                    <Sparkles size={14} fill="currentColor" />
+                                    Vídeo Commerce
+                                </div>
+                                <h3 className="text-3xl md:text-5xl font-black mb-6 uppercase text-white leading-tight">Chega de vitrines<br/> frias e paradas.</h3>
+                                <p className="text-gray-400 text-lg leading-relaxed font-medium">
+                                    Atenção é o seu maior ativo. Seus clientes rolam o TikTok o dia todo. A VyzGo permite que você substitua fotos estáticas por <strong>vídeos cativantes que tocam automaticamente</strong> na sua vitrine.
+                                </p>
+                            </div>
+                            <div className="md:w-1/2 bg-black relative min-h-[300px] p-8 flex items-center justify-center border-l border-white/5">
+                                <div className="w-full max-w-[240px] aspect-[9/16] bg-zinc-800 rounded-3xl border border-zinc-700 shadow-2xl relative overflow-hidden group-hover:scale-105 transition-transform duration-700">
+                                    <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                                        <div className="w-[120%] h-[120%] bg-gradient-to-tr from-purple-900 via-indigo-900 to-black animate-pulse-slow"></div>
+                                        <div className="absolute font-black text-white/20 text-3xl italic tracking-widest rotate-[-90deg]">.MP4</div>
+                                    </div>
+                                    <div className="absolute bottom-4 left-4 right-4 h-12 bg-white/10 backdrop-blur-md rounded-xl"></div>
+                                    <div className="absolute top-4 left-4 w-12 h-4 bg-white/20 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Weapon 2: Deep Links */}
+                        <div className="flex flex-col md:flex-row-reverse items-stretch bg-[#111111] border border-white/5 rounded-[40px] overflow-hidden group hover:border-green-500/30 transition-colors shadow-2xl">
+                            <div className="md:w-1/2 p-10 md:p-14 flex flex-col justify-center">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-bold uppercase tracking-widest mb-6 self-start">
+                                    <LinkIcon size={14} />
+                                    Deep Links
+                                </div>
+                                <h3 className="text-3xl md:text-5xl font-black mb-6 uppercase text-white leading-tight">Feche a Venda<br/> Pelo Direct.</h3>
+                                <p className="text-gray-400 text-lg leading-relaxed font-medium">
+                                    Não perca o 'momentum' mandando o cliente caçar produtos na sua página inicial. Copie o <strong>Link Direto</strong> com 1 clique e mande no WhatsApp ou nos Stories. Clicou, Abriu, Comprou.
+                                </p>
+                            </div>
+                            <div className="md:w-1/2 bg-black relative min-h-[300px] p-8 flex items-center justify-center border-r border-white/5">
+                                <div className="bg-zinc-800 border border-zinc-700 rounded-2xl p-5 w-full max-w-[300px] shadow-2xl group-hover:-translate-y-2 transition-transform duration-500">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center font-bold text-white text-lg shrink-0">V</div>
+                                        <div>
+                                            <div className="text-sm font-bold text-white">VyzGo Lojista</div>
+                                            <div className="text-[10px] text-gray-400">Aqui está a bolsa que você pediu! 👇</div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-green-500/20 text-green-400 px-3 py-2.5 rounded-xl text-xs font-bold font-mono break-all inline-flex items-center gap-2 border border-green-500/30 hover:bg-green-500/30 cursor-pointer w-full">
+                                        <LinkIcon size={14} className="shrink-0" />
+                                        vyz.go/bolsa-prada
+                                    </div>
+                                    <div className="mt-4 flex gap-2">
+                                        <div className="flex-1 h-8 bg-white/5 rounded-lg"></div>
+                                        <div className="flex-1 h-8 bg-indigo-500 rounded-lg"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
             {/* 3. VSL / DEMO MOCKUP - More Realistic & Explanatory */}
             <section id="demo" className="py-32 bg-neutral-900 border-y border-white/5 w-full relative overflow-hidden">
                 <div className="container mx-auto px-4 relative z-10">
@@ -184,7 +258,7 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         {/* Visual Side (Mockup with Realistic Asset) */}
-                        <div className="lg:w-1/2 bg-zinc-900 relative min-h-[600px] overflow-hidden">
+                        <div className="lg:w-1/2 bg-zinc-900 relative min-h-[400px] md:min-h-[600px] overflow-hidden">
                             <img 
                                 src="/person_using_phone.png" 
                                 alt="Uso na prática" 
@@ -299,10 +373,10 @@ const LandingPage: React.FC = () => {
 
                     <div className="max-w-2xl mx-auto">
                         <div className="p-1 md:p-1.5 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-[45px] shadow-[0_0_80px_rgba(79,70,229,0.15)]">
-                            <div className="bg-[#0A0A0A] rounded-[43px] p-8 md:p-20 text-left relative overflow-hidden">
+                            <div className="bg-[#0A0A0A] rounded-[43px] p-6 sm:p-8 md:p-20 text-left relative overflow-hidden">
                                 <div className="mb-14">
                                     <span className="text-[12px] font-black tracking-[0.4em] text-gray-500 uppercase">Valor Único Mensal</span>
-                                    <div className="text-7xl md:text-8xl font-black mt-6 text-white tracking-tighter">R$ 29,90</div>
+                                    <div className="text-5xl sm:text-7xl md:text-8xl font-black mt-6 text-white tracking-tighter">R$ 29,90</div>
                                     <p className="text-indigo-400 text-xl mt-6 font-black uppercase italic">Zero Taxas Por Venda</p>
                                     <p className="text-gray-500 text-lg mt-2 font-medium">O lucro é 100% seu. Nós cobramos apenas pela tecnologia.</p>
                                 </div>
@@ -381,18 +455,18 @@ const LandingPage: React.FC = () => {
                         }
                     ].map((item, i) => (
                         <div key={i} className="border border-white/5 rounded-[32px] bg-neutral-900/30 overflow-hidden group hover:border-white/10 transition-colors">
-                            <button
-                                onClick={() => toggleFaq(i)}
-                                className="w-full p-8 flex items-center justify-between text-left transition-colors"
-                            >
-                                <span className="font-bold text-xl md:text-2xl text-gray-200 group-hover:text-white">{item.q}</span>
-                                <ChevronDown className={`transition-transform duration-500 ${openFaq === i ? 'rotate-180 text-indigo-400' : 'text-gray-500'}`} />
-                            </button>
-                            {openFaq === i && (
-                                <div className="p-8 pt-0 text-gray-400 text-lg leading-relaxed border-t border-dashed border-white/10 mt-4 animate-fade-in">
-                                    {item.a}
-                                </div>
-                            )}
+                                <button
+                                    onClick={() => toggleFaq(i)}
+                                    className="w-full p-5 md:p-8 flex items-center justify-between text-left transition-colors"
+                                >
+                                    <span className="font-bold text-lg md:text-2xl text-gray-200 group-hover:text-white pr-4">{item.q}</span>
+                                    <ChevronDown className={`shrink-0 transition-transform duration-500 ${openFaq === i ? 'rotate-180 text-indigo-400' : 'text-gray-500'}`} />
+                                </button>
+                                {openFaq === i && (
+                                    <div className="p-5 md:p-8 pt-0 md:pt-0 text-gray-400 text-base md:text-lg leading-relaxed border-t border-dashed border-white/10 mt-4 animate-fade-in">
+                                        {item.a}
+                                    </div>
+                                )}
                         </div>
                     ))}
                 </div>
@@ -420,6 +494,15 @@ const LandingPage: React.FC = () => {
                 </div>
             </footer>
 
+            {/* 8. STICKY MOBILE CTA */}
+            <div className="md:hidden fixed bottom-0 left-0 w-full z-40 p-4 bg-gradient-to-t from-black via-black/90 to-transparent pointer-events-none">
+                <a href="https://app.vyzgo.com" className="w-full flex items-center justify-center py-4 bg-indigo-600 active:bg-indigo-700 text-white rounded-2xl font-black text-lg transition-all shadow-2xl shadow-indigo-900/50 pointer-events-auto border border-white/10 animate-fade-in relative overflow-hidden group">
+                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[100%] group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                    CRIAR MINHA VITRINE
+                </a>
+            </div>
+
+
             <style>{`
                 .animate-fade-in {
                     animation: fadeIn 0.5s ease-out forwards;
@@ -427,6 +510,9 @@ const LandingPage: React.FC = () => {
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(10px); }
                     to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes shimmer {
+                    100% { transform: translateX(100%); }
                 }
                 /* Hide scrollbar for Chrome, Safari and Opera */
                 .no-scrollbar::-webkit-scrollbar {

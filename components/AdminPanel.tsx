@@ -8,8 +8,10 @@ import { availableIcons, DynamicIcon } from './IconMapper';
 import { ProductItem } from '../types';
 import PaymentGateway from './PaymentGateway';
 import { uploadToR2, saveConfigToR2 } from '../services/r2';
+import { supabase } from '../services/supabase';
 import { generateProductDescription } from '../services/ai';
 import { CloudUpload, Sparkles } from 'lucide-react';
+import ImageWithFallback from './ImageWithFallback';
 
 // Preset Themes Configuration
 export const PRESET_THEMES = [
@@ -298,44 +300,75 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
       return theme;
     }));
   };
-  // Image upload with canvas compression
+  // Image/Video upload via Supabase
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, onUrl: (url: string) => void) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      addToast('Apenas imagens são permitidas (JPG, PNG, WEBP).', 'error');
+
+    const isVideo = file.type.startsWith('video/');
+    const isImage = file.type.startsWith('image/');
+
+    if (!isImage && !isVideo) {
+      addToast('Apenas imagens (JPG/PNG/WEBP) ou vídeos (MP4/WEBM) são permitidos.', 'error');
       e.target.value = '';
       return;
     }
-    // Compress via canvas (max 800px wide, JPEG 82%)
-    const compress = (f: File): Promise<File> => new Promise(resolve => {
-      const img = new Image();
-      const objUrl = URL.createObjectURL(f);
-      img.onload = () => {
-        const MAX = 800;
-        let { width, height } = img;
-        if (width > MAX) { height = Math.round(height * MAX / width); width = MAX; }
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
-        canvas.toBlob(blob => {
-          URL.revokeObjectURL(objUrl);
-          resolve(blob ? new File([blob], f.name, { type: 'image/jpeg' }) : f);
-        }, 'image/jpeg', 0.82);
-      };
-      img.src = objUrl;
-    });
-    addToast('Comprimindo e enviando...', 'info');
+
+    // Validação de limite de 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      addToast('O arquivo excede o limite de 5MB. Envie um arquivo menor.', 'error');
+      e.target.value = '';
+      return;
+    }
+
+    addToast('Processando mídia...', 'info');
+
+    let finalFile = file;
+
+    // Se for imagem, comprime o formato (vídeo sobe direto respeitando o limite de 5MB)
+    if (isImage) {
+      const compress = (f: File): Promise<File> => new Promise(resolve => {
+        const img = new Image();
+        const objUrl = URL.createObjectURL(f);
+        img.onload = () => {
+          const MAX = 800;
+          let { width, height } = img;
+          if (width > MAX) { height = Math.round(height * MAX / width); width = MAX; }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(blob => {
+            URL.revokeObjectURL(objUrl);
+            resolve(blob ? new File([blob], f.name, { type: 'image/jpeg' }) : f);
+          }, 'image/jpeg', 0.82);
+        };
+        img.src = objUrl;
+      });
+      finalFile = await compress(file);
+    }
+
+    addToast('Enviando para o servidor seguro...', 'info');
     try {
-      const compressed = await compress(file);
-      const url = await uploadToR2(compressed);
-      onUrl(url);
-      addToast('Imagem enviada!', 'success');
+      // Usar Supabase Storage (Assunção: bucket 'vitrine-media' criado e público)
+      const fileExt = finalFile.name.split('.').pop();
+      const fileName = `${storeId}-${Date.now()}.${fileExt}`;
+      const filePath = `uploads/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('vitrine-media')
+        .upload(filePath, finalFile, { cacheControl: '3600', upsert: false });
+
+      if (error) throw error;
+      
+      const { data: publicData } = supabase.storage
+        .from('vitrine-media')
+        .getPublicUrl(filePath);
+
+      onUrl(publicData.publicUrl);
+      addToast('Mídia enviada com sucesso!', 'success');
     } catch (error) {
-      addToast('Erro no upload. Usando fallback local.', 'error');
-      const reader = new FileReader();
-      reader.onloadend = () => onUrl(reader.result as string);
-      reader.readAsDataURL(file);
+      console.error(error);
+      addToast('Erro no envio ao servidor.', 'error');
     }
   };
 
@@ -1494,10 +1527,10 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                   <div key={prod.id} className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4">
                     <div className="flex gap-2 mb-2">
                       <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0 relative group">
-                        <img src={prod.imageUrl} className="w-full h-full object-cover" />
+                        <ImageWithFallback src={prod.imageUrl} className="w-full h-full object-cover" />
                         <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer text-white">
                           <Upload size={12} />
-                          <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, (url) => updateProduct(selectedCategoryIndex, pIndex, 'imageUrl', url))} />
+                          <input type="file" accept="image/*,video/mp4,video/webm" className="hidden" onChange={(e) => handleImageUpload(e, (url) => updateProduct(selectedCategoryIndex, pIndex, 'imageUrl', url))} />
                         </label>
                       </div>
                       <div className="flex-1 space-y-1">
@@ -1514,9 +1547,36 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                           placeholder="Preço"
                         />
                       </div>
-                      <button onClick={() => removeProductFromCategory(selectedCategoryIndex, pIndex)} className="text-red-400 self-start">
-                        <Trash2 size={14} />
-                      </button>
+                      <div className="flex flex-col gap-1 items-center self-start">
+                        <button 
+                          onClick={() => {
+                            let domain = window.location.origin;
+                            // Se for ambiente local, podemos simular ou usar o próprio.
+                            // Em prod, o subdomínio já está no window.location.origin.
+                            const originAndParams = storeId !== 'demo' && domain.includes('localhost') 
+                              ? `${domain}?store=${storeId}`
+                              : domain;
+                              
+                            const baseUrl = originAndParams.includes('?') 
+                              ? `${originAndParams}&` 
+                              : `${originAndParams}`;
+                              
+                            const finalPath = domain.includes('localhost')
+                              ? originAndParams.replace('localhost:3000', `localhost:3000/product/${prod.id}`)
+                              : `${domain}/product/${prod.id}`;
+                              
+                            navigator.clipboard.writeText(finalPath);
+                            addToast('Link direto copiado! 🔗', 'success');
+                          }} 
+                          className="text-indigo-500 bg-indigo-50 p-1.5 rounded-lg hover:bg-indigo-100 transition-colors"
+                          title="Obter Link de Venda (Stories / Bio)"
+                        >
+                          <Link size={14} />
+                        </button>
+                        <button onClick={() => removeProductFromCategory(selectedCategoryIndex, pIndex)} className="text-red-400 p-1.5 hover:bg-red-50 rounded-lg transition-colors">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
                     <div className="flex justify-end mb-1">
                       <button

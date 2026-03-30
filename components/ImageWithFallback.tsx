@@ -33,6 +33,22 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
     );
   }
 
+  const isVideo = src?.toLowerCase().endsWith('.mp4') || src?.toLowerCase().endsWith('.webm');
+
+  if (isVideo) {
+    return (
+      <video
+        src={src}
+        className={`${className} object-cover w-full h-full`}
+        autoPlay
+        loop
+        muted
+        playsInline
+        onError={() => setError(true)}
+      />
+    );
+  }
+
   return (
     <img
       src={src}
