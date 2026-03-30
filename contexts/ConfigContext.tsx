@@ -261,7 +261,19 @@ const getStoreId = () => {
   const queryStore = params.get('store');
   if (queryStore) return queryStore;
   
-  return window.location.hostname; // Hostname é a chave para o multitenant
+  const hostname = window.location.hostname;
+  
+  // Se for o domínio raiz ou o app oficial, usamos demo por padrão (se não houver query)
+  if (hostname === 'app.vyzgo.com' || hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'localhost') {
+    return 'demo';
+  }
+
+  // Se for um subdomínio vyzgo.com, pegamos apenas o prefixo
+  if (hostname.endsWith('.vyzgo.com')) {
+    return hostname.split('.')[0];
+  }
+
+  return hostname; // Hostname é a chave para domínios customizados
 };
 
 const INITIAL_CONFIG: AppConfig = BASE_CONFIGS['demo'];

@@ -407,7 +407,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
 
   const contentClasses = isStandalone
     ? "w-full h-full flex flex-col"
-    : "bg-white/80 backdrop-blur-xl w-full max-w-6xl h-[90vh] rounded-[40px] shadow-2xl border border-white/50 overflow-hidden flex flex-col relative";
+    : "bg-[#F9FAFB] w-full max-w-6xl h-[90vh] rounded-[40px] shadow-2xl border border-gray-200 overflow-hidden flex flex-col relative";
 
   // 2. Login Screen (if not authenticated)
   if (!isAdmin) {
@@ -479,7 +479,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
       
       <div className={contentClasses}>
         {/* Header */}
-        <div className="p-6 md:p-8 border-b border-gray-100 flex items-center justify-between bg-white/50">
+        <div className="p-6 md:p-8 border-b border-gray-200 flex items-center justify-between bg-white shadow-sm z-10">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center shadow-lg">
               <Settings size={24} />
@@ -545,12 +545,14 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             { id: 'help', icon: HelpCircle, label: 'Ajuda' },
           ].map(tab => (
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex-1 py-2 px-3 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase transition-all whitespace-nowrap relative ${
-                activeTab === tab.id ? 'bg-white shadow-md text-gray-900 scale-105' : 'text-gray-500 hover:bg-white/30'
-              } ${(tab as any).highlight ? 'text-yellow-600 bg-yellow-50' : ''}`}
-            >
+               key={tab.id}
+               onClick={() => setActiveTab(tab.id as any)}
+               className={`flex-1 py-3 px-3 rounded-2xl flex flex-col items-center gap-1.5 text-[10px] font-black uppercase transition-all whitespace-nowrap relative border ${
+                 activeTab === tab.id 
+                 ? 'bg-white border-blue-100 shadow-lg text-blue-600 scale-105 z-10' 
+                 : 'bg-gray-50/50 border-transparent text-gray-400 hover:bg-white hover:border-gray-100'
+               } ${(tab as any).highlight ? 'text-yellow-600 bg-yellow-50 border-yellow-100' : ''}`}
+             >
               <tab.icon size={18} className={(tab as any).highlight ? 'fill-yellow-500 text-yellow-600' : ''} />
               {tab.label}
               {(tab as any).badge > 0 && (
@@ -1000,7 +1002,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
           {activeTab === 'branding' && (
             <div className="space-y-4">
               {/* CONFIGURAÇÕES GERAIS DA LOJA */}
-              <div className="bg-white/40 border border-white/50 rounded-xl p-3 mb-4 relative overflow-hidden">
+              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4 mb-4 relative overflow-hidden">
                 <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
                   <Store size={14} /> Modo de Operação
                 </h3>
@@ -1097,16 +1099,16 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
               </div>
 
               {/* CUSTOM DOMAIN CONFIGURATION */}
-              <div className={`bg-white/40 border border-white/50 rounded-xl p-3 mb-4 relative overflow-hidden ${!isPro ? 'opacity-60' : ''}`}>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-bold text-gray-700 uppercase flex items-center gap-2">
-                    <Globe size={14} /> Endereço da Loja (Subdomínio)
+              <div className={`bg-white border border-gray-200 shadow-sm rounded-2xl p-4 mb-4 relative overflow-hidden ${!isPro ? 'opacity-60' : ''}`}>
+                <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-2">
+                  <h3 className="text-xs font-black text-gray-800 uppercase flex items-center gap-2">
+                    <Globe size={14} className="text-blue-500" /> Endereço da Loja (Subdomínio)
                   </h3>
                 </div>
-                <div className="flex items-center gap-2 mb-4 group">
-                  <div className="flex-1 flex items-center bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-xs">
-                    <span className="flex-1 text-gray-500 font-medium text-right pr-1">{storeId}</span>
-                    <span className="font-bold text-gray-400">.vyzgo.com</span>
+                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 mb-6">
+                  <div className="flex-1 flex items-center bg-gray-100 border border-gray-200 rounded-2xl px-4 py-3 text-sm shadow-inner group">
+                    <span className="flex-1 text-gray-700 font-black text-right pr-1 tracking-tight">{storeId}</span>
+                    <span className="font-black text-gray-400">.vyzgo.com</span>
                   </div>
                   <div className="flex flex-col gap-2">
                     <a 
@@ -1147,7 +1149,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                     onChange={(e) => updateConfig({ ...config, customDomain: e.target.value })}
                     placeholder="ex: loja.suamarca.com"
                     disabled={!isPro}
-                    className="w-full bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed shadow-inner"
                   />
                   {!isPro && (
                     <div className="absolute inset-0 flex items-center justify-center bg-white/10 backdrop-blur-[1px]">
@@ -1163,7 +1165,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
               </div>
 
               {/* HEADER CONFIGURATION GROUP */}
-              <div className="bg-white/40 border border-white/50 rounded-xl p-3">
+              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4">
                 <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
                   <ImageIcon size={14} /> Identidade Visual
                 </h3>
@@ -1209,7 +1211,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
 
                 <InputGroup label="Nome da Loja (Usado se sem logo)" value={config.header.title} onChange={(v) => updateNestedConfig('header.title', v)} />
                 <InputGroup label="Subtítulo" value={config.header.subtitle} onChange={(v) => updateNestedConfig('header.subtitle', v)} />
-                <div className="pt-2 border-t border-white/20 mt-2">
+                <div className="pt-4 border-t border-gray-100 mt-4">
                   <InputGroup label="Texto do Rodapé (Direitos Autorais)" value={config.footerText} onChange={(v) => updateConfig({ ...config, footerText: v })} />
                 </div>
               </div>
@@ -1217,7 +1219,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
               <InputGroup label="WhatsApp" value={config.whatsapp.phoneNumber} onChange={(v) => updateNestedConfig('whatsapp.phoneNumber', v)} />
 
               {/* Tracking & Location Toggle */}
-              <div className="pt-2 border-t border-white/20">
+              <div className="pt-4 border-t border-gray-100">
                 <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-wider">Funcionalidades Extras</label>
                 <div className="space-y-2">
                   <button
@@ -1253,7 +1255,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
           {activeTab === 'home' && (
             <div className="space-y-6">
               {/* BANNERS SECTION */}
-              <div className="bg-white/40 border border-white/50 rounded-xl p-3">
+              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4">
                 <h3 className="text-xs font-black text-gray-700 uppercase mb-3 flex items-center gap-2">
                   <ImageIcon size={14} className="text-blue-500" /> Banners da Vitrine (Carrossel)
                 </h3>
@@ -1273,7 +1275,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                           updateConfig({ ...config, banners: newBanners });
                         }}
                         placeholder="URL da Imagem..."
-                        className="flex-1 bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-[10px] outline-none"
+                        className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-[10px] outline-none shadow-inner"
                       />
                       <button 
                          onClick={() => {
@@ -1300,8 +1302,8 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
               </div>
 
               {/* FEATURED PRODUCTS SECTION */}
-              <div className="bg-white/40 border border-white/50 rounded-xl p-3">
-                <h3 className="text-xs font-black text-gray-700 uppercase mb-3 flex items-center gap-2">
+              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4">
+                <h3 className="text-xs font-black text-gray-800 uppercase mb-3 flex items-center gap-2">
                   <Star size={14} className="text-yellow-500" /> Produtos em Destaque
                 </h3>
                 <p className="text-[10px] text-gray-500 mb-4">Selecione até 5 produtos para aparecerem no carrossel de destaques.</p>
@@ -1320,7 +1322,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                           updateConfig({ ...config, featuredProductIds: next });
                         }}
                         className={`w-full flex items-center gap-3 p-2 rounded-xl border transition-all text-left ${
-                          isFeatured ? 'bg-yellow-50 border-yellow-200 shadow-sm' : 'bg-white/40 border-white/50 opacity-60 hover:opacity-100'
+                          isFeatured ? 'bg-yellow-50 border-yellow-200 shadow-sm' : 'bg-gray-50 border-gray-200 opacity-60 hover:opacity-100'
                         }`}
                       >
                         <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
@@ -1342,7 +1344,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                 <h3 className="font-black text-xs text-gray-800 mb-2 uppercase tracking-tight">Categorias & Navegação</h3>
                 <div className="space-y-2">
                   {config.categories.map((cat, index) => (
-                    <div key={cat.id} className="p-3 bg-white/40 rounded-xl border border-white/50 shadow-sm">
+                    <div key={cat.id} className="p-4 bg-white rounded-2xl border border-gray-200 shadow-sm">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <span className="text-xl">{cat.iconKey === 'Star' ? '⭐' : cat.iconKey === 'Package' ? '📦' : '📁'}</span>
@@ -1407,7 +1409,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                 <select
                   value={selectedCategoryIndex}
                   onChange={(e) => setSelectedCategoryIndex(Number(e.target.value))}
-                  className="w-full bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs outline-none"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none shadow-inner"
                 >
                   {config.categories.map((cat, i) => (
                     <option key={cat.id} value={i}>{cat.title}</option>
@@ -1417,7 +1419,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
 
               <div className="space-y-3">
                 {config.categories[selectedCategoryIndex]?.products.map((prod, pIndex) => (
-                  <div key={prod.id} className="bg-white/40 border border-white/50 rounded-xl p-3">
+                  <div key={prod.id} className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4">
                     <div className="flex gap-2 mb-2">
                       <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0 relative group">
                         <img src={prod.imageUrl} className="w-full h-full object-cover" />
@@ -1470,7 +1472,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                     <textarea
                       value={prod.description}
                       onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'description', e.target.value)}
-                      className="w-full bg-white/50 rounded-lg p-2 text-[10px] resize-none outline-none mb-2"
+                      className="w-full bg-gray-50 border border-gray-100 rounded-lg p-3 text-[11px] resize-none outline-none mb-2 shadow-inner"
                       placeholder="Descrição..."
                       rows={2}
                     />
@@ -1518,7 +1520,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-white/20 bg-white/10">
+        <div className="p-4 border-t border-gray-200 bg-gray-50">
           <button onClick={resetConfig} className="w-full flex items-center justify-center gap-2 text-red-500 text-xs font-bold opacity-60 hover:opacity-100"><RotateCcw size={12} /> Resetar App</button>
         </div>
       </div>
@@ -1539,7 +1541,7 @@ const FAQItem = ({ title, content }: { title: string, content: React.ReactNode }
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="bg-white/40 border border-white/50 rounded-xl overflow-hidden transition-all">
+    <div className="bg-white border border-gray-200 shadow-sm rounded-2xl overflow-hidden transition-all mb-2">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between p-3 text-left hover:bg-white/30"
