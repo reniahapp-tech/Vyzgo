@@ -1080,14 +1080,29 @@ const AdminPanel: React.FC = () => {
                     />
                     <span className="font-bold text-gray-400">.vyzgo.com</span>
                   </div>
-                  <a 
-                    href={`https://${storeId}.vyzgo.com`} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="bg-black text-white px-4 py-2 rounded-xl text-[10px] font-bold flex items-center gap-2 hover:bg-gray-800 transition-colors shadow-sm"
-                  >
-                    <ArrowRight size={14} /> Ver Loja (Subdomínio)
-                  </a>
+                  <div className="flex flex-col gap-2">
+                    <a 
+                      href={`https://${storeId}.vyzgo.com`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="bg-black text-white px-4 py-2 rounded-xl text-[10px] font-bold flex items-center justify-between group hover:bg-gray-800 transition-colors shadow-sm"
+                    >
+                      <span>Ver Loja (Subdomínio)</span>
+                      <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    </a>
+                    <a 
+                      href={`/v/${storeId}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="bg-white text-black border border-gray-200 px-4 py-2 rounded-xl text-[10px] font-bold flex items-center justify-between group hover:bg-gray-50 transition-colors shadow-sm"
+                    >
+                      <div className="flex flex-col items-start">
+                        <span>Acesso Imediato (Provisório)</span>
+                        <span className="text-[8px] font-normal opacity-50">Não depende de DNS</span>
+                      </div>
+                      <ExternalLink size={14} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+                    </a>
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between mb-2">
