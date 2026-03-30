@@ -1069,15 +1069,25 @@ const AdminPanel: React.FC = () => {
                     <Globe size={14} /> Endereço da Loja (Subdomínio)
                   </h3>
                 </div>
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-[10px] font-bold text-gray-400">vyzgo.com/</span>
-                  <input
-                    value={storeId}
-                    onChange={(e) => {/* Slug logic needs careful handling in ConfigContext */}}
-                    placeholder="ex: minha-loja"
-                    disabled={true} // For now, read-only from Supabase
-                    className="flex-1 bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs outline-none opacity-60"
-                  />
+                <div className="flex items-center gap-2 mb-4 group">
+                  <div className="flex-1 flex items-center bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs">
+                    <input
+                      value={storeId}
+                      onChange={(e) => {/* Slug logic needs careful handling in ConfigContext */}}
+                      placeholder="ex: minha-loja"
+                      disabled={true}
+                      className="flex-1 bg-transparent outline-none opacity-60 text-right pr-1"
+                    />
+                    <span className="font-bold text-gray-400">.vyzgo.com</span>
+                  </div>
+                  <a 
+                    href={`/v/${storeId}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="bg-black text-white px-4 py-2 rounded-xl text-[10px] font-bold flex items-center gap-2 hover:bg-gray-800 transition-colors shadow-sm"
+                  >
+                    <ArrowRight size={14} /> Ver Loja
+                  </a>
                 </div>
 
                 <div className="flex items-center justify-between mb-2">

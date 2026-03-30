@@ -175,19 +175,21 @@ const AppContent: React.FC = () => {
   if (isLoadingStore || authLoading) return <FullScreenLoader />;
 
   const hostname = window.location.hostname;
-  const rawPath = window.location.pathname.toLowerCase().replace(/\/$/, "");
-  const normalizedPath = rawPath === "" ? "/" : rawPath;
+  const pathname = window.location.pathname;
   
-  const isAppDomain = hostname === 'app.vyzgo.com' || hostname.startsWith('localhost');
-  const isLandingPage = (hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com' || hostname === 'vitrinebio.vercel.app') 
-                        && !new URLSearchParams(window.location.search).get('store')
-                        && (normalizedPath === "" || normalizedPath === "/" || normalizedPath === "/index.html");
+  const isMainDomain = hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname.includes('vercel.app') || hostname === 'localhost';
+  const isAppDashboard = hostname === 'app.vyzgo.com';
   
-  // Força a AuthPage se o caminho for /login ou se for o domínio do app sem usuário
-  if (normalizedPath === '/login' || (isAppDomain && !user)) {
-    return <AuthPage />;
+  // Detect store slug from subdomain or path fallback /v/slug
+  let storeSlugFromUrl = '';
+  if (!isMainDomain && !isAppDashboard) {
+    storeSlugFromUrl = hostname.split('.')[0];
+  } else if (isAppDashboard && pathname.startsWith('/v/')) {
+    storeSlugFromUrl = pathname.split('/')[2];
   }
 
+  const isLandingPage = isMainDomain && (pathname === "/" || pathname === "/index.html");
+  
   if (isLandingPage) {
     return (
       <Routes>
@@ -196,8 +198,19 @@ const AppContent: React.FC = () => {
     );
   }
 
+  // 2. DASHBOARD DO LOJISTA (app.vyzgo.com)
+  if (isAppDashboard && !pathname.startsWith('/v/')) {
+    return (
+      <Routes>
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/" element={<CorporateDashboard />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    );
+  }
 
-  if (isNotFound && !isLandingPage && !isAppDomain && storeId !== 'demo' && !window.location.pathname.startsWith('/auth')) {
+  if (isNotFound && !isLandingPage && !isAppDashboard && storeId !== 'demo' && !window.location.pathname.startsWith('/auth')) {
     return <StoreNotFound />;
   }
 
@@ -217,6 +230,7 @@ const AppContent: React.FC = () => {
         <div className="p-6 md:p-8 lg:p-10 flex-grow flex flex-col">
           <Routes>
             <Route path="/" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
+            <Route path="/v/:slug" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
             <Route path="/demo" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
             <Route path="/login" element={<AuthPage />} />
             <Route path="/setup" element={<ProtectedSetup />} />

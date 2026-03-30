@@ -77,7 +77,7 @@ const OnboardingWizard: React.FC = () => {
             // Redireciona para o novo subdomínio se possível, ou apenas limpa
             const hostname = window.location.hostname;
             if (hostname.includes('vyzgo.com')) {
-                window.location.href = `https://${localConfig.slug}.vyzgo.com`;
+                window.location.href = window.location.origin;
             } else {
                 navigate('/');
             }
