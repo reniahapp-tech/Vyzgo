@@ -222,7 +222,7 @@ const AppContent: React.FC = () => {
       >
         {/* Main Content Area */}
         <div className="p-6 md:p-8 lg:p-10 flex-grow flex flex-col">
-          {isAppDashboard ? (
+          {isAppDashboard && pathname !== '/corporate' ? (
             <AdminPanel isStandalone={true} />
           ) : (
             <Routes>
