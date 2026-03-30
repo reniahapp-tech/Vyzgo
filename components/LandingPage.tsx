@@ -16,9 +16,16 @@ const LandingPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A0A0A] text-white font-sans overflow-x-hidden w-full">
-
-            {/* 1. NAVBAR - Sticky & Glassmorphism */}
+        <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-indigo-500/30 overflow-x-hidden font-['Inter',sans-serif]">
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+                
+                body {
+                    font-family: 'Inter', sans-serif;
+                }
+            `}</style>
+            
+            {/* 1. NAVIGATION - Premium Glassmorphism */}
             <nav className="fixed top-0 left-0 w-full z-50 bg-black/80 backdrop-blur-lg border-b border-white/10">
                 <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between font-sans">
                     <div className="flex items-center transition-transform hover:scale-105">
@@ -59,47 +66,53 @@ const LandingPage: React.FC = () => {
                 )}
             </nav>
 
-            {/* 2. HERO SECTION - Centered & High Impact */}
-            <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-4 w-full overflow-hidden flex flex-col items-center text-center">
-                {/* Background Glow - Contained */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-[500px] bg-indigo-900/20 blur-[100px] rounded-full -z-10 pointer-events-none" />
+            {/* 2. HERO SECTION - Side-by-side */}
+            <section className="pt-32 pb-20 container mx-auto px-4 relative">
+                <div className="flex flex-col lg:flex-row items-center gap-16">
+                    {/* Left Side: Content */}
+                    <div className="lg:w-3/5 text-left lg:pr-10">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold uppercase tracking-widest mb-8">
+                            <Zap size={14} fill="currentColor" />
+                            Tecnologia 2.0
+                        </div>
 
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-8">
-                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    Nova Tecnologia 2.0
-                </div>
+                        <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter mb-8 leading-[1.05] uppercase italic">
+                            Transforme sua <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-500">
+                                Bio em Lucro.
+                            </span>
+                        </h1>
 
-                <h1 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 max-w-5xl mx-auto leading-[0.95] px-4">
-                    Transforme sua <br className="hidden md:block" />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-500 uppercase italic">
-                        Bio em Lucro.
-                    </span>
-                </h1>
+                        <p className="text-gray-400 text-lg md:text-xl mb-12 leading-relaxed font-medium max-w-2xl">
+                            A vitrine inteligente que converte seguidores em clientes. Produtos físicos e digitais em um link profissional e integrado ao WhatsApp.
+                        </p>
 
-                <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed font-medium">
-                    A vitrine inteligente que converte seguidores em clientes. Produtos físicos, digitais ou afiliados em um único link profissional e integrado ao WhatsApp.
-                </p>
+                        <div className="flex flex-col sm:flex-row gap-5 w-full max-w-md">
+                            <a href="https://app.vyzgo.com" className="flex-1 py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[20px] font-black text-lg transition-all shadow-xl shadow-indigo-900/20 flex items-center justify-center gap-3 group">
+                                <Zap size={22} className="group-hover:animate-pulse" fill="currentColor" />
+                                CRIAR MINHA VITRINE
+                            </a>
+                        </div>
 
-                <div className="flex flex-col sm:flex-row gap-5 w-full max-w-xl mx-auto mb-16 px-4">
-                    <a href="https://app.vyzgo.com" className="flex-1 py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[24px] font-black text-xl transition-all shadow-2xl shadow-indigo-900/40 flex items-center justify-center gap-3 group">
-                        <Zap size={24} className="group-hover:animate-pulse" fill="currentColor" />
-                        CRIAR MINHA VITRINE
-                    </a>
-                </div>
+                        <div className="mt-12 flex flex-wrap gap-8 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                            <div className="flex items-center gap-2">🛡️ 100% SEGURO</div>
+                            <div className="flex items-center gap-2">💳 ZERO TAXAS</div>
+                            <div className="flex items-center gap-2">👥 +10 MIL LOJISTAS</div>
+                        </div>
+                    </div>
 
-                <div className="relative w-full max-w-4xl mx-auto mt-8 rounded-[48px] overflow-hidden border border-white/10 shadow-3xl aspect-[16/10] md:aspect-[21/9]">
-                    <img 
-                        src="/hero_lifestyle.png" 
-                        alt="Empreendedor VyzGo" 
-                        className="w-full h-full object-cover object-top"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-transparent to-transparent"></div>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-center gap-8 text-xs font-black text-gray-500 uppercase tracking-[0.2em] opacity-60">
-                    <div className="flex items-center gap-2"><ShieldCheck size={16} /> 100% SEGURO</div>
-                    <div className="flex items-center gap-2"><CreditCard size={16} /> SEM TAXAS POR VENDA</div>
-                    <div className="flex items-center gap-2"><Users size={16} /> +10 MIL LOJISTAS</div>
+                    {/* Right Side: Proportional Image */}
+                    <div className="lg:w-2/5 relative">
+                        <div className="absolute -inset-10 bg-indigo-500/10 blur-[100px] rounded-full"></div>
+                        <div className="relative rounded-[40px] overflow-hidden border border-white/10 shadow-3xl transform border-indigo-500/20 group hover:scale-[1.01] transition-transform duration-700">
+                            <img 
+                                src="/hero_lifestyle.png" 
+                                alt="Empreendedor VyzGo" 
+                                className="w-full h-auto object-cover scale-110"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/80 via-transparent to-transparent"></div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
