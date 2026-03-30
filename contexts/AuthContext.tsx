@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  VITRINE APP — AUTH CONTEXT (Supabase Google OAuth)
+ *  VYZGO — AUTH CONTEXT (Supabase Google OAuth)
  *  Arquivo: contexts/AuthContext.tsx
  * ============================================================
  *

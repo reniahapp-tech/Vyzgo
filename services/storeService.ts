@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  VITRINE APP — STORE SERVICE (SUPABASE)
+ *  VYZGO — STORE SERVICE (SUPABASE)
  *  Arquivo: services/storeService.ts
  * ============================================================
  */

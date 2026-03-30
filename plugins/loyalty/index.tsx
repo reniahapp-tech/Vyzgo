@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  VITRINE APP — PLUGIN EXEMPLO
+ *  VYZGO — PLUGIN EXEMPLO
  *  Arquivo: plugins/loyalty/index.tsx
  * ============================================================
  *
@@ -138,7 +138,7 @@ export const LoyaltyPlugin: VitrinePlugin = {
   version: '1.0.0',
   description: 'Clientes acumulam pontos a cada compra e podem resgatar descontos.',
   icon: '⭐',
-  author: 'Vitrine App',
+  author: 'VyzGo',
 
   defaultConfig: {
     pointsPerReal: 10,

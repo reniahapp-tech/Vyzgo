@@ -1070,7 +1070,7 @@ const AdminPanel: React.FC = () => {
                   </h3>
                 </div>
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="text-[10px] font-bold text-gray-400">vitrine.ai/</span>
+                  <span className="text-[10px] font-bold text-gray-400">vyzgo.com/</span>
                   <input
                     value={storeId}
                     onChange={(e) => {/* Slug logic needs careful handling in ConfigContext */}}
@@ -1105,7 +1105,7 @@ const AdminPanel: React.FC = () => {
                   )}
                 </div>
                 <p className="text-[9px] text-gray-500 mt-2 leading-relaxed">
-                  Para funcionar, configure um CNAME no seu provedor de domínio apontando para <b>cname.vitrine.ai</b>.
+                  Para funcionar, configure um CNAME no seu provedor de domínio apontando para <b>cname.vyzgo.com</b>.
                 </p>
               </div>
 

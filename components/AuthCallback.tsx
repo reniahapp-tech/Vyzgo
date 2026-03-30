@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  VITRINE APP — AUTH CALLBACK
+ *  VYZGO — AUTH CALLBACK
  *  Arquivo: components/AuthCallback.tsx
  * ============================================================
  */

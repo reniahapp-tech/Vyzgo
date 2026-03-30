@@ -1,6 +1,6 @@
 /**
  * ============================================================
- *  VITRINE APP — SISTEMA DE MÓDULOS/PLUGINS
+ *  VYZGO — SISTEMA DE MÓDULOS/PLUGINS
  *  Arquivo: plugins/types.ts
  * ============================================================
  *
