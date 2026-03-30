@@ -250,7 +250,7 @@ const WHATSAPP_LABELS = [
   "Orçamento Rápido"
 ];
 
-const AdminPanel: React.FC = () => {
+const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false }) => {
   const { storeId, config, updateConfig, updateNestedConfig, resetConfig, addCategory, removeCategory, addProductToCategory, removeProductFromCategory, updateProduct, addToast, upgradeToPro, seedInitialData, clearDemoData, orders, coupons, saveCoupon, deleteCoupon, saveStoreToCloud, isLoadingStore } = useConfig();
   const { plugins, enablePlugin, disablePlugin, updatePluginConfig } = usePlugins();
   const { isAdmin, user, signOut, hasStore, isActive } = useAuth();
@@ -390,22 +390,24 @@ const AdminPanel: React.FC = () => {
   };
 
   // 1. Button to open panel (always visible)
-  if (!isOpen) {
+  if (!isStandalone && !isOpen) {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-white/10 backdrop-blur-md border border-white/20 text-dark p-4 rounded-full shadow-2xl z-50 hover:bg-white/30 transition-all hover:scale-110 group"
-        title="Admin Panel"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-black text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40 group"
       >
-        <div className="absolute inset-0 bg-gradient-to-tr from-terracotta/20 to-sage/20 rounded-full animate-spin-slow opacity-50 blur-md"></div>
-        {isAdmin ? (
-          <Unlock size={24} className="relative z-10 text-green-700" />
-        ) : (
-          <Settings size={24} className="relative z-10 text-gray-800" />
-        )}
+        <Settings className="group-hover:rotate-90 transition-transform duration-500" />
       </button>
     );
   }
+
+  const containerClasses = isStandalone 
+    ? "flex flex-col h-full bg-white/80 backdrop-blur-xl"
+    : "fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 animate-in fade-in zoom-in duration-300";
+
+  const contentClasses = isStandalone
+    ? "w-full h-full flex flex-col"
+    : "bg-white/80 backdrop-blur-xl w-full max-w-6xl h-[90vh] rounded-[40px] shadow-2xl border border-white/50 overflow-hidden flex flex-col relative";
 
   // 2. Login Screen (if not authenticated)
   if (!isAdmin) {
@@ -467,50 +469,36 @@ const AdminPanel: React.FC = () => {
   );
 
   return (
-    <>
-      <div className="fixed inset-0 bg-white/20 backdrop-blur-xl z-50 flex flex-col animate-in slide-in-from-bottom-4 duration-300">
+    <div className={containerClasses}>
+      {!isStandalone && (
+        <div 
+          className="absolute inset-0 bg-black/20 backdrop-blur-sm -z-10" 
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+      
+      <div className={contentClasses}>
         {/* Header */}
-        <div className="bg-white/40 backdrop-blur-md border-b border-white/20 p-4 flex items-center justify-between sticky top-0 z-10">
-          <h2 className="font-bold text-gray-800 flex items-center gap-2">
-            <span className="p-2 bg-gray-900 text-white rounded-xl"><Settings size={18} /></span>
-            Painel de Gestão
-            {isPro && <span className="text-[10px] bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-2 py-0.5 rounded-full uppercase font-bold flex items-center gap-1"><Crown size={10} /> Pro</span>}
-          </h2>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={saveStoreToCloud}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl text-xs font-bold hover:bg-green-700 transition-all shadow-lg active:scale-95"
-            >
-              <Save size={16} /> Salvar na Nuvem
-            </button>
-            <div className="hidden md:flex flex-col items-end mr-2">
-              <span className="text-[10px] font-bold text-gray-700">{user?.user_metadata?.full_name || 'Lojista'}</span>
-              <span className="text-[8px] text-gray-400">{user?.email}</span>
+        <div className="p-6 md:p-8 border-b border-gray-100 flex items-center justify-between bg-white/50">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center shadow-lg">
+              <Settings size={24} />
             </div>
-            <button
-              onClick={() => { signOut(); setIsOpen(false); addToast('Até logo!', 'info'); }}
-              className="p-2 hover:bg-red-50 text-red-500 rounded-full transition-colors"
-              title="Sair"
-            >
-              <LogOut size={16} />
-            </button>
-            <button
-              onClick={async () => {
-                if (confirm('Publicar alterações na nuvem?')) {
-                  try {
-                    await saveConfigToR2(storeId, config);
-                    addToast('Loja publicada com sucesso!', 'success');
-                  } catch (e) {
-                    addToast('Erro ao publicar.', 'error');
-                  }
-                }
-              }}
-              className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-md transition-colors"
-              title="Publicar Loja"
-            >
-              <CloudUpload size={18} />
-            </button>
-            <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-black/5 rounded-full"><X size={20} /></button>
+            <div>
+              <h2 className="text-xl font-black text-gray-800 tracking-tight">VyzGo Painel</h2>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Configurações da sua Vitrine</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            {!isStandalone && (
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-3 hover:bg-gray-100 rounded-2xl transition-colors text-gray-400 hover:text-black"
+              >
+                <X size={24} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -1401,7 +1389,7 @@ const AdminPanel: React.FC = () => {
         planName="Plano Pro"
         price="R$ 29,90"
       />
-    </>
+    </div>
   );
 };
 

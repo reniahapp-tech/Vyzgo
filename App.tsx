@@ -207,6 +207,7 @@ const AppContent: React.FC = () => {
     return <StoreNotFound />;
   }
 
+  // RENDERIZAÇÃO PRINCIPAL
   return (
     <div
       className="min-h-screen font-sans selection:text-white transition-colors duration-300"
@@ -221,29 +222,36 @@ const AppContent: React.FC = () => {
       >
         {/* Main Content Area */}
         <div className="p-6 md:p-8 lg:p-10 flex-grow flex flex-col">
-          <Routes>
-            <Route path="/" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
-            <Route path="/v/:slug" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
-            <Route path="/demo" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
-            <Route path="/login" element={<AuthPage />} />
-            <Route path="/setup" element={<ProtectedSetup />} />
-            <Route path="/corporate" element={<CorporateDashboard />} />
-            <Route path="/category/:categoryId" element={<CategoryRoute />} />
-            <Route path="/product/:productId" element={<ProductRoute />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-          </Routes>
+          {isAppDashboard ? (
+            <AdminPanel isStandalone={true} />
+          ) : (
+            <Routes>
+              <Route path="/" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
+              <Route path="/v/:slug" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
+              <Route path="/demo" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
+              <Route path="/login" element={<AuthPage />} />
+              <Route path="/setup" element={<ProtectedSetup />} />
+              <Route path="/corporate" element={<CorporateDashboard />} />
+              <Route path="/category/:categoryId" element={<CategoryRoute />} />
+              <Route path="/product/:productId" element={<ProductRoute />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+            </Routes>
+          )}
         </div>
 
-                {/* Global Modals & Overlays */}
-        <ProductModal isOpen={isProductModalOpen} onClose={() => setIsProductModalOpen(false)} />
-        <QuizModal isOpen={isQuizModalOpen} onClose={() => setIsQuizModalOpen(false)} />
-        <TrackingModal />
-        <LocationModal />
-        <CartModal />
-        <CheckoutModal />
-        <ToastContainer />
-
-        <AdminPanel />
+        {/* Global Modals & Overlays (Only for store view) */}
+        {!isAppDashboard && (
+          <>
+            <ProductModal isOpen={isProductModalOpen} onClose={() => setIsProductModalOpen(false)} />
+            <QuizModal isOpen={isQuizModalOpen} onClose={() => setIsQuizModalOpen(false)} />
+            <TrackingModal />
+            <LocationModal />
+            <CartModal />
+            <CheckoutModal />
+            <ToastContainer />
+            <AdminPanel />
+          </>
+        )}
       </div>
     </div>
   );
