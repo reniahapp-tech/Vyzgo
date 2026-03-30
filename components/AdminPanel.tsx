@@ -534,15 +534,15 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
         {/* Tabs */}
         <div className="flex p-2 gap-1 overflow-x-auto scrollbar-hide">
           {[
-            { id: 'plan', icon: Crown, label: 'Plano', highlight: !isPro },
-            { id: 'orders', icon: ClipboardList, label: 'Pedidos', badge: orders.filter(o => o.status === 'pending').length || 0 },
-            { id: 'coupons', icon: Tag, label: 'Cupons' },
-            { id: 'modules', icon: Puzzle, label: 'Módulos', badge: plugins.filter(p => p.enabled).length || 0 },
-            { id: 'help', icon: HelpCircle, label: 'Ajuda' },
-            { id: 'themes', icon: Palette, label: 'Temas' },
-            { id: 'branding', icon: Link, label: 'Marca' },
             { id: 'home', icon: Layout, label: 'Home' },
             { id: 'products', icon: ShoppingBag, label: 'Itens' },
+            { id: 'orders', icon: ClipboardList, label: 'Pedidos', badge: orders.filter(o => o.status === 'pending').length || 0 },
+            { id: 'coupons', icon: Tag, label: 'Cupons' },
+            { id: 'branding', icon: Link, label: 'Marca' },
+            { id: 'themes', icon: Palette, label: 'Temas' },
+            { id: 'modules', icon: Puzzle, label: 'Módulos', badge: plugins.filter(p => p.enabled).length || 0 },
+            { id: 'plan', icon: Crown, label: 'Plano', highlight: !isPro },
+            { id: 'help', icon: HelpCircle, label: 'Ajuda' },
           ].map(tab => (
             <button
               key={tab.id}
@@ -1104,14 +1104,8 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                   </h3>
                 </div>
                 <div className="flex items-center gap-2 mb-4 group">
-                  <div className="flex-1 flex items-center bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs">
-                    <input
-                      value={storeId}
-                      onChange={(e) => {/* Slug logic needs careful handling in ConfigContext */}}
-                      placeholder="ex: minha-loja"
-                      disabled={true}
-                      className="flex-1 bg-transparent outline-none opacity-60 text-right pr-1"
-                    />
+                  <div className="flex-1 flex items-center bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-xs">
+                    <span className="flex-1 text-gray-500 font-medium text-right pr-1">{storeId}</span>
                     <span className="font-bold text-gray-400">.vyzgo.com</span>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -1141,7 +1135,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
 
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xs font-bold text-gray-700 uppercase flex items-center gap-2">
-                    <Globe size={14} /> Domínio Personalizado (White Label)
+                    <Globe size={14} /> Domínio Personalizado
                     {!isPro && <Lock size={12} />}
                   </h3>
                   {isPro && <span className="text-[10px] bg-green-100 text-green-700 px-2 rounded-full font-bold">PRO</span>}
