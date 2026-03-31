@@ -1662,7 +1662,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
         onClose={() => setIsPaymentOpen(false)}
         onSuccess={upgradeToPro}
         planName="Plano Pro"
-        price="R$ 29,90"
+        price="R$ 39,90"
       />
     </div>
   );

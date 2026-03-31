@@ -380,45 +380,80 @@ const LandingPage: React.FC = () => {
                 <div className="container mx-auto px-4 text-center">
                     <h2 className="text-4xl md:text-7xl font-black mb-20 tracking-tighter italic uppercase">Transparência Total.</h2>
 
-                    <div className="max-w-2xl mx-auto">
-                        <div className="p-1 md:p-1.5 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-[45px] shadow-[0_0_80px_rgba(79,70,229,0.15)]">
-                            <div className="bg-[#0A0A0A] rounded-[43px] p-6 sm:p-8 md:p-20 text-left relative overflow-hidden">
-                                <div className="mb-14">
-                                    <span className="text-[12px] font-black tracking-[0.4em] text-gray-500 uppercase">Valor Único Mensal</span>
-                                    <div className="text-5xl sm:text-7xl md:text-8xl font-black mt-6 text-white tracking-tighter">R$ 29,90</div>
-                                    <p className="text-indigo-400 text-xl mt-6 font-black uppercase italic">Zero Taxas Por Venda</p>
-                                    <p className="text-gray-500 text-lg mt-2 font-medium">O lucro é 100% seu. Nós cobramos apenas pela tecnologia.</p>
+                    <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        {/* Plano Faça Você Mesmo */}
+                        <div className="p-[1px] bg-white/10 rounded-[45px] transition-transform hover:-translate-y-2 duration-500">
+                            <div className="bg-[#0A0A0A] rounded-[44px] p-8 md:p-14 text-left h-full flex flex-col relative overflow-hidden">
+                                <div className="mb-10">
+                                    <span className="text-[12px] font-black tracking-[0.3em] text-gray-500 uppercase">Plano Empreendedor</span>
+                                    <div className="text-4xl md:text-6xl font-black mt-4 text-white tracking-tighter">R$ 39,90<span className="text-xl text-gray-500 tracking-normal font-medium">/mês</span></div>
+                                    <p className="text-gray-400 text-lg mt-4 font-medium leading-relaxed">A tecnologia perfeita para quem tem tempo de montar a própria vitrine sozinho.</p>
                                 </div>
 
-                                <div className="space-y-6 mb-16 border-y border-white/5 py-14">
-                                    <div className="flex items-center gap-5 text-gray-200 font-bold text-xl italic uppercase">
-                                        <CheckCircle size={24} className="text-indigo-500 shrink-0" /> 
-                                        <span>Vitrine Profissional</span>
+                                <div className="space-y-4 mb-12 flex-grow">
+                                    <div className="flex items-center gap-4 text-gray-300 font-bold text-lg uppercase italic">
+                                        <CheckCircle size={20} className="text-gray-600 shrink-0" /> 
+                                        <span>Você mesmo cadastra tudo</span>
                                     </div>
-                                    <div className="flex items-center gap-5 text-gray-200 font-bold text-xl italic uppercase">
-                                        <CheckCircle size={24} className="text-indigo-500 shrink-0" /> 
+                                    <div className="flex items-center gap-4 text-gray-300 font-bold text-lg uppercase italic">
+                                        <CheckCircle size={20} className="text-gray-600 shrink-0" /> 
                                         <span>Produtos Ilimitados</span>
                                     </div>
-                                    <div className="flex items-center gap-5 text-gray-200 font-bold text-xl italic uppercase">
-                                        <CheckCircle size={24} className="text-indigo-500 shrink-0" /> 
-                                        <span>Integração WhatsApp</span>
-                                    </div>
-                                    <div className="flex items-center gap-5 text-gray-200 font-bold text-xl italic uppercase">
-                                        <CheckCircle size={24} className="text-indigo-500 shrink-0" /> 
-                                        <span>Receba Pedidos Organizados</span>
-                                    </div>
-                                    <div className="flex items-center gap-5 text-gray-200 font-bold text-xl italic uppercase">
-                                        <CheckCircle size={24} className="text-indigo-500 shrink-0" /> 
-                                        <span>Suporte Brasileiro</span>
+                                    <div className="flex items-center gap-4 text-gray-300 font-bold text-lg uppercase italic">
+                                        <CheckCircle size={20} className="text-gray-600 shrink-0" /> 
+                                        <span>Zero Taxas Por Venda</span>
                                     </div>
                                 </div>
 
-                                <a href="https://app.vyzgo.com" className="w-full py-8 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[35px] font-black text-2xl text-center transition-all shadow-xl shadow-indigo-900/40 flex items-center justify-center gap-3">
-                                    CRIAR MINHA VITRINE 🚀
+                                <a href="https://app.vyzgo.com" className="w-full py-6 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-[25px] font-black text-xl text-center transition-all flex items-center justify-center gap-3">
+                                    ASSINAR PLANO
                                 </a>
-                                <p className="text-center text-gray-600 text-[10px] mt-6 font-black uppercase tracking-widest opacity-60">
-                                    Tecnologia brasileira de alta conversão.
-                                </p>
+                            </div>
+                        </div>
+
+                        {/* Plano Setup Express */}
+                        <div className="p-1 md:p-1.5 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-[45px] shadow-[0_0_80px_rgba(79,70,229,0.2)] relative transition-transform hover:-translate-y-2 duration-500">
+                            <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-indigo-600 text-white font-black text-xs px-6 py-2 rounded-full uppercase tracking-widest border border-indigo-400 shadow-xl z-20">
+                                MAIS ESCOLHIDO 🔥
+                            </div>
+                            <div className="bg-[#0A0A0A] rounded-[43px] p-8 md:p-14 text-left h-full flex flex-col relative overflow-hidden">
+                                <div className="mb-10">
+                                    <span className="text-[12px] font-black tracking-[0.3em] text-indigo-400 uppercase">Setup Express ("Nós fazemos")</span>
+                                    <div className="text-5xl md:text-7xl font-black mt-4 text-white tracking-tighter">R$ 97,90</div>
+                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mt-2">Taxa Única de Configuração</span>
+                                    <p className="text-gray-300 text-lg mt-4 font-bold leading-relaxed">Você não tem tempo a perder. Mande suas fotos no WhatsApp e nós te entregamos a loja 100% pronta pra vender em 24h.</p>
+                                </div>
+
+                                <div className="space-y-5 mb-12 flex-grow border-y border-white/10 py-8">
+                                    <div className="flex items-start gap-4 text-white font-black text-xl uppercase italic">
+                                        <Sparkles size={24} className="text-indigo-400 shrink-0 mt-1" /> 
+                                        <div>
+                                            Cadastro de 10 Produtos
+                                            <p className="text-[10px] text-gray-400 font-medium tracking-widest uppercase mt-1 not-italic">Títulos, fotos e links perfeitos</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4 text-white font-black text-xl uppercase italic">
+                                        <Sparkles size={24} className="text-indigo-400 shrink-0 mt-1" /> 
+                                        <div>
+                                            Identidade Visual VIP
+                                            <p className="text-[10px] text-gray-400 font-medium tracking-widest uppercase mt-1 not-italic">Logo + Cores Harmonizadas</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4 text-white font-black text-xl uppercase italic">
+                                        <Sparkles size={24} className="text-indigo-400 shrink-0 mt-1" /> 
+                                        <div>
+                                            1 Vídeo Commerce Incluso
+                                            <p className="text-[10px] text-gray-400 font-medium tracking-widest uppercase mt-1 not-italic">Sua loja já nasce em movimento</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3 bg-indigo-500/10 p-4 rounded-2xl border border-indigo-500/20 mt-4">
+                                        <span className="text-xs text-indigo-200 font-bold">*Depois da entrega, apenas R$ 39,90/mês pela tecnologia. Cancelle quando quiser.</span>
+                                    </div>
+                                </div>
+
+                                <a href="https://wa.me/5511999999999?text=Quero%20o%20Setup%20Express%20da%20VyzGo!" target="_blank" rel="noreferrer" className="w-full py-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[25px] font-black text-2xl text-center transition-all shadow-2xl shadow-indigo-900/40 flex items-center justify-center gap-3 group">
+                                    QUERO A LOJA PRONTA ⚡
+                                </a>
                             </div>
                         </div>
                     </div>
