@@ -180,7 +180,8 @@ const LandingPage: React.FC = () => {
                                     <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
                                         <div className="absolute inset-0 bg-gradient-to-tr from-purple-900 via-indigo-900 to-black"></div>
                                         <video 
-                                            src="https://cdn.pixabay.com/video/2021/08/04/83863-584742721_tiny.mp4" 
+                                            src="https://assets.mixkit.co/videos/preview/mixkit-a-woman-in-a-fashion-shoot-with-a-red-dress-51543-large.mp4" 
+                                            poster="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1000&auto=format&fit=crop"
                                             className="w-full h-full object-cover opacity-60 mix-blend-screen" 
                                             autoPlay 
                                             muted 
