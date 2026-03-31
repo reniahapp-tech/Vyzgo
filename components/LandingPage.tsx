@@ -393,15 +393,23 @@ const LandingPage: React.FC = () => {
                                 <div className="space-y-4 mb-12 flex-grow">
                                     <div className="flex items-center gap-4 text-gray-300 font-bold text-lg uppercase italic">
                                         <CheckCircle size={20} className="text-gray-600 shrink-0" /> 
-                                        <span>Você mesmo cadastra tudo</span>
+                                        <span>Vitrine com Vídeo Commerce</span>
                                     </div>
                                     <div className="flex items-center gap-4 text-gray-300 font-bold text-lg uppercase italic">
                                         <CheckCircle size={20} className="text-gray-600 shrink-0" /> 
-                                        <span>Produtos Ilimitados</span>
+                                        <span>Você cadastra os produtos livremente</span>
                                     </div>
                                     <div className="flex items-center gap-4 text-gray-300 font-bold text-lg uppercase italic">
                                         <CheckCircle size={20} className="text-gray-600 shrink-0" /> 
-                                        <span>Zero Taxas Por Venda</span>
+                                        <span>Gerador de Deep Links (Tráfego)</span>
+                                    </div>
+                                    <div className="flex items-center gap-4 text-gray-300 font-bold text-lg uppercase italic">
+                                        <CheckCircle size={20} className="text-gray-600 shrink-0" /> 
+                                        <span>Botão Direto para seu Pix/Zap</span>
+                                    </div>
+                                    <div className="flex items-center gap-4 text-gray-300 font-bold text-lg uppercase italic">
+                                        <CheckCircle size={20} className="text-gray-600 shrink-0" /> 
+                                        <span>Zero Taxas Ocultas por Venda</span>
                                     </div>
                                 </div>
 
@@ -447,12 +455,12 @@ const LandingPage: React.FC = () => {
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3 bg-indigo-500/10 p-4 rounded-2xl border border-indigo-500/20 mt-4">
-                                        <span className="text-xs text-indigo-200 font-bold">*Depois da entrega, apenas R$ 39,90/mês pela tecnologia. Cancelle quando quiser.</span>
+                                        <span className="text-xs text-indigo-200 font-bold block leading-relaxed">*A taxa de R$ 97,90 paga todo o trabalho inicial da nossa equipe. Após a entrega da loja pronta, sua única despesa será a manutenção do servidor no valor de R$ 39,90/mês. Cancele quando quiser.</span>
                                     </div>
                                 </div>
 
-                                <a href="https://wa.me/5511999999999?text=Quero%20o%20Setup%20Express%20da%20VyzGo!" target="_blank" rel="noreferrer" className="w-full py-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[25px] font-black text-2xl text-center transition-all shadow-2xl shadow-indigo-900/40 flex items-center justify-center gap-3 group">
-                                    QUERO A LOJA PRONTA ⚡
+                                <a href="https://app.vyzgo.com/" className="w-full py-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[25px] font-black text-2xl text-center transition-all shadow-2xl shadow-indigo-900/40 flex items-center justify-center gap-3 group">
+                                    BORA COMEÇAR ⚡
                                 </a>
                             </div>
                         </div>
