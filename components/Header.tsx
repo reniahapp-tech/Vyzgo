@@ -13,70 +13,47 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className="flex items-center justify-between mb-6 pt-2">
-        <div className="flex items-center gap-4">
-          {/* Avatar */}
-          <div className="relative">
-            {header.avatarUrl ? (
-               <img 
-                 src={header.avatarUrl} 
-                 alt="Avatar" 
-                 className="w-12 h-12 rounded-full object-cover shadow-sm border-2 border-white"
-               />
-            ) : (
-              <div 
-                className="w-12 h-12 rounded-full shadow-sm flex items-center justify-center text-white/20"
-                style={{ backgroundColor: theme.secondaryColor }}
-              >
-              </div>
-            )}
-            
-            {header.showStatus && (
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-            )}
-          </div>
-          
-          <div>
-            {header.logoUrl ? (
-              <img 
-                src={header.logoUrl} 
-                alt={header.title} 
-                className="h-10 w-auto object-contain mb-1"
-              />
-            ) : (
-              <h1 className="text-xl font-bold tracking-tight leading-none" style={{ color: theme.textColor }}>
-                {header.title}
-              </h1>
-            )}
-            
-            <span className="text-xs text-gray-500 font-medium block mt-0.5">
-              <span className="inline-block w-2 h-2 rounded-full bg-green-400 mr-1.5 align-middle"></span>
-              {header.subtitle}
-            </span>
-          </div>
+      <header className="sticky top-0 z-[50] bg-white/70 backdrop-blur-xl border-b border-gray-100 flex items-center justify-between px-6 py-4 -mx-6 mb-6">
+        <div className="flex items-center gap-3">
+          {header.logoUrl ? (
+            <img 
+              src={header.logoUrl} 
+              alt={header.title} 
+              className="h-9 w-auto object-contain transition-transform active:scale-95"
+            />
+          ) : (
+             <div className="flex flex-col">
+                <h1 className="text-lg font-black tracking-tight leading-none text-gray-900">
+                  {header.title}
+                </h1>
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mt-0.5">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5 align-middle"></span>
+                  {header.subtitle}
+                </span>
+             </div>
+          )}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           {/* Search Button */}
           <button 
             onClick={() => setIsSearchOpen(true)}
-            className="p-2.5 rounded-xl transition-all active:scale-95 hover:bg-black/5"
+            className="p-2.5 rounded-2xl transition-all active:scale-90 hover:bg-black/5 text-gray-800"
             aria-label="Buscar"
           >
-            <Search size={24} style={{ color: theme.textColor }} />
+            <Search size={22} strokeWidth={2.5} />
           </button>
 
           {/* Cart Button (Conditional) */}
           {showCart && (
             <button 
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 rounded-xl transition-all active:scale-95 hover:bg-black/5"
+              className="relative p-2.5 rounded-2xl transition-all active:scale-90 hover:bg-black/5 text-gray-800"
             >
-              <ShoppingBag size={24} style={{ color: theme.textColor }} />
+              <ShoppingBag size={22} strokeWidth={2.5} />
               {cart.length > 0 && (
                 <div 
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white border-2 border-white"
-                  style={{ backgroundColor: theme.accentColor }}
+                  className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black text-white border border-white bg-indigo-600 animate-in zoom-in duration-300"
                 >
                   {cart.length}
                 </div>

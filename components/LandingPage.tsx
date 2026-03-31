@@ -41,8 +41,8 @@ const LandingPage: React.FC = () => {
                     </div>
 
                     {/* CTA Desktop */}
-                    <a href="https://app.vyzgo.com" className="hidden md:inline-flex items-center justify-center px-8 py-3 bg-indigo-600 text-white font-black rounded-full text-sm hover:translate-y-[-2px] hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 transition-all uppercase tracking-wider">
-                        Acessar
+                    <a href="https://app.vyzgo.com/login" className="hidden md:inline-flex items-center justify-center px-8 py-3 bg-white text-indigo-600 font-black rounded-full text-sm hover:translate-y-[-2px] hover:shadow-lg hover:shadow-white/10 active:scale-95 transition-all uppercase tracking-wider">
+                        Começar Agora
                     </a>
 
                     {/* Mobile Menu Button */}
@@ -413,9 +413,12 @@ const LandingPage: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <a href="https://app.vyzgo.com" className="w-full py-6 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-[25px] font-black text-xl text-center transition-all flex items-center justify-center gap-3">
-                                    ASSINAR PLANO
-                                </a>
+                                <button 
+                                    onClick={() => window.open('https://buy.stripe.com/test_placeholder_basic', '_blank')}
+                                    className="w-full py-6 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-[25px] font-black text-xl text-center transition-all flex items-center justify-center gap-3 active:scale-95"
+                                >
+                                    ASSINAR PLANO <ArrowRight size={20} />
+                                </button>
                             </div>
                         </div>
 
@@ -459,9 +462,12 @@ const LandingPage: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <a href="https://app.vyzgo.com/" className="w-full py-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[25px] font-black text-2xl text-center transition-all shadow-2xl shadow-indigo-900/40 flex items-center justify-center gap-3 group">
-                                    BORA COMEÇAR ⚡
-                                </a>
+                                <button 
+                                    onClick={() => window.open('https://buy.stripe.com/test_placeholder_express', '_blank')}
+                                    className="w-full py-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[25px] font-black text-2xl text-center transition-all shadow-2xl shadow-indigo-900/40 flex items-center justify-center gap-3 group active:scale-95"
+                                >
+                                    GARANTIR VAGA ⚡
+                                </button>
                             </div>
                         </div>
                     </div>

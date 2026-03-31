@@ -39,24 +39,24 @@ const SearchBar: React.FC = () => {
   }, []);
 
   return (
-    <div data-search-bar="" className="relative w-full max-w-xl mx-auto mb-6">
+    <div data-search-bar="" className="relative w-full max-w-xl mx-auto mb-2 px-1">
       {/* Input */}
       <div
-        className="flex items-center gap-2 px-4 py-2.5 rounded-2xl shadow-sm border border-white/60 backdrop-blur-sm transition-all"
-        style={{ backgroundColor: 'white', borderColor: `${theme.primaryColor}30` }}
+        className="flex items-center gap-3 px-5 py-4 rounded-[1.5rem] shadow-xl shadow-gray-200/50 border border-gray-50 backdrop-blur-md transition-all group focus-within:ring-2 focus-within:ring-indigo-500/20"
+        style={{ backgroundColor: 'white' }}
       >
-        <Search size={16} style={{ color: theme.primaryColor }} className="shrink-0" />
+        <Search size={20} className="shrink-0 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
         <input
           ref={inputRef}
           type="search"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="Buscar produtos..."
-          className="flex-1 bg-transparent outline-none text-sm placeholder-gray-400"
-          style={{ color: theme.textColor }}
+          placeholder="O que você está procurando?"
+          className="flex-1 bg-transparent outline-none text-base font-medium placeholder-gray-300"
+          style={{ color: '#1A2E22' }}
         />
         {query && (
-          <button onClick={() => { setQuery(''); setIsOpen(false); }} className="text-gray-400 hover:text-gray-600">
+          <button onClick={() => { setQuery(''); setIsOpen(false); }} className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors">
             <X size={14} />
           </button>
         )}

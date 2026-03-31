@@ -91,28 +91,29 @@ const CheckoutModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
+    <div className="fixed inset-0 z-[120] flex items-stretch justify-center sm:items-center">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity animate-in fade-in duration-300" onClick={handleClose} />
       <div
-        className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl animate-slide-up-panel flex flex-col max-h-[90vh]"
-        style={{ backgroundColor: config.theme.backgroundColor }}
+        className="relative w-full max-w-xl bg-white rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl animate-in slide-in-from-bottom-10 duration-500 flex flex-col max-h-[95vh] overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-black/5">
-          <div className="flex items-center gap-3">
-            <button onClick={handleBack} className="p-1.5 rounded-full bg-black/5 hover:bg-black/10 transition-colors" style={{ color: theme.textColor }}>
-              <X size={18} />
+        <div className="flex items-center justify-between px-8 py-8 border-b border-gray-50 bg-white sticky top-0 z-10 shrink-0">
+          <div className="flex items-center gap-4">
+            <button onClick={handleBack} className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-100 transition-all active:scale-90 text-gray-400">
+               {step === 'form' ? <X size={20} strokeWidth={2.5} /> : <ArrowRight size={20} className="rotate-180" strokeWidth={2.5} />}
             </button>
-            <div>
-              <h2 className="font-bold text-base" style={{ color: theme.textColor }}>Finalizar Pedido</h2>
-              <p className="text-xs opacity-50" style={{ color: theme.textColor }}>
-                {step === 'form' ? 'Preencha seus dados' : 'Confirme o pedido'}
+            <div className="flex flex-col">
+              <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">
+                {step === 'form' ? 'Seus Dados' : 'Quase Pronto'}
+              </h2>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mt-0.5">
+                {step === 'form' ? 'Checkout Seguro' : 'Confirme seu pedido'}
               </p>
             </div>
           </div>
-          <div className="flex gap-1.5">
-            <div className={`w-2 h-2 rounded-full transition-colors ${step === 'form' ? 'bg-green-500' : 'bg-gray-200'}`} />
-            <div className={`w-2 h-2 rounded-full transition-colors ${step === 'confirm' ? 'bg-green-500' : 'bg-gray-200'}`} />
+          <div className="flex gap-2">
+            <div className={`h-1.5 rounded-full transition-all duration-300 ${step === 'form' ? 'w-8 bg-indigo-600' : 'w-2 bg-gray-100'}`} />
+            <div className={`h-1.5 rounded-full transition-all duration-300 ${step === 'confirm' ? 'w-8 bg-indigo-600' : 'w-2 bg-gray-100'}`} />
           </div>
         </div>
 
@@ -269,33 +270,39 @@ const CheckoutModal: React.FC = () => {
           )}
         </div>
 
-        {/* Footer */}
-        <div className="p-6 pt-4 border-t border-black/5">
+        {/* Sticky Footer Actions */}
+        <div className="p-8 bg-white border-t border-gray-50 shrink-0 shadow-[0_-20px_40px_rgba(0,0,0,0.02)]">
           {step === 'form' ? (
             <button
               onClick={() => setStep('confirm')}
               disabled={!isFormValid()}
-              className="w-full py-4 rounded-2xl font-bold text-white flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ backgroundColor: theme.primaryColor }}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-[1.5rem] font-black shadow-2xl shadow-indigo-200 transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
             >
-              Revisar Pedido →
+              Revisar Detalhes
+              <ArrowRight size={20} strokeWidth={2.5} />
             </button>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <button
                 onClick={handleConfirm}
-                className="w-full py-4 rounded-2xl font-bold text-white flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98]"
-                style={{ backgroundColor: theme.accentColor }}
+                className="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white py-5 rounded-[1.5rem] font-black shadow-2xl shadow-green-200 transition-all active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
               >
-                <MessageCircle size={20} className="fill-white" />
-                Confirmar e Enviar no WhatsApp
+                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                  <MessageCircle size={18} fill="currentColor" />
+                </div>
+                Enviar para o WhatsApp
               </button>
-              <button onClick={() => setStep('form')} className="w-full text-sm text-gray-400 hover:text-gray-600 font-medium">
-                ← Editar dados
+              <button 
+                onClick={() => setStep('form')} 
+                className="w-full text-[10px] text-gray-400 hover:text-gray-600 font-black uppercase tracking-widest py-2"
+              >
+                ← Voltar e Editar Dados
               </button>
             </div>
           )}
         </div>
+      </div>
+    </div>
       </div>
     </div>
   );

@@ -1057,65 +1057,118 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
           )}
 
           {activeTab === 'settings' && settingsTab === 'branding' && (
-            <div className="space-y-4">
-              {/* CONFIGURAÇÕES GERAIS DA LOJA */}
-              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4 mb-4 relative overflow-hidden">
-                <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
-                  <Store size={14} /> Modo de Operação
+            <div className="space-y-6">
+              {/* HEADER CONFIGURATION GROUP - IDENTIDADE VISUAL */}
+              <div className="bg-indigo-600 border border-indigo-500 shadow-xl rounded-3xl p-6 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                
+                <h3 className="text-xs font-black uppercase tracking-widest mb-6 flex items-center gap-2 opacity-80">
+                  <Star size={14} className="fill-white" /> Identidade da Loja
                 </h3>
 
-                <div className="space-y-2 relative z-10">
-                  <label className="flex items-center gap-3 p-2 bg-white/50 rounded-lg cursor-pointer hover:bg-white/80 transition-colors">
-                    <input
-                      type="radio"
-                      name="storeMode"
-                      checked={config.storeMode === 'mixed'}
-                      onChange={() => handleStoreModeChange('mixed')}
-                      className="text-terracotta focus:ring-terracotta"
-                    />
-                    <div>
-                      <p className="text-xs font-bold text-gray-800">Híbrido (Padrão)</p>
-                      <p className="text-[10px] text-gray-500">Carrinho + Links Externos</p>
-                    </div>
-                  </label>
+                <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-6 items-center">
+                  {/* Logo Upload Circle */}
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-full border-2 border-dashed border-white/40 flex items-center justify-center overflow-hidden relative group">
+                      {config.header.logoUrl ? (
+                        <img src={config.header.logoUrl} className="w-full h-full object-contain p-2" />
+                      ) : (
+                        <ImageIcon size={32} className="text-white/40" />
+                      )}
 
-                  <label className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${!isPro ? 'opacity-50 grayscale bg-gray-100' : 'bg-white/50 hover:bg-white/80'}`}>
-                    <div className="relative">
+                      <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                        <Upload size={20} className="text-white" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => handleImageUpload(e, (url) => updateNestedConfig('header.logoUrl', url))}
+                        />
+                      </label>
+                    </div>
+                    <span className="text-[9px] font-black uppercase tracking-tighter opacity-60">Logotipo</span>
+                  </div>
+
+                  {/* Name and Subtitle Inputs */}
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase tracking-widest opacity-70 ml-1">Nome da sua Vitrine</label>
+                      <input
+                        value={config.header.title}
+                        onChange={(v) => updateNestedConfig('header.title', v.target.value)}
+                        placeholder="Nome da sua Marca"
+                        className="w-full bg-white/10 border border-white/20 focus:bg-white focus:text-indigo-900 rounded-2xl px-4 py-3 text-lg font-black outline-none transition-all placeholder:text-white/30"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black uppercase tracking-widest opacity-70 ml-1">Slogan ou Subtítulo</label>
+                      <input
+                        value={config.header.subtitle}
+                        onChange={(v) => updateNestedConfig('header.subtitle', v.target.value)}
+                        placeholder="Ex: Sua moda, seu estilo"
+                        className="w-full bg-white/5 border border-white/10 focus:bg-white focus:text-indigo-900 rounded-xl px-4 py-2 text-sm font-bold outline-none transition-all placeholder:text-white/20"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* MODO DE OPERACAO & WHATSAPP */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 relative overflow-hidden">
+                  <h3 className="text-[10px] font-black text-gray-400 uppercase mb-3 tracking-widest flex items-center gap-2">
+                    <Store size={14} /> Modo de Operação
+                  </h3>
+
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors border border-transparent active:border-indigo-100">
+                      <input
+                        type="radio"
+                        name="storeMode"
+                        checked={config.storeMode === 'mixed'}
+                        onChange={() => handleStoreModeChange('mixed')}
+                        className="accent-indigo-600"
+                      />
+                      <div>
+                        <p className="text-xs font-bold text-gray-800 tracking-tight">Híbrido (Padrão)</p>
+                        <p className="text-[9px] text-gray-500 font-bold uppercase">Vitrine + Compra Direta</p>
+                      </div>
+                    </label>
+
+                    <label className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors border border-transparent ${!isPro ? 'opacity-40 grayscale bg-gray-100' : 'bg-gray-50 hover:bg-gray-100 active:border-indigo-100'}`}>
                       <input
                         type="radio"
                         name="storeMode"
                         checked={config.storeMode === 'store'}
                         onChange={() => handleStoreModeChange('store')}
-                        className="text-terracotta focus:ring-terracotta"
+                        className="accent-indigo-600"
                         disabled={!isPro}
                       />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center">
-                        <p className="text-xs font-bold text-gray-800">Apenas Loja</p>
-                        {!isPro && <Lock size={12} className="text-gray-500" />}
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center">
+                          <p className="text-xs font-bold text-gray-800 tracking-tight">Apenas Loja</p>
+                          {!isPro && <Lock size={12} className="text-gray-400" />}
+                        </div>
+                        <p className="text-[9px] text-gray-500 font-bold uppercase">Foco total no Carrinho</p>
                       </div>
-                      <p className="text-[10px] text-gray-500">Apenas Carrinho / WhatsApp</p>
-                    </div>
-                  </label>
+                    </label>
+                  </div>
+                </div>
 
-                  <label className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${!isPro ? 'opacity-50 grayscale bg-gray-100' : 'bg-white/50 hover:bg-white/80'}`}>
-                    <input
-                      type="radio"
-                      name="storeMode"
-                      checked={config.storeMode === 'affiliate'}
-                      onChange={() => handleStoreModeChange('affiliate')}
-                      className="text-terracotta focus:ring-terracotta"
-                      disabled={!isPro}
-                    />
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center">
-                        <p className="text-xs font-bold text-gray-800">Apenas Afiliado</p>
-                        {!isPro && <Lock size={12} className="text-gray-500" />}
-                      </div>
-                      <p className="text-[10px] text-gray-500">Esconde Carrinho. Foco em Links.</p>
-                    </div>
-                  </label>
+                {/* WHATSAPP CONFIG */}
+                <div className={`bg-white border border-gray-100 shadow-sm rounded-2xl p-4 ${!isPro ? 'opacity-60 grayscale' : ''}`}>
+                  <div className="flex items-center justify-between mb-3 leading-tight">
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                      <MessageCircle size={14} /> Botão WhatsApp
+                    </span>
+                    <button
+                      onClick={handleWhatsappToggle}
+                      className={`transition-all active:scale-90 ${config.enableWhatsapp ? 'text-indigo-600' : 'text-gray-300'}`}
+                    >
+                      {config.enableWhatsapp ? <ToggleRight size={38} /> : <ToggleLeft size={38} />}
+                    </button>
+                  </div>
+                  <InputGroup label="WhatsApp Número" value={config.whatsapp.phoneNumber} onChange={(v) => updateNestedConfig('whatsapp.phoneNumber', v)} placeholder="Ex: 551199999999" />
                 </div>
               </div>
 
@@ -1255,90 +1308,34 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                 </p>
               </div>
 
-              {/* HEADER CONFIGURATION GROUP */}
-              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4">
-                <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
-                  <ImageIcon size={14} /> Identidade Visual
-                </h3>
-
-                {/* Logo Upload */}
-                <div className="mb-4">
-                  <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2">Logotipo da Loja</label>
-                  <div className="flex items-center gap-3">
-                    <div className="w-16 h-16 bg-white rounded-xl border border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative group">
-                      {config.header.logoUrl ? (
-                        <img src={config.header.logoUrl} className="w-full h-full object-contain p-1" />
-                      ) : (
-                        <span className="text-gray-300 text-xs text-center px-1">Sem Logo</span>
-                      )}
-
-                      <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-                        <Upload size={16} className="text-white" />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => handleImageUpload(e, (url) => updateNestedConfig('header.logoUrl', url))}
-                        />
-                      </label>
-                    </div>
-
-                    <div className="flex-1 space-y-2">
-                      <p className="text-[10px] text-gray-500 leading-tight">
-                        Carregue sua logo para substituir o título em texto. <br />
-                        <span className="text-[9px] opacity-70">Recomendado: PNG transparente.</span>
-                      </p>
-                      {config.header.logoUrl && (
-                        <button
-                          onClick={() => updateNestedConfig('header.logoUrl', '')}
-                          className="px-3 py-1 bg-red-50 text-red-500 text-[10px] font-bold rounded-lg flex items-center gap-1 hover:bg-red-100 transition-colors"
-                        >
-                          <Trash2 size={10} /> Remover Logo
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <InputGroup label="Nome da Loja (Usado se sem logo)" value={config.header.title} onChange={(v) => updateNestedConfig('header.title', v)} />
-                <InputGroup label="Subtítulo" value={config.header.subtitle} onChange={(v) => updateNestedConfig('header.subtitle', v)} />
-                <div className="pt-4 border-t border-gray-100 mt-4">
-                  <InputGroup label="Texto do Rodapé (Direitos Autorais)" value={config.footerText} onChange={(v) => updateConfig({ ...config, footerText: v })} />
-                </div>
+              <div className="pt-6 border-t border-gray-100 mt-4">
+                <InputGroup label="Texto do Rodapé (Direitos Autorais)" value={config.footerText} onChange={(v) => updateConfig({ ...config, footerText: v })} />
               </div>
 
-              <InputGroup label="WhatsApp" value={config.whatsapp.phoneNumber} onChange={(v) => updateNestedConfig('whatsapp.phoneNumber', v)} />
-
-              {/* Tracking & Location Toggle */}
-              <div className="pt-4 border-t border-gray-100">
-                <label className="block text-[10px] font-bold text-gray-500 uppercase mb-2 tracking-wider">Funcionalidades Extras</label>
-                <div className="space-y-2">
+              {/* DOMINIO E EXTRAS */}
+              <div className="space-y-4 pt-4">
+                {/* Tracking & Location Toggle */}
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => toggleCard('tracking')}
-                    className={`w-full py-2 px-3 rounded-xl flex items-center justify-between text-xs font-bold transition-all ${hasTracking ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}
+                    className={`py-3 px-3 rounded-2xl flex flex-col items-center gap-2 text-[10px] font-black transition-all border ${hasTracking ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-gray-50 text-gray-400 border-transparent'}`}
                   >
-                    <span className="flex items-center gap-2">
-                      {hasTracking ? <MapPinOff size={14} /> : <MapPin size={14} />}
-                      Rastreio de Pedido
-                    </span>
-                    <span className="text-[10px] opacity-60 uppercase">{hasTracking ? 'Ativo' : 'Inativo'}</span>
+                    {hasTracking ? <Package size={18} /> : <MapPinOff size={18} />}
+                    <span>Rastreio {hasTracking ? 'Ativo' : 'Off'}</span>
                   </button>
 
                   <button
                     onClick={() => toggleCard('location')}
-                    className={`w-full py-2 px-3 rounded-xl flex items-center justify-between text-xs font-bold transition-all ${hasLocation ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-600 border border-green-100'}`}
+                    className={`py-3 px-3 rounded-2xl flex flex-col items-center gap-2 text-[10px] font-black transition-all border ${hasLocation ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-gray-50 text-gray-400 border-transparent'}`}
                   >
-                    <span className="flex items-center gap-2">
-                      {hasLocation ? <MapPinOff size={14} /> : <MapPin size={14} />}
-                      Mapa da Loja
-                    </span>
-                    <span className="text-[10px] opacity-60 uppercase">{hasLocation ? 'Ativo' : 'Inativo'}</span>
+                    {hasLocation ? <MapPin size={18} /> : <MapPinOff size={18} />}
+                    <span>Mapa {hasLocation ? 'Ativo' : 'Off'}</span>
                   </button>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-white/20">
-                <p className="text-[9px] text-gray-400 text-center">Configurações de marca e operação da loja pública.</p>
+              <div className="pt-4 opacity-40">
+                <p className="text-[9px] text-gray-500 text-center font-black uppercase tracking-widest leading-relaxed">Configurações de Identidade e Operação</p>
               </div>
             </div>
           )}

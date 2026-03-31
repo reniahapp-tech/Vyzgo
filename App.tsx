@@ -54,66 +54,77 @@ const Home: React.FC<{ setIsProductModalOpen: (v: boolean) => void, setIsQuizMod
   const { config } = useConfig();
 
   return (
-    <>
-      <div className="animate-fade-in" style={{ animationDelay: '0ms' }}>
-        <Header />
+    <div className="min-h-screen bg-[#FDFDFD] relative overflow-x-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_#f3f4ff,_transparent_50%)] pointer-events-none opacity-50"></div>
+      
+      <div className="max-w-2xl mx-auto px-6 relative z-10">
+        <div className="animate-fade-in" style={{ animationDelay: '0ms' }}>
+          <Header />
+        </div>
+
+        <main className="space-y-12 pb-24">
+          {/* 1. Hero Card - Multi-Banner Carousel */}
+          <section className="animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <HeroCard onClick={() => setIsProductModalOpen(true)} />
+          </section>
+
+          {/* 2. Categorias - Stories Style (Horizontal Scroll) */}
+          <section className="animate-fade-in" style={{ animationDelay: '150ms' }}>
+             <div className="flex items-center justify-between mb-2 px-1">
+               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                 Coleções
+               </h3>
+             </div>
+             <div className="flex gap-1 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide snap-x">
+               {config.categories
+                 .filter(item => item.id !== 'location' && item.id !== 'tracking') 
+                 .map((item, index) => (
+                 <div
+                   key={item.id}
+                   className="snap-start animate-fade-in"
+                   style={{ animationDelay: `${200 + (index * 50)}ms` }}
+                 >
+                   <CategoryCard item={item} />
+                 </div>
+               ))}
+             </div>
+          </section>
+
+          {/* SearchBar - Minimal Pill */}
+          <section className="animate-fade-in" style={{ animationDelay: '250ms' }}>
+            <SearchBar />
+          </section>
+
+          {/* 3. Featured Products - Carousel */}
+          <section className="animate-fade-in" style={{ animationDelay: '300ms' }}>
+            <div className="flex items-center justify-between mb-4 px-1">
+               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                 Os mais desejados
+               </h3>
+             </div>
+            <FeaturedCarousel />
+          </section>
+
+          {/* 4. Store Map & Location */}
+          <section className="animate-fade-in pb-10" style={{ animationDelay: '400ms' }}>
+            <StoreMap />
+          </section>
+        </main>
+
+        <div className="animate-fade-in" style={{ animationDelay: '500ms' }}>
+          <WhatsAppButton />
+        </div>
+
+        <div className="animate-fade-in mt-12" style={{ animationDelay: '600ms' }}>
+          <SocialFooter />
+        </div>
+
+        {/* Footer note */}
+        <div className="mt-8 text-center opacity-30 text-[9px] uppercase font-black tracking-widest pb-12 animate-fade-in" style={{ animationDelay: '600ms' }}>
+          <p>{config.footerText}</p>
+        </div>
       </div>
-
-      <main className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-        {/* 1. Hero Card - Multi-Banner Carousel */}
-        <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <HeroCard onClick={() => setIsProductModalOpen(true)} />
-        </div>
-
-        {/* 2. Featured Products - Carousel */}
-        <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '150ms' }}>
-          <FeaturedCarousel />
-        </div>
-
-        {/* SearchBar */}
-        <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <SearchBar />
-        </div>
-
-        {/* 3. Categories Grid */}
-        <div className="col-span-2 md:col-span-4 mt-2">
-           <h3 className="text-xl font-black uppercase tracking-tight mb-4 flex items-center gap-2">
-             Categorias
-           </h3>
-           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-             {config.categories
-               .filter(item => item.id !== 'location') // Removendo "Nossa Loja" das categorias
-               .map((item, index) => (
-               <div
-                 key={item.id}
-                 className="col-span-1 animate-fade-in"
-                 style={{ animationDelay: `${250 + (index * 50)}ms` }}
-               >
-                 <CategoryCard item={item} />
-               </div>
-             ))}
-           </div>
-        </div>
-
-        {/* 4. Store Map */}
-        <div className="col-span-2 md:col-span-4 animate-fade-in" style={{ animationDelay: '400ms' }}>
-          <StoreMap />
-        </div>
-      </main>
-
-      <div className="mt-8 md:mt-12 animate-fade-in" style={{ animationDelay: '500ms' }}>
-        <WhatsAppButton />
-      </div>
-
-      <div className="animate-fade-in" style={{ animationDelay: '600ms' }}>
-        <SocialFooter />
-      </div>
-
-      {/* Footer note */}
-      <div className="mt-4 text-center opacity-40 text-[10px] uppercase font-black tracking-widest pb-6 animate-fade-in" style={{ animationDelay: '600ms' }}>
-        <p>{config.footerText}</p>
-      </div>
-    </>
+    </div>
   );
 };
 

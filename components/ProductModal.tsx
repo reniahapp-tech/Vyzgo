@@ -14,22 +14,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  // Use the config to determine if the Hero Product has an affiliate link
-  // Note: Since Hero is hardcoded in config for this demo, we assume it might have a property or we treat it as standard.
-  // For a real app, the Hero would likely be linked to a real Product ID. 
-  // Here, we will check if the Hero description or config implies an affiliate link, 
-  // OR we can add a specific 'heroAffiliateUrl' to config later.
-  // For now, to keep it consistent with the user request, let's assume the Hero behaves like a standard product 
-  // unless we are in Affiliate Only mode without a specific link, where it might default to a specific action.
-  
-  // Since the Hero object in types.ts doesn't have affiliateUrl, let's use a safe fallback or assume standard cart for now,
-  // BUT if storeMode is 'affiliate', we shouldn't show "Add to Cart".
-  
   const showCartButton = storeMode !== 'affiliate';
-  
-  // Assuming Hero doesn't have a specific affiliate URL in the current type definition,
-  // we will direct to WhatsApp or hide the button if in strict affiliate mode.
-  // To make this robust, let's assume if it's affiliate mode, the hero button acts as "Contact" or similar if no link exists.
 
   const handleAddToCart = () => {
     addToCart({
@@ -43,80 +28,98 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity animate-in fade-in duration-300"
         onClick={onClose}
       ></div>
 
       {/* Modal Content */}
       <div 
-        className="relative w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl animate-slide-up-panel max-h-[90vh] overflow-y-auto"
-        style={{ backgroundColor: config.theme.backgroundColor }}
+        className="relative w-full max-w-lg bg-white rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-10 duration-500 max-h-[95vh] flex flex-col"
       >
-        {/* Close Button */}
-        <button 
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-black/5 hover:bg-black/10 transition-colors"
-          style={{ color: theme.textColor }}
-        >
-          <X size={20} />
-        </button>
+        {/* Header Image */}
+        <div className="relative w-full aspect-[4/3] md:aspect-video shrink-0">
+          <ImageWithFallback 
+            src={hero.imageUrl} 
+            alt={hero.title} 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-40"></div>
+          
+          <button 
+            onClick={onClose}
+            className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/40 transition-all active:scale-90"
+          >
+            <X size={20} />
+          </button>
 
-        {/* Image */}
-        <div className="w-full h-56 rounded-2xl overflow-hidden mb-6 shadow-sm relative">
-           <ImageWithFallback 
-             src={hero.imageUrl} 
-             alt={hero.title} 
-             className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-           />
-           <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold shadow-sm" style={{ color: theme.primaryColor }}>
-             Destaque
-           </div>
+          <div className="absolute bottom-6 left-8 bg-indigo-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl">
+            Edição Especial
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-2xl font-bold leading-tight mb-1" style={{ color: theme.textColor }}>
-              {hero.title}
-            </h2>
-            <p className="text-xl font-medium" style={{ color: theme.primaryColor }}>
-              {hero.price}
-            </p>
+        {/* Content Area */}
+        <div className="px-8 pb-8 pt-4 overflow-y-auto flex-1">
+          <div className="space-y-6">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-3xl font-black text-gray-900 leading-[0.95] tracking-tighter uppercase">
+                {hero.title}
+              </h2>
+              <div className="flex items-center gap-3 mt-2">
+                <p className="text-2xl font-black text-indigo-600">
+                  {hero.price}
+                </p>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-green-50 text-green-600 text-[10px] font-black uppercase tracking-wider">
+                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                   Pronta Entrega
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+               <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-2">Sobre este item</h3>
+               <p className="text-gray-600 text-sm leading-relaxed font-medium">
+                  {hero.description || "Este item exclusivo foi selecionado para proporcionar a melhor experiência de estilo e qualidade. Design atemporal com acabamento premium."}
+               </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 py-2">
+               <div className="p-3 bg-gray-50 rounded-2xl flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-indigo-500 shadow-sm">
+                    <Check size={16} strokeWidth={3} />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">100% Original</span>
+               </div>
+               <div className="p-3 bg-gray-50 rounded-2xl flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-indigo-500 shadow-sm">
+                    <Info size={16} strokeWidth={3} />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-tighter text-gray-500">Garantia VyzGo</span>
+               </div>
+            </div>
           </div>
+        </div>
 
-          <div className="w-full h-px bg-current opacity-10"></div>
-
-          <p className="opacity-80 leading-relaxed" style={{ color: theme.textColor }}>
-            {hero.description || "Descrição do produto indisponível."}
-          </p>
-
-          <div className="flex gap-2 mt-2">
-            <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md bg-green-100 text-green-700">
-              <Check size={12} /> Em estoque
-            </span>
-            <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-md bg-blue-100 text-blue-700">
-              <Check size={12} /> Envio imediato
-            </span>
-          </div>
-
-          {/* Action Button */}
+        {/* Sticky Actions */}
+        <div className="p-6 bg-white border-t border-gray-100 shrink-0">
           {showCartButton ? (
             <button 
               onClick={handleAddToCart}
-              className="block w-full text-center font-bold py-4 px-6 rounded-xl2 shadow-lg hover:shadow-xl transition-all active:scale-[0.98] mt-6 flex items-center justify-center gap-2"
-              style={{ backgroundColor: theme.primaryColor, color: '#FFFFFF' }}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-5 rounded-[1.5rem] font-black shadow-2xl shadow-indigo-200 transition-all active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
             >
-              <ShoppingBag size={20} className="fill-white" />
+              <ShoppingBag size={20} strokeWidth={2.5} />
               Adicionar à Sacola
             </button>
           ) : (
-            <div className="mt-6 p-4 bg-gray-100 rounded-xl text-center text-gray-500 text-sm flex flex-col items-center">
-              <Info size={24} className="mb-2 opacity-50"/>
-              <p>Este produto é exclusivo. Entre em contato para saber onde comprar.</p>
-            </div>
+             <button 
+              onClick={() => window.open(`https://wa.me/${config.whatsapp.phoneNumber}`, '_blank')}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-5 rounded-[1.5rem] font-black shadow-2xl shadow-green-200 transition-all active:scale-[0.98] flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
+            >
+              <ExternalLink size={20} strokeWidth={2.5} />
+              Comprar via WhatsApp
+            </button>
           )}
         </div>
       </div>

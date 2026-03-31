@@ -35,29 +35,41 @@ const HeroCard: React.FC<HeroCardProps> = ({ onClick }) => {
     setCurrentIndex((prev) => (prev - 1 + bannerList.length) % bannerList.length);
   };
 
+  const isVideo = (url: string) => /\.(mp4|webm|mov|ogg|m4v)$/i.test(url);
+
   return (
     <div 
       onClick={onClick}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative overflow-hidden rounded-xl2 h-72 md:h-96 group cursor-pointer shadow-lg shadow-gray-200/50 transition-all hover:shadow-xl w-full"
+      className="relative overflow-hidden rounded-3xl h-[400px] md:h-[500px] group cursor-pointer shadow-2xl shadow-indigo-200/20 transition-all hover:scale-[1.01] w-full bg-gray-900"
     >
-      {/* Background Image with Safety Shield */}
-      <div className="absolute inset-0 flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
+      {/* Background Media (Image or Video) */}
+      <div className="absolute inset-0 flex transition-transform duration-700 cubic-bezier(0.4, 0, 0.2, 1)" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
         {bannerList.map((src, idx) => (
           <div key={idx} className="min-w-full h-full relative">
-            <ImageWithFallback 
-              src={src} 
-              alt={`${hero.title} ${idx + 1}`} 
-              fallbackText="Imagem Indisponível"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
+            {isVideo(src) ? (
+              <video 
+                src={src} 
+                autoPlay 
+                muted 
+                loop 
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <ImageWithFallback 
+                src={src} 
+                alt={`${hero.title} ${idx + 1}`} 
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            )}
           </div>
         ))}
       </div>
       
-      {/* Gradient Overlay for Text Readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
+      {/* Premium Glass Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
       
       {/* Manual Navigation Arrows */}
       {bannerList.length > 1 && (
@@ -90,25 +102,26 @@ const HeroCard: React.FC<HeroCardProps> = ({ onClick }) => {
       )}
 
       {/* Content */}
-      <div className="absolute bottom-0 left-0 w-full p-6 md:p-10 flex flex-col items-start z-10">
-        <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] md:text-xs font-bold text-white uppercase tracking-wider mb-2 border border-white/30">
-          Destaque {currentIndex + 1}
+      <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-end z-10">
+        <div className="animate-in slide-in-from-bottom-4 duration-700 delay-100">
+          <div className="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[9px] md:text-xs font-black text-white uppercase tracking-[0.2em] mb-4 border border-white/20 w-fit">
+            News & Trends
+          </div>
+          <h2 className="text-white text-4xl md:text-6xl font-black mb-2 leading-[0.95] tracking-tighter max-w-[90%] uppercase">
+            {hero.title}
+          </h2>
+          <p className="text-white/70 text-sm md:text-lg font-bold mb-8 drop-shadow-sm max-w-[85%] md:max-w-[50%] leading-snug">
+            {hero.subtitle}
+          </p>
+          
+          <button 
+            className="group/btn bg-white hover:bg-slate-50 text-indigo-900 px-8 py-4 rounded-2xl text-sm md:text-base font-black shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-3 w-fit uppercase tracking-wider"
+          >
+            {hero.buttonText} 
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
+            <span className="opacity-60">{hero.price}</span>
+          </button>
         </div>
-        <h2 className="text-white text-3xl md:text-5xl font-bold mb-1 md:mb-3 leading-tight drop-shadow-sm uppercase italic tracking-tighter">
-          {hero.title}
-        </h2>
-        <p className="text-white/90 text-sm md:text-base font-medium mb-4 md:mb-6 drop-shadow-sm max-w-[80%] md:max-w-[60%]">
-          {hero.subtitle}
-        </p>
-        
-        <button 
-          className="bg-white px-6 py-3 md:px-8 md:py-4 rounded-full text-sm md:text-base font-black shadow-md hover:scale-105 transition-transform flex items-center gap-1 group-active:scale-95 uppercase tracking-tighter"
-          style={{ color: theme.primaryColor }}
-        >
-          {hero.buttonText} 
-          <span className="w-px h-3 bg-gray-300 mx-2"></span>
-          <span>{hero.price}</span>
-        </button>
       </div>
     </div>
   );
