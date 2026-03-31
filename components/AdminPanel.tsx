@@ -536,7 +536,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
           
           <div className="flex items-center gap-2 md:gap-4">
             <a 
-              href={storeId === 'demo' ? '/demo' : `/v/${storeId}`}
+              href={window.location.hostname === 'localhost' ? `http://localhost:3000/v/${storeId}` : `https://vyzgo.com/v/${storeId}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-xl text-[10px] md:text-xs font-black hover:bg-blue-100 transition-all border border-blue-100 shadow-sm active:scale-95"
@@ -615,7 +615,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                   Você está visualizando a vitrine de exemplo. Qualquer alteração feita aqui é <b>compartilhada com outros usuários</b> e pode ser resetada a qualquer momento. Para ter sua própria vitrine exclusiva, faça login ou crie sua conta.
                 </p>
                 <div className="flex gap-3 mt-3">
-                   <button onClick={() => window.location.href = '/'} className="text-[10px] font-black text-yellow-800 underline decoration-yellow-300 hover:decoration-yellow-500 transition-all">Criar Minha Própria Vitrine</button>
+                   <button onClick={() => window.location.href = window.location.hostname === 'localhost' ? 'http://localhost:3000/login' : 'https://app.vyzgo.com/'} className="text-[10px] font-black text-yellow-800 underline decoration-yellow-300 hover:decoration-yellow-500 transition-all">Criar Minha Própria Vitrine</button>
                 </div>
               </div>
             </div>
