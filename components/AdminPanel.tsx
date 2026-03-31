@@ -258,9 +258,11 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
   const { isAdmin, user, signOut, hasStore, isActive } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'themes' | 'branding' | 'home' | 'products' | 'plan' | 'social' | 'help' | 'orders' | 'modules' | 'coupons'>('themes');
+  const [activeTab, setActiveTab] = useState<'home' | 'products' | 'orders' | 'settings'>('home');
+  const [settingsTab, setSettingsTab] = useState<'branding' | 'themes' | 'modules' | 'coupons' | 'plan' | 'social' | 'help'>('branding');
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
   const [activePluginId, setActivePluginId] = useState<string | null>(null);
+  const [editingProductIndex, setEditingProductIndex] = useState<{cIdx: number, pIdx: number} | null>(null);
   // Coupon form state
   const [couponForm, setCouponForm] = useState({ code: '', type: 'percent' as 'percent' | 'fixed', value: 10, minOrder: 0, active: true });
   
@@ -375,12 +377,16 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
   const handleAddProduct = () => {
     const newProduct: ProductItem = {
       id: `prod-${Date.now()}`,
-      title: 'Novo Produto',
-      price: 'R$ 0,00',
-      description: 'Descrição do produto',
+      title: '',
+      price: '',
+      description: '',
       imageUrl: 'https://images.unsplash.com/photo-1590735213920-68192a487561?q=80&w=1000&auto=format&fit=crop'
     };
+    const pIdx = config.categories[selectedCategoryIndex].products.length;
     addProductToCategory(selectedCategoryIndex, newProduct);
+    setTimeout(() => {
+        setEditingProductIndex({ cIdx: selectedCategoryIndex, pIdx });
+    }, 50);
   };
 
   // Helper to check if Tracking/Location is active
@@ -571,15 +577,10 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
         {/* Tabs */}
         <div className="flex p-2 gap-1 overflow-x-auto scrollbar-hide">
           {[
-            { id: 'home', icon: Layout, label: 'Home' },
-            { id: 'products', icon: ShoppingBag, label: 'Itens' },
-            { id: 'orders', icon: ClipboardList, label: 'Pedidos', badge: orders.filter(o => o.status === 'pending').length || 0 },
-            { id: 'coupons', icon: Tag, label: 'Cupons' },
-            { id: 'branding', icon: Link, label: 'Marca' },
-            { id: 'themes', icon: Palette, label: 'Temas' },
-            { id: 'modules', icon: Puzzle, label: 'Módulos', badge: plugins.filter(p => p.enabled).length || 0 },
-            { id: 'plan', icon: Crown, label: 'Plano', highlight: !isPro },
-            { id: 'help', icon: HelpCircle, label: 'Ajuda' },
+            { id: 'home', icon: Layout, label: 'Início' },
+            { id: 'products', icon: ShoppingBag, label: 'Produtos' },
+            { id: 'orders', icon: ClipboardList, label: 'Vendas', badge: orders.filter(o => o.status === 'pending').length || 0 },
+            { id: 'settings', icon: Settings, label: 'Configurações' },
           ].map(tab => (
             <button
                key={tab.id}
@@ -621,7 +622,26 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             </div>
           )}
 
-          {activeTab === 'help' && (
+          {activeTab === 'settings' && (
+             <div className="mb-8 p-1 flex overflow-x-auto gap-2 bg-gray-50 rounded-2xl border border-gray-100/50">
+                 {[
+                   { id: 'branding', label: '1. Perfil da Loja' },
+                   { id: 'themes', label: '2. Aparência Gráfica' },
+                   { id: 'modules', label: '3. Integrações' },
+                   { id: 'coupons', label: '4. Cupons' },
+                   { id: 'social', label: '5. Redes Sociais' },
+                   { id: 'plan', label: 'Assinatura Pro', highlight: !isPro },
+                   { id: 'help', label: 'Ajuda e Dúvidas' },
+                 ].map(t => (
+                    <button key={t.id} onClick={() => setSettingsTab(t.id as any)} className={`px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all flex items-center gap-2 ${settingsTab === t.id ? 'bg-white text-indigo-600 shadow-sm border border-black/5 scale-100' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50 border border-transparent'}`}>
+                       {t.label} 
+                       {t.highlight && <Crown size={12} className="text-yellow-500"/>}
+                    </button>
+                 ))}
+             </div>
+          )}
+
+          {activeTab === 'settings' && settingsTab === 'help' && (
             <div className="space-y-4">
               <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
                 <h3 className="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
@@ -667,7 +687,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             </div>
           )}
 
-          {activeTab === 'coupons' && (
+          {activeTab === 'settings' && settingsTab === 'coupons' && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 mb-1">
                 <Tag size={14} className="text-yellow-500" />
@@ -765,7 +785,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             </div>
           )}
 
-          {activeTab === 'modules' && (
+          {activeTab === 'settings' && settingsTab === 'modules' && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 mb-1">
                 <Puzzle size={14} className="text-purple-500" />
@@ -877,7 +897,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             </div>
           )}
 
-          {activeTab === 'plan' && (
+          {activeTab === 'settings' && settingsTab === 'plan' && (
             <div className="space-y-4">
               <div className={`p-6 rounded-2xl text-center border-2 ${isPro ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white/50'}`}>
                 {isPro ? (
@@ -965,7 +985,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             </div>
           )}
 
-          {activeTab === 'themes' && (
+          {activeTab === 'settings' && settingsTab === 'themes' && (
             <div className="space-y-3">
               <div className="bg-white/40 p-3 rounded-xl border border-white/50 mb-4">
                 <h3 className="text-xs font-bold text-gray-700 uppercase mb-2">Ajuste Rápido (Atual)</h3>
@@ -1013,7 +1033,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             </div>
           )}
 
-          {activeTab === 'social' && (
+          {activeTab === 'settings' && settingsTab === 'social' && (
             <div className="space-y-4">
               <div className="bg-white/40 border border-white/50 rounded-xl p-3">
                 <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
@@ -1036,7 +1056,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             </div>
           )}
 
-          {activeTab === 'branding' && (
+          {activeTab === 'settings' && settingsTab === 'branding' && (
             <div className="space-y-4">
               {/* CONFIGURAÇÕES GERAIS DA LOJA */}
               <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4 mb-4 relative overflow-hidden">
@@ -1524,117 +1544,44 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
 
               <div className="space-y-3">
                 {config.categories[selectedCategoryIndex]?.products.map((prod, pIndex) => (
-                  <div key={prod.id} className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4">
-                    <div className="flex gap-2 mb-2">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0 relative group">
+                  <div key={prod.id} className="bg-white border border-gray-100 shadow-sm rounded-2xl p-3 flex items-center justify-between hover:border-blue-200 transition-colors group">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100">
                         <ImageWithFallback src={prod.imageUrl} className="w-full h-full object-cover" />
-                        <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer text-white">
-                          <Upload size={12} />
-                          <input type="file" accept="image/*,video/mp4,video/webm" className="hidden" onChange={(e) => handleImageUpload(e, (url) => updateProduct(selectedCategoryIndex, pIndex, 'imageUrl', url))} />
-                        </label>
                       </div>
-                      <div className="flex-1 space-y-1">
-                        <input
-                          value={prod.title}
-                          onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'title', e.target.value)}
-                          className="w-full bg-transparent border-b border-gray-200 text-xs font-bold outline-none"
-                          placeholder="Nome do Produto"
-                        />
-                        <input
-                          value={prod.price}
-                          onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'price', e.target.value)}
-                          className="w-full bg-transparent border-b border-gray-200 text-xs text-green-600 outline-none"
-                          placeholder="Preço"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1 items-center self-start">
-                        <button 
-                          onClick={() => {
-                            let domain = window.location.origin;
-                            // Se for ambiente local, podemos simular ou usar o próprio.
-                            // Em prod, o subdomínio já está no window.location.origin.
-                            const originAndParams = storeId !== 'demo' && domain.includes('localhost') 
-                              ? `${domain}?store=${storeId}`
-                              : domain;
-                              
-                            const baseUrl = originAndParams.includes('?') 
-                              ? `${originAndParams}&` 
-                              : `${originAndParams}`;
-                              
-                            const finalPath = domain.includes('localhost')
-                              ? originAndParams.replace('localhost:3000', `localhost:3000/product/${prod.id}`)
-                              : `${domain}/product/${prod.id}`;
-                              
-                            navigator.clipboard.writeText(finalPath);
-                            addToast('Link direto copiado! 🔗', 'success');
-                          }} 
-                          className="text-indigo-500 bg-indigo-50 p-1.5 rounded-lg hover:bg-indigo-100 transition-colors"
-                          title="Obter Link de Venda (Stories / Bio)"
-                        >
-                          <Link size={14} />
-                        </button>
-                        <button onClick={() => removeProductFromCategory(selectedCategoryIndex, pIndex)} className="text-red-400 p-1.5 hover:bg-red-50 rounded-lg transition-colors">
-                          <Trash2 size={14} />
-                        </button>
+                      <div className="flex flex-col">
+                        <h4 className="text-[13px] font-black text-gray-800 line-clamp-1">{prod.title || 'Produto S/ Nome'}</h4>
+                        <div className="flex items-center gap-2 mt-0.5">
+                           <p className="text-[11px] font-bold text-green-600">{prod.price || 'R$ 0,00'}</p>
+                           {prod.stock !== undefined && prod.stock !== null && (
+                              <span className="text-[9px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded font-bold">{prod.stock} em estoque</span>
+                           )}
+                        </div>
                       </div>
                     </div>
-                    <div className="flex justify-end mb-1">
-                      <button
-                        onClick={async () => {
-                          if (!prod.title) return alert("Digite o nome do produto primeiro.");
-                          addToast('Criando mágica... ✨', 'info');
-                          try {
-                            const desc = await generateProductDescription(
-                              prod.title,
-                              prod.price,
-                              config.categories[selectedCategoryIndex].title
-                            );
-                            updateProduct(selectedCategoryIndex, pIndex, 'description', desc);
-                            addToast('Descrição gerada!', 'success');
-                          } catch (e: any) {
-                            addToast(e.message || 'Erro ao gerar descrição.', 'error');
-                          }
-                        }}
-                        className="text-[10px] text-purple-600 font-bold flex items-center gap-1 hover:bg-purple-50 px-2 py-1 rounded-full transition-colors"
-                        title="Gerar descrição com IA"
+                    <div className="flex items-center gap-1.5">
+                      <button 
+                        onClick={() => {
+                          let domain = window.location.origin;
+                          const originAndParams = storeId !== 'demo' && domain.includes('localhost') ? `${domain}?store=${storeId}` : domain;
+                          const finalPath = domain.includes('localhost') ? originAndParams.replace('localhost:3000', `localhost:3000/product/${prod.id}`) : `${domain}/product/${prod.id}`;
+                          navigator.clipboard.writeText(finalPath);
+                          addToast('Link copiado!', 'success');
+                        }} 
+                        className="text-gray-400 p-2 hover:bg-gray-50 hover:text-black rounded-lg transition-colors"
+                        title="Obter Link de Venda"
                       >
-                        <Sparkles size={10} /> Mágica IA
+                        <Link size={16} />
                       </button>
-                    </div>
-                    <textarea
-                      value={prod.description}
-                      onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'description', e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-100 rounded-lg p-3 text-[11px] resize-none outline-none mb-2 shadow-inner"
-                      placeholder="Descrição..."
-                      rows={2}
-                    />
-                    {/* Stock field */}
-                    <div className="flex items-center gap-2 mt-2 p-2 bg-orange-50 border border-orange-100 rounded-lg">
-                      <Package size={10} className="text-orange-500 shrink-0" />
-                      <label className="text-[9px] font-bold text-orange-700 uppercase flex-1">Estoque</label>
-                      <input
-                        type="number"
-                        value={prod.stock ?? ''}
-                        placeholder="∞"
-                        min={0}
-                        onChange={e => updateProduct(selectedCategoryIndex, pIndex, 'stock', e.target.value === '' ? null : Number(e.target.value))}
-                        className="w-20 bg-white border border-orange-200 rounded px-2 py-1 text-[10px] text-center outline-none"
-                      />
-                      {prod.stock === 0 && <span className="text-[9px] font-bold text-red-500">Esgotado</span>}
-                    </div>
-
-                    {/* Affiliate Link Input */}
-                    <div className="bg-blue-50/50 p-2 rounded-lg border border-blue-100">
-                      <div className="flex items-center gap-1 mb-1">
-                        <Link size={10} className="text-blue-500" />
-                        <label className="text-[9px] font-bold text-blue-600 uppercase">Link de Afiliado/Externo (Opcional)</label>
-                      </div>
-                      <input
-                        value={prod.affiliateUrl || ''}
-                        onChange={(e) => updateProduct(selectedCategoryIndex, pIndex, 'affiliateUrl', e.target.value)}
-                        placeholder="https://..."
-                        className="w-full bg-white border border-blue-100 rounded px-2 py-1 text-[10px] text-blue-800 outline-none"
-                      />
+                      <button 
+                        onClick={() => setEditingProductIndex({ cIdx: selectedCategoryIndex, pIdx: pIndex })}
+                        className="px-3 py-1.5 bg-blue-50 text-blue-600 font-bold text-[11px] rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                      >
+                        Editar
+                      </button>
+                      <button onClick={() => removeProductFromCategory(selectedCategoryIndex, pIndex)} className="text-red-400 p-2 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors">
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -1657,15 +1604,132 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
         </div>
       </div>
 
-      <PaymentGateway
-        isOpen={isPaymentOpen}
-        onClose={() => setIsPaymentOpen(false)}
-        onSuccess={upgradeToPro}
-        planName="Plano Pro"
-        price="R$ 39,90"
-      />
-    </div>
-  );
+        <PaymentGateway
+          isOpen={isPaymentOpen}
+          onClose={() => setIsPaymentOpen(false)}
+          onSuccess={upgradeToPro}
+          planName="Plano Pro"
+          price="R$ 39,90"
+        />
+
+        {/* Product Editor Modal */}
+        {editingProductIndex !== null && config.categories[editingProductIndex.cIdx]?.products[editingProductIndex.pIdx] && (
+          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex justify-center items-end md:items-center animate-in fade-in duration-300">
+            <div className="bg-white w-full md:w-[600px] md:max-h-[90vh] md:rounded-3xl rounded-t-3xl overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-10 md:slide-in-from-bottom-4 duration-500 relative">
+              {(() => {
+                const cIdx = editingProductIndex.cIdx;
+                const pIdx = editingProductIndex.pIdx;
+                const prod = config.categories[cIdx].products[pIdx];
+                return (
+                  <div>
+                    <div className="sticky top-0 bg-white/90 backdrop-blur-md z-10 border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+                      <h2 className="text-lg font-black text-gray-800 tracking-tight">Editar Produto</h2>
+                      <button onClick={() => setEditingProductIndex(null)} className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition-colors text-gray-500 cursor-pointer">
+                        <X size={18} />
+                      </button>
+                    </div>
+                    
+                    <div className="p-6 space-y-6">
+                      {/* Imagem (Hero do Form Cadastro) */}
+                      <div className="w-full h-48 md:h-64 bg-gray-100 rounded-2xl overflow-hidden relative group border-2 border-dashed border-gray-200 hover:border-indigo-400 transition-colors">
+                        <ImageWithFallback src={prod.imageUrl} className="w-full h-full object-cover" />
+                        <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer text-white transition-opacity">
+                          <Upload size={24} className="mb-2" />
+                          <span className="text-xs font-bold uppercase tracking-widest">Nova Foto/Vídeo</span>
+                          <input type="file" accept="image/*,video/mp4,video/webm" className="hidden" onChange={(e) => handleImageUpload(e, (url) => updateProduct(cIdx, pIdx, 'imageUrl', url))} />
+                        </label>
+                      </div>
+                      
+                      {/* Grid de Informacoes Essenciais */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5 md:col-span-2">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome do Produto</label>
+                          <input
+                            value={prod.title}
+                            onChange={(e) => updateProduct(cIdx, pIdx, 'title', e.target.value)}
+                            className="w-full bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white text-sm font-bold rounded-xl px-4 py-3 outline-none transition-all"
+                            placeholder="Ex: Tênis Nike Air Max"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Preço (R$)</label>
+                          <input
+                            value={prod.price}
+                            onChange={(e) => updateProduct(cIdx, pIdx, 'price', e.target.value)}
+                            className="w-full bg-gray-50 border-2 border-transparent focus:border-green-500 focus:bg-white text-sm text-green-600 font-bold rounded-xl px-4 py-3 outline-none transition-all"
+                            placeholder="199,90"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Estoque</label>
+                          <div className="relative">
+                            <Package size={16} className="absolute left-3 top-3 text-orange-400" />
+                            <input
+                              type="number"
+                              value={prod.stock ?? ''}
+                              placeholder="Ilimitado"
+                              min={0}
+                              onChange={e => updateProduct(cIdx, pIdx, 'stock', e.target.value === '' ? null : Number(e.target.value))}
+                              className="w-full bg-orange-50/50 border-2 border-transparent focus:border-orange-500 focus:bg-white text-sm text-orange-700 font-bold rounded-xl pl-10 pr-4 py-3 outline-none transition-all"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Descricao Area */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição</label>
+                           <button
+                              onClick={async () => {
+                                if (!prod.title) return alert("Digite o nome do produto primeiro.");
+                                addToast('Criando mágica AI... ✨', 'info');
+                                try {
+                                  const desc = await generateProductDescription(prod.title, prod.price, config.categories[cIdx].title);
+                                  updateProduct(cIdx, pIdx, 'description', desc);
+                                  addToast('Descrição gerada!', 'success');
+                                } catch (e: any) { addToast(e.message || 'Erro.', 'error'); }
+                              }}
+                              className="text-[10px] text-purple-600 font-black flex items-center gap-1 hover:bg-purple-100 px-3 py-1.5 rounded-full transition-colors uppercase tracking-wider"
+                            >
+                              <Sparkles size={12} /> Gerar Mágica IA
+                           </button>
+                        </div>
+                        <textarea
+                          value={prod.description}
+                          onChange={(e) => updateProduct(cIdx, pIdx, 'description', e.target.value)}
+                          className="w-full bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-xl p-4 text-xs resize-none outline-none shadow-inner min-h-[100px]"
+                          placeholder="Fale sobre os benefícios do produto..."
+                        />
+                      </div>
+
+                      {/* Affiliate Link Input */}
+                      <div className="space-y-1.5 p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
+                        <label className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest ml-1">
+                          <Link size={12} /> Link de Pagamento / Afiliado (Opcional)
+                        </label>
+                        <p className="text-[10px] text-blue-400 mb-2 ml-1">Se preenchido, o cliente não vai pro seu WhatsApp, vai direto pra esse site comprar.</p>
+                        <input
+                          value={prod.affiliateUrl || ''}
+                          onChange={(e) => updateProduct(cIdx, pIdx, 'affiliateUrl', e.target.value)}
+                          placeholder="https://..."
+                          className="w-full bg-white border border-blue-200 focus:border-blue-500 rounded-lg px-3 py-2.5 text-xs text-blue-800 outline-none transition-colors"
+                        />
+                      </div>
+
+                    </div>
+                    
+                    <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 md:p-6 flex gap-3">
+                       <button onClick={() => setEditingProductIndex(null)} className="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-sm uppercase tracking-wider transition-all shadow-xl shadow-indigo-900/20 active:scale-95">Concluir Edição</button>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        )}
+      </div>
+    );
 };
 
 // FAQ Accordion Component
