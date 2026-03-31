@@ -75,9 +75,9 @@ const LandingPage: React.FC = () => {
                         </div>
 
                         <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter mb-8 leading-[1.05] uppercase italic">
-                            Transforme sua <br />
+                            Multiplique suas vendas <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 via-purple-500 to-pink-500">
-                                Bio em Lucro.
+                                Pelo WhatsApp.
                             </span>
                         </h1>
 
@@ -119,7 +119,7 @@ const LandingPage: React.FC = () => {
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-20">
                         <h2 className="text-3xl md:text-6xl font-black mb-6 tracking-tighter uppercase italic">A Transformação Digital.</h2>
-                        <p className="text-gray-400 text-lg md:text-xl font-medium">O que muda quando você profissionaliza seu link na bio.</p>
+                        <p className="text-gray-400 text-lg md:text-xl font-medium">O que muda quando você profissionaliza suas vendas sociais.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
@@ -178,8 +178,16 @@ const LandingPage: React.FC = () => {
                             <div className="md:w-1/2 bg-black relative min-h-[300px] p-8 flex items-center justify-center border-l border-white/5">
                                 <div className="w-full max-w-[240px] aspect-[9/16] bg-zinc-800 rounded-3xl border border-zinc-700 shadow-2xl relative overflow-hidden group-hover:scale-105 transition-transform duration-700">
                                     <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-                                        <div className="w-[120%] h-[120%] bg-gradient-to-tr from-purple-900 via-indigo-900 to-black animate-pulse-slow"></div>
-                                        <div className="absolute font-black text-white/20 text-3xl italic tracking-widest rotate-[-90deg]">.MP4</div>
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-purple-900 via-indigo-900 to-black"></div>
+                                        <video 
+                                            src="https://cdn.pixabay.com/video/2021/08/04/83863-584742721_tiny.mp4" 
+                                            className="w-full h-full object-cover opacity-60 mix-blend-screen" 
+                                            autoPlay 
+                                            muted 
+                                            loop 
+                                            playsInline 
+                                        />
+                                        <div className="absolute font-black text-white/30 text-3xl italic tracking-widest rotate-[-90deg] drop-shadow-2xl">.MP4</div>
                                     </div>
                                     <div className="absolute bottom-4 left-4 right-4 h-12 bg-white/10 backdrop-blur-md rounded-xl"></div>
                                     <div className="absolute top-4 left-4 w-12 h-4 bg-white/20 rounded-full"></div>
@@ -420,7 +428,7 @@ const LandingPage: React.FC = () => {
             <section id="faq" className="py-32 container mx-auto px-4 max-w-4xl">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl md:text-5xl font-black mb-4 tracking-tight italic">Tirando Duvidas.</h2>
-                    <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Tudo o que você precisa saber antes de lucrar com seu link na bio</p>
+                    <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Tudo o que você precisa saber antes de lucrar com a VyzGo</p>
                 </div>
 
                 <div className="space-y-4">
