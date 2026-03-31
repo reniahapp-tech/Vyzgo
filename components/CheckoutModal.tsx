@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Phone, MapPin, Package, MessageCircle, Check, Truck, Store, Tag, CheckCircle2, XCircle } from 'lucide-react';
+import { X, User, Phone, MapPin, Package, MessageCircle, Check, Truck, Store, Tag, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
 import { CheckoutData, Order } from '../types';
 
@@ -117,154 +117,195 @@ const CheckoutModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
           {step === 'form' && (
-            <>
+            <div className="space-y-6">
               {/* Name */}
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 tracking-wide">
-                  <User size={11} className="inline mr-1" />Seu nome
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
+                  Seu Nome Completo
                 </label>
-                <input
-                  type="text" placeholder="Maria Silva" value={data.customerName}
-                  onChange={e => setData({ ...data, customerName: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-green-400 outline-none transition-colors text-sm"
-                  style={{ backgroundColor: 'white', color: theme.textColor }} autoFocus
-                />
+                <div className="relative group">
+                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors">
+                    <User size={18} />
+                  </div>
+                  <input
+                    type="text" placeholder="Ex: Maria Oliveira" value={data.customerName}
+                    onChange={e => setData({ ...data, customerName: e.target.value })}
+                    className="w-full pl-12 pr-5 py-4 rounded-2xl bg-gray-50 border border-transparent focus:border-indigo-500/30 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all text-gray-900 font-bold"
+                  />
+                </div>
               </div>
 
               {/* Phone */}
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 tracking-wide">
-                  <Phone size={11} className="inline mr-1" />Telefone/WhatsApp
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
+                  WhatsApp para Contato
                 </label>
-                <input
-                  type="tel" placeholder="(11) 99999-9999" value={data.customerPhone}
-                  onChange={e => setData({ ...data, customerPhone: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-green-400 outline-none transition-colors text-sm"
-                  style={{ backgroundColor: 'white', color: theme.textColor }}
-                />
+                <div className="relative group">
+                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors">
+                    <Phone size={18} />
+                  </div>
+                  <input
+                    type="tel" placeholder="(11) 99999-9999" value={data.customerPhone}
+                    onChange={e => setData({ ...data, customerPhone: e.target.value })}
+                    className="w-full pl-12 pr-5 py-4 rounded-2xl bg-gray-50 border border-transparent focus:border-indigo-500/30 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all text-gray-900 font-bold"
+                  />
+                </div>
               </div>
 
-              {/* Delivery */}
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-2 tracking-wide">
-                  <Package size={11} className="inline mr-1" />Como deseja receber?
+              {/* Delivery Type */}
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
+                  Forma de Recebimento
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-4">
                   <button
                     onClick={() => setData({ ...data, deliveryType: 'delivery' })}
-                    className={`p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${data.deliveryType === 'delivery' ? 'border-green-500 bg-green-50' : 'border-gray-100 bg-white'}`}
+                    className={`p-5 rounded-3xl border-2 flex flex-col items-center gap-3 transition-all active:scale-95 ${data.deliveryType === 'delivery' ? 'border-indigo-600 bg-indigo-50/50 shadow-lg shadow-indigo-100' : 'border-gray-50 bg-gray-50/50'}`}
                   >
-                    <Truck size={22} className={data.deliveryType === 'delivery' ? 'text-green-600' : 'text-gray-400'} />
-                    <span className={`text-xs font-bold ${data.deliveryType === 'delivery' ? 'text-green-700' : 'text-gray-500'}`}>Entrega</span>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${data.deliveryType === 'delivery' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-200' : 'bg-white text-gray-400'}`}>
+                      <Truck size={24} />
+                    </div>
+                    <span className={`text-xs font-black uppercase tracking-widest ${data.deliveryType === 'delivery' ? 'text-indigo-900' : 'text-gray-400'}`}>Entrega</span>
                   </button>
                   <button
                     onClick={() => setData({ ...data, deliveryType: 'pickup' })}
-                    className={`p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${data.deliveryType === 'pickup' ? 'border-green-500 bg-green-50' : 'border-gray-100 bg-white'}`}
+                    className={`p-5 rounded-3xl border-2 flex flex-col items-center gap-3 transition-all active:scale-95 ${data.deliveryType === 'pickup' ? 'border-indigo-600 bg-indigo-50/50 shadow-lg shadow-indigo-100' : 'border-gray-50 bg-gray-50/50'}`}
                   >
-                    <Store size={22} className={data.deliveryType === 'pickup' ? 'text-green-600' : 'text-gray-400'} />
-                    <span className={`text-xs font-bold ${data.deliveryType === 'pickup' ? 'text-green-700' : 'text-gray-500'}`}>Retirar</span>
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${data.deliveryType === 'pickup' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-200' : 'bg-white text-gray-400'}`}>
+                      <Store size={24} />
+                    </div>
+                    <span className={`text-xs font-black uppercase tracking-widest ${data.deliveryType === 'pickup' ? 'text-indigo-900' : 'text-gray-400'}`}>Retirada</span>
                   </button>
                 </div>
               </div>
 
               {/* Address */}
               {data.deliveryType === 'delivery' && (
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 tracking-wide">
-                    <MapPin size={11} className="inline mr-1" />Endereço de entrega
+                <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">
+                    Endereço Completo
                   </label>
-                  <textarea
-                    placeholder="Rua, número, bairro, cidade..."
-                    value={data.address || ''} rows={2}
-                    onChange={e => setData({ ...data, address: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-green-400 outline-none transition-colors text-sm resize-none"
-                    style={{ backgroundColor: 'white', color: theme.textColor }}
-                  />
+                  <div className="relative group">
+                    <div className="absolute left-5 top-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors">
+                      <MapPin size={18} />
+                    </div>
+                    <textarea
+                      placeholder="Rua, número, bairro, cidade..."
+                      value={data.address || ''} rows={3}
+                      onChange={e => setData({ ...data, address: e.target.value })}
+                      className="w-full pl-12 pr-5 py-4 rounded-2xl bg-gray-50 border border-transparent focus:border-indigo-500/30 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all text-gray-900 font-bold resize-none"
+                    />
+                  </div>
                 </div>
               )}
 
               {/* Coupon */}
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 tracking-wide">
-                  <Tag size={11} className="inline mr-1" />Cupom de desconto (opcional)
+              <div className="pt-4 border-t border-gray-50">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1 mb-2 block">
+                  Tem um Cupom?
                 </label>
                 {appliedCoupon ? (
-                  <div className="flex items-center justify-between px-4 py-3 bg-green-50 border-2 border-green-400 rounded-xl">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 size={16} className="text-green-600" />
-                      <span className="text-sm font-bold text-green-700">{appliedCoupon.code}</span>
-                      <span className="text-xs text-green-600">
-                        {appliedCoupon.type === 'percent' ? `-${appliedCoupon.value}%` : `-R$ ${appliedCoupon.value.toFixed(2).replace('.', ',')}`}
-                      </span>
+                  <div className="flex items-center justify-between px-6 py-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white">
+                        <Tag size={14} />
+                      </div>
+                      <div>
+                        <span className="text-xs font-black text-indigo-900 uppercase tracking-widest block">{appliedCoupon.code}</span>
+                        <span className="text-[10px] font-bold text-indigo-400">Cupom Aplicado</span>
+                      </div>
                     </div>
-                    <button onClick={() => { removeCoupon(); setCouponStatus('idle'); setCouponInput(''); }} className="text-green-500 hover:text-red-500 transition-colors">
-                      <XCircle size={16} />
+                    <button onClick={() => { removeCoupon(); setCouponStatus('idle'); setCouponInput(''); }} className="text-red-400 hover:text-red-600 transition-colors">
+                      <XCircle size={20} />
                     </button>
                   </div>
                 ) : (
                   <div className="flex gap-2">
                     <input
-                      type="text" placeholder="Ex: PROMO10" value={couponInput}
+                      type="text" placeholder="EX: VYZGO10" value={couponInput}
                       onChange={e => { setCouponInput(e.target.value.toUpperCase()); setCouponStatus('idle'); }}
                       onKeyDown={e => e.key === 'Enter' && handleCouponApply()}
-                      className={`flex-1 px-4 py-3 rounded-xl border-2 outline-none transition-colors text-sm font-mono ${
-                        couponStatus === 'invalid' ? 'border-red-300 bg-red-50' : 'border-gray-100 focus:border-yellow-400'
+                      className={`flex-1 px-5 py-4 rounded-2xl bg-gray-50 border border-transparent focus:border-indigo-500/30 focus:bg-white outline-none transition-all text-gray-900 font-black uppercase tracking-widest text-sm ${
+                        couponStatus === 'invalid' ? 'border-red-500/30 bg-red-50' : ''
                       }`}
-                      style={{ backgroundColor: 'white', color: theme.textColor }}
                     />
                     <button
                       onClick={handleCouponApply}
-                      className="px-4 py-3 rounded-xl font-bold text-sm text-white transition-colors"
-                      style={{ backgroundColor: theme.primaryColor }}
+                      className="px-6 py-4 rounded-2xl font-black text-xs text-white uppercase tracking-widest transition-all bg-indigo-600 hover:bg-indigo-700 active:scale-95 shadow-lg shadow-indigo-100"
                     >
                       Aplicar
                     </button>
                   </div>
                 )}
-                {couponStatus === 'invalid' && (
-                  <p className="text-[10px] text-red-500 mt-1">Cupom inválido, expirado ou pedido mínimo não atingido.</p>
-                )}
               </div>
-            </>
+            </div>
           )}
 
           {step === 'confirm' && (
-            <div className="space-y-4">
-              <div className="bg-gray-50 rounded-2xl p-4">
-                <h3 className="text-xs font-bold text-gray-500 uppercase mb-3">Resumo do Pedido</h3>
-                {cart.map(item => (
-                  <div key={item.id} className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-700">{item.quantity}x {item.title}</span>
-                    <span className="font-bold" style={{ color: theme.primaryColor }}>{item.price}</span>
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="bg-gray-50 rounded-[2rem] p-8">
+                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Resumo da Sacola</h3>
+                <div className="space-y-4">
+                  {cart.map(item => (
+                    <div key={item.id} className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm">
+                      <div className="flex items-center gap-3">
+                         <span className="w-6 h-6 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-black text-indigo-600">{item.quantity}x</span>
+                         <span className="font-bold text-gray-900 text-sm">{item.title}</span>
+                      </div>
+                      <span className="font-black text-indigo-600 text-sm">{item.price}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-gray-200">
+                  {appliedCoupon && (
+                    <div className="flex justify-between items-center mb-2 px-1">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Desconto Cupom</span>
+                      <span className="font-black text-green-500">- R$ {discount.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-end px-1">
+                    <div className="flex flex-col">
+                       <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total do Pedido</span>
+                       <span className="text-4xl font-black text-gray-900 tracking-tighter">
+                         R$ {total.toFixed(2).replace('.', ',')}
+                       </span>
+                    </div>
+                    <div className="bg-indigo-100 px-3 py-1 rounded-full">
+                       <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest">Pronto p/ Zap</span>
+                    </div>
                   </div>
-                ))}
-                {appliedCoupon && (
-                  <div className="flex justify-between text-sm mb-2 text-green-600">
-                    <span>Desconto ({appliedCoupon.code})</span>
-                    <span className="font-bold">- R$ {discount.toFixed(2).replace('.', ',')}</span>
-                  </div>
-                )}
-                <div className="border-t border-gray-200 pt-3 mt-2 flex justify-between">
-                  <span className="font-bold text-gray-700">Total</span>
-                  <span className="text-xl font-bold" style={{ color: theme.primaryColor }}>
-                    R$ {total.toFixed(2).replace('.', ',')}
-                  </span>
                 </div>
               </div>
 
-              <div className="bg-green-50 rounded-2xl p-4 border border-green-100">
-                <h3 className="text-xs font-bold text-green-700 uppercase mb-3 flex items-center gap-1">
-                  <Check size={12} /> Seus dados
-                </h3>
-                <p className="text-sm text-gray-700 mb-1"><strong>Nome:</strong> {data.customerName}</p>
-                <p className="text-sm text-gray-700 mb-1"><strong>Tel:</strong> {data.customerPhone}</p>
-                <p className="text-sm text-gray-700">
-                  <strong>{data.deliveryType === 'delivery' ? 'Entrega:' : 'Retirada na loja'}</strong>
-                  {data.deliveryType === 'delivery' && ` ${data.address}`}
-                </p>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="bg-indigo-600 p-6 rounded-[2rem] text-white flex items-center gap-5 shadow-2xl shadow-indigo-200">
+                   <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+                      <User size={28} />
+                   </div>
+                   <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Para entregar para:</p>
+                      <h4 className="text-xl font-black uppercase tracking-tight">{data.customerName}</h4>
+                      <p className="text-xs font-bold opacity-80">{data.customerPhone}</p>
+                   </div>
+                </div>
+
+                <div className="bg-gray-900 p-6 rounded-[2rem] text-white flex items-center gap-5">
+                   <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
+                      {data.deliveryType === 'delivery' ? <MapPin size={28} /> : <Store size={28} />}
+                   </div>
+                   <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-widest opacity-60">
+                        {data.deliveryType === 'delivery' ? 'Endereço de Entrega:' : 'Local de Retirada:'}
+                      </p>
+                      <p className="text-sm font-bold truncate leading-relaxed">
+                        {data.deliveryType === 'delivery' ? data.address : 'Retirada Direta na Loja'}
+                      </p>
+                   </div>
+                </div>
               </div>
             </div>
           )}
@@ -301,8 +342,6 @@ const CheckoutModal: React.FC = () => {
             </div>
           )}
         </div>
-      </div>
-    </div>
       </div>
     </div>
   );
