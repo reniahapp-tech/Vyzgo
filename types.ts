@@ -110,6 +110,12 @@ export type StoreMode = 'mixed' | 'store' | 'affiliate';
 
 export type PlanType = 'free' | 'pro';
 
+export interface BannerItem {
+  imageUrl: string;
+  linkUrl?: string;   // URL de destino ao clicar (categoria, produto ou URL externa)
+  label?: string;     // rótulo opcional para identificação no admin
+}
+
 export interface AppConfig {
   storeMode: StoreMode;
   enableWhatsapp: boolean;
@@ -138,7 +144,8 @@ export interface AppConfig {
     buttonText: string;
     imageUrl: string;
   };
-  banners?: string[]; // Moved to root for easier access
+  banners?: string[];       // legacy – kept for backward compat
+  bannerItems?: BannerItem[]; // NEW: banners with links
   featuredProductIds?: string[]; // IDs of products to show in featured section
   categories: CategoryItem[];
   quiz: {

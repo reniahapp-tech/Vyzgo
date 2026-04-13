@@ -25,32 +25,37 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ item }) => {
   return (
     <div 
       onClick={handleClick}
-      className="flex flex-col items-center gap-2 cursor-pointer group shrink-0 w-20 pt-1"
+      className="flex flex-col items-center gap-2.5 cursor-pointer group shrink-0 w-[76px] py-1"
     >
       <div 
-        className="w-16 h-16 rounded-full flex items-center justify-center relative transition-all duration-300 active:scale-90 border-2 border-white shadow-md group-hover:shadow-lg overflow-hidden"
-        style={{ backgroundColor: item.bgColor || '#F3F4F6' }}
+        className="relative w-16 h-16 p-[3px] rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-yellow-500 transition-all duration-300 group-active:scale-95"
       >
-        {item.imageUrl ? (
-          <ImageWithFallback 
-            src={item.imageUrl} 
-            alt={item.title} 
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-          />
-        ) : (
-          <DynamicIcon 
-            iconKey={item.iconKey} 
-            size={24} 
-            strokeWidth={2.5}
-            style={{ color: item.iconColor || theme.primaryColor }} 
-          />
-        )}
-        
-        {/* Subtle gradient overlay for image categories */}
-        {item.imageUrl && <div className="absolute inset-0 bg-black/5 opacity-20 group-hover:opacity-0 transition-opacity"></div>}
+        <div className="w-full h-full rounded-full bg-white p-[2px]">
+          <div 
+            className="w-full h-full rounded-full flex items-center justify-center relative shadow-sm overflow-hidden"
+            style={{ backgroundColor: item.bgColor || '#F8F9FA' }}
+          >
+            {item.imageUrl ? (
+              <ImageWithFallback 
+                src={item.imageUrl} 
+                alt={item.title} 
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+            ) : (
+              <DynamicIcon 
+                iconKey={item.iconKey} 
+                size={22} 
+                strokeWidth={2}
+                style={{ color: item.iconColor || theme.primaryColor }} 
+              />
+            )}
+            
+            <div className="absolute inset-0 bg-black/5 opacity-20 group-hover:opacity-0 transition-opacity"></div>
+          </div>
+        </div>
       </div>
       
-      <span className="text-[10px] font-black text-gray-700 uppercase tracking-tighter text-center line-clamp-1 w-full leading-none px-1">
+      <span className="text-[9px] font-black text-gray-900 uppercase tracking-tight text-center line-clamp-1 w-full leading-none group-hover:text-indigo-600 transition-colors">
         {item.title}
       </span>
     </div>

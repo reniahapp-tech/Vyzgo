@@ -445,12 +445,12 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
   }
 
   const containerClasses = isStandalone 
-    ? "flex flex-col h-full bg-white/80 backdrop-blur-xl"
+    ? "flex flex-col h-full bg-gray-50"
     : "fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 animate-in fade-in zoom-in duration-300";
 
   const contentClasses = isStandalone
     ? "w-full h-full flex flex-col"
-    : "bg-[#F9FAFB] w-full max-w-6xl h-[90vh] rounded-[40px] shadow-2xl border border-gray-200 overflow-hidden flex flex-col relative";
+    : "bg-white w-full max-w-6xl h-[90vh] rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden flex flex-col relative";
 
   // 2. Login Screen (if not authenticated)
   if (!isAdmin) {
@@ -623,451 +623,29 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
           )}
 
           {activeTab === 'settings' && (
-             <div className="mb-8 p-1 flex overflow-x-auto gap-2 bg-gray-50 rounded-2xl border border-gray-100/50">
+             <div className="mb-8 p-1 flex overflow-x-auto gap-1 bg-gray-100 rounded-2xl border border-gray-200">
                  {[
-                   { id: 'branding', label: '1. Perfil da Loja' },
-                   { id: 'themes', label: '2. Aparência Gráfica' },
-                   { id: 'modules', label: '3. Integrações' },
-                   { id: 'coupons', label: '4. Cupons' },
-                   { id: 'social', label: '5. Redes Sociais' },
-                   { id: 'plan', label: 'Assinatura Pro', highlight: !isPro },
-                   { id: 'help', label: 'Ajuda e Dúvidas' },
+                   { id: 'profile', label: '1. Perfil e Marca' },
+                   { id: 'store', label: '2. Minha Loja' },
+                   { id: 'advanced', label: '3. Assinatura e Ajuda' },
                  ].map(t => (
-                    <button key={t.id} onClick={() => setSettingsTab(t.id as any)} className={`px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all flex items-center gap-2 ${settingsTab === t.id ? 'bg-white text-indigo-600 shadow-sm border border-black/5 scale-100' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100/50 border border-transparent'}`}>
+                    <button key={t.id} onClick={() => setSettingsTab(t.id as any)} className={`flex-1 px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-2 ${settingsTab === t.id ? 'bg-white text-indigo-600 shadow-sm border border-gray-200' : 'text-gray-400 hover:text-gray-600 border border-transparent'}`}>
                        {t.label} 
-                       {t.highlight && <Crown size={12} className="text-yellow-500"/>}
+                       {t.id === 'advanced' && !isPro && <Crown size={12} className="text-yellow-500"/>}
                     </button>
                  ))}
              </div>
           )}
 
-          {activeTab === 'settings' && settingsTab === 'help' && (
-            <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                <h3 className="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
-                  <BookOpen size={16} /> Bem-vindo ao VyzGo
-                </h3>
-                <p className="text-xs text-blue-600 leading-relaxed mb-3">
-                  Este é seu painel de controle. Aqui você pode personalizar toda a aparência e funcionamento da sua loja virtual sem precisar de código.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <FAQItem
-                  title="Primeiros Passos"
-                  content="Comece na aba 'Marca' para definir seu logo e nome. Depois, vá em 'Temas' para escolher as cores. Por fim, use 'Home' e 'Itens' para cadastrar seus produtos."
-                />
-                <FAQItem
-                  title="Modos de Loja"
-                  content={
-                    <ul className="list-disc pl-4 space-y-1">
-                      <li><strong>Híbrido:</strong> O padrão. Permite carrinho de compras E links externos (afiliados).</li>
-                      <li><strong>Apenas Loja (Pro):</strong> Foca 100% no carrinho e envio do pedido para o WhatsApp.</li>
-                      <li><strong>Apenas Afiliado (Pro):</strong> Remove o carrinho e transforma todos os botões em links externos.</li>
-                    </ul>
-                  }
-                />
-                <FAQItem
-                  title="Como recebo os pedidos?"
-                  content="Os pedidos feitos no carrinho geram uma mensagem automática formatada que o cliente envia para o seu WhatsApp cadastrado na aba 'Marca'."
-                />
-                <FAQItem
-                  title="Como funciona o Plano Pro?"
-                  content="O plano Pro desbloqueia funcionalidades avançadas como modos exclusivos de loja, remoção de limites e controle total sobre o botão flutuante do WhatsApp."
-                />
-                <FAQItem
-                  title="Como funciona a marca VyzGo?"
-                  content="No plano Pro, você tem total autonomia para remover a marca VyzGo e usar seu próprio domínio customizado."
-                />
-                <FAQItem
-                  title="Fiz login, e agora?"
-                  content="Agora você está autenticado com sua conta Google. Seu acesso é protegido e você pode gerenciar todas as configurações da sua loja com segurança."
-                />
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'settings' && settingsTab === 'coupons' && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Tag size={14} className="text-yellow-500" />
-                <h3 className="text-xs font-bold text-gray-700 uppercase">Cupons de Desconto</h3>
-                <span className="ml-auto text-[10px] bg-yellow-100 text-yellow-600 px-2 py-0.5 rounded-full">
-                  {coupons.filter(c => c.active).length} ativo{coupons.filter(c => c.active).length !== 1 ? 's' : ''}
-                </span>
-              </div>
-
-              {/* Form para criar cupom */}
-              <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-3 space-y-2">
-                <h4 className="text-[10px] font-bold text-yellow-800 uppercase">Criar Cupom</h4>
-                <input
-                  type="text" placeholder="Código (ex: PROMO10)" value={couponForm.code}
-                  onChange={e => setCouponForm(f => ({ ...f, code: e.target.value.toUpperCase() }))}
-                  className="w-full bg-white border border-yellow-200 rounded-xl px-3 py-2 text-sm font-mono outline-none focus:ring-2 focus:ring-yellow-300"
-                />
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-[9px] font-bold text-gray-500 uppercase">Tipo</label>
-                    <select
-                      value={couponForm.type}
-                      onChange={e => setCouponForm(f => ({ ...f, type: e.target.value as 'percent' | 'fixed' }))}
-                      className="w-full bg-white border border-gray-200 rounded-xl px-2 py-2 text-xs outline-none"
-                    >
-                      <option value="percent">% Desconto</option>
-                      <option value="fixed">R$ Fixo</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-[9px] font-bold text-gray-500 uppercase">Valor</label>
-                    <input
-                      type="number" min={1} value={couponForm.value}
-                      onChange={e => setCouponForm(f => ({ ...f, value: Number(e.target.value) }))}
-                      className="w-full bg-white border border-gray-200 rounded-xl px-2 py-2 text-xs outline-none"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-[9px] font-bold text-gray-500 uppercase">Pedido Mínimo (R$) — 0 = sem mínimo</label>
-                  <input
-                    type="number" min={0} value={couponForm.minOrder}
-                    onChange={e => setCouponForm(f => ({ ...f, minOrder: Number(e.target.value) }))}
-                    className="w-full bg-white border border-gray-200 rounded-xl px-2 py-2 text-xs outline-none"
-                  />
-                </div>
-                <button
-                  onClick={() => {
-                    if (!couponForm.code.trim()) { addToast('Digite um código de cupom.', 'error'); return; }
-                    saveCoupon({
-                      code: couponForm.code,
-                      type: couponForm.type,
-                      value: couponForm.value,
-                      minOrder: couponForm.minOrder || undefined,
-                      active: true,
-                      usedCount: 0
-                    });
-                    setCouponForm({ code: '', type: 'percent', value: 10, minOrder: 0, active: true });
-                    addToast(`Cupom ${couponForm.code} salvo!`, 'success');
-                  }}
-                  className="w-full py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-xs font-bold transition-colors"
-                >
-                  + Criar Cupom
-                </button>
-              </div>
-
-              {/* Lista de cupons */}
-              {coupons.length === 0 ? (
-                <p className="text-[10px] text-gray-400 text-center py-4">Nenhum cupom criado ainda.</p>
-              ) : coupons.map(coupon => (
-                <div key={coupon.code} className="bg-white/50 border border-white/60 rounded-xl p-3 flex items-center gap-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-mono font-bold text-gray-800">{coupon.code}</span>
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${coupon.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                        {coupon.active ? 'ATIVO' : 'INATIVO'}
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-gray-500 mt-0.5">
-                      {coupon.type === 'percent' ? `${coupon.value}% off` : `R$ ${coupon.value.toFixed(2)} off`}
-                      {coupon.minOrder ? ` • Mín. R$ ${coupon.minOrder}` : ''}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => saveCoupon({ ...coupon, active: !coupon.active })}
-                    className={`text-2xl transition-colors ${coupon.active ? 'text-green-500' : 'text-gray-300'}`}
-                  >
-                    {coupon.active ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
-                  </button>
-                  <button onClick={() => deleteCoupon(coupon.code)} className="text-red-400 hover:text-red-600">
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {activeTab === 'settings' && settingsTab === 'modules' && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 mb-1">
-                <Puzzle size={14} className="text-purple-500" />
-                <h3 className="text-xs font-bold text-gray-700 uppercase">Módulos do App</h3>
-                <span className="ml-auto text-[10px] bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full">
-                  {plugins.filter(p => p.enabled).length} ativo{plugins.filter(p => p.enabled).length !== 1 ? 's' : ''}
-                </span>
-              </div>
-              <p className="text-[10px] text-gray-400 leading-relaxed">
-                Módulos adicionam funcionalidades extras à sua vitrine sem alterar o código principal.
-              </p>
-
-              {/* Lista de plugins */}
-              {plugins.map(({ plugin, enabled, config: pConfig }) => (
-                <div key={plugin.id} className="bg-white/50 border border-white/60 rounded-xl overflow-hidden">
-                  <div className="flex items-center gap-3 p-3">
-                    <span className="text-2xl">{plugin.icon}</span>
-                    <div className="flex-1">
-                      <h4 className="text-xs font-bold text-gray-800">{plugin.name}</h4>
-                      <p className="text-[10px] text-gray-500 leading-tight">{plugin.description}</p>
-                      <p className="text-[9px] text-gray-400 mt-0.5">v{plugin.version}{plugin.author ? ` • ${plugin.author}` : ''}</p>
-                    </div>
-                    {/* Toggle ON/OFF */}
-                    <button
-                      onClick={() => enabled ? disablePlugin(plugin.id) : enablePlugin(plugin.id)}
-                      className={`text-3xl transition-colors ${enabled ? 'text-green-500' : 'text-gray-300'}`}
-                    >
-                      {enabled ? <ToggleRight size={36} /> : <ToggleLeft size={36} />}
-                    </button>
-                  </div>
-
-                  {/* Configuração do plugin (só se ativo e tiver AdminTab) */}
-                  {enabled && plugin.AdminTab && (
-                    <div className="border-t border-gray-100">
-                      <button
-                        onClick={() => setActivePluginId(activePluginId === plugin.id ? null : plugin.id)}
-                        className="w-full flex items-center justify-between px-3 py-2 text-[10px] font-bold text-purple-600 hover:bg-purple-50 transition-colors"
-                      >
-                        <span>⚙️ Configurar módulo</span>
-                        {activePluginId === plugin.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                      </button>
-                      {activePluginId === plugin.id && (
-                        <div className="px-3 pb-3">
-                          <plugin.AdminTab
-                            config={pConfig}
-                            onConfigChange={(key, val) => updatePluginConfig(plugin.id, key, val)}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {/* Dica de criação */}
-              <div className="bg-purple-50 border border-purple-100 rounded-xl p-3 mt-2">
-                <p className="text-[10px] text-purple-700 leading-relaxed">
-                  💡 <strong>Quer criar um módulo?</strong> Veja o arquivo
-                  <code className="bg-purple-100 px-1 rounded ml-1">plugins/COMO_CRIAR_PLUGIN.md</code>
-                </p>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'orders' && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 mb-1">
-                <ClipboardList size={14} className="text-gray-500" />
-                <h3 className="text-xs font-bold text-gray-700 uppercase">Histórico de Pedidos</h3>
-                <span className="ml-auto text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{orders.length} pedido{orders.length !== 1 ? 's' : ''}</span>
-              </div>
-
-              {orders.length === 0 ? (
-                <div className="text-center py-12 opacity-40">
-                  <Package size={40} className="mx-auto mb-3 text-gray-300" />
-                  <p className="text-xs font-medium text-gray-500">Nenhum pedido ainda.</p>
-                  <p className="text-[10px] text-gray-400 mt-1">Os pedidos aparecem aqui após o cliente finalizar.</p>
-                </div>
-              ) : (
-                orders.map(order => (
-                  <div key={order.id} className="bg-white/50 border border-white/60 rounded-xl p-3 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono text-gray-400">{order.id}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                        order.status === 'confirmed' ? 'bg-blue-100 text-blue-700' :
-                        order.status === 'shipped' ? 'bg-green-100 text-green-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
-                        {order.status === 'pending' ? 'Pendente' :
-                         order.status === 'confirmed' ? 'Confirmado' :
-                         order.status === 'shipped' ? 'Enviado' : 'Cancelado'}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-bold text-gray-800">{order.customer.customerName}</p>
-                        <p className="text-[10px] text-gray-500">{order.customer.deliveryType === 'delivery' ? `📦 ${order.customer.address}` : '🏪 Retirada'}</p>
-                      </div>
-                      <span className="text-sm font-bold text-green-600">R$ {order.total.toFixed(2).replace('.', ',')}</span>
-                    </div>
-                    <div className="text-[10px] text-gray-400">
-                      {order.items.map(i => `${i.quantity}x ${i.title}`).join(', ')}
-                    </div>
-                    <p className="text-[10px] text-gray-400">{new Date(order.createdAt).toLocaleString('pt-BR')}</p>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-
-          {activeTab === 'settings' && settingsTab === 'plan' && (
-            <div className="space-y-4">
-              <div className={`p-6 rounded-2xl text-center border-2 ${isPro ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white/50'}`}>
-                {isPro ? (
-                  <>
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
-                      <Crown size={32} fill="currentColor" />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800">Membro Premium</h3>
-                    <p className="text-sm text-gray-500 mb-4">Você tem acesso total a todos os recursos.</p>
-                    <div className="text-xs font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full inline-block">ATIVO</div>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
-                      <Lock size={32} />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800">Plano Gratuito</h3>
-                    <p className="text-sm text-gray-500 mb-6">Desbloqueie modos exclusivos e remova limites.</p>
-                    <button
-                      onClick={() => setIsPaymentOpen(true)}
-                      className="w-full py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl shadow-lg hover:scale-105 transition-transform font-bold flex items-center justify-center gap-2"
-                    >
-                      <Crown size={18} fill="gold" className="text-yellow-400" />
-                      Fazer Upgrade (R$ 29/mês)
-                    </button>
-                  </>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="text-xs font-bold text-gray-500 uppercase ml-1">Comparativo</h4>
-                <div className="bg-white/40 rounded-xl p-3 border border-white/50">
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                    <span className="text-xs font-bold text-gray-700">Produtos Ilimitados</span>
-                    <CheckIcon active={true} />
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                    <span className="text-xs font-bold text-gray-700">Temas Premium</span>
-                    <CheckIcon active={true} />
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                    <span className="text-xs font-bold text-gray-700 flex items-center gap-1">Modo Loja <Crown size={10} className="text-yellow-600" /></span>
-                    <CheckIcon active={isPro} />
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                    <span className="text-xs font-bold text-gray-700 flex items-center gap-1">Modo Afiliado <Crown size={10} className="text-yellow-600" /></span>
-                    <CheckIcon active={isPro} />
-                  </div>
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-xs font-bold text-gray-700 flex items-center gap-1">Controle WhatsApp <Crown size={10} className="text-yellow-600" /></span>
-                    <CheckIcon active={isPro} />
-                  </div>
-                </div>
-              </div>
-
-          {/* DEVELOPER BYPASS — only in development */}
-              {import.meta.env.DEV && (
-              <div className="mt-8 border-t border-dashed border-gray-300 pt-4">
-                <div className="flex items-center justify-center gap-2 mb-3 text-gray-400">
-                  <Terminal size={12} />
-                  <p className="text-[10px] font-bold uppercase tracking-widest">Área do Desenvolvedor</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => {
-                      updateConfig({ ...config, plan: 'free' });
-                      addToast('Forçado para plano Free');
-                    }}
-                    className="py-2 px-3 rounded-lg bg-gray-100 text-gray-500 text-xs font-bold hover:bg-gray-200 transition-colors"
-                  >
-                    Forçar Free
-                  </button>
-                  <button
-                    onClick={() => {
-                      updateConfig({ ...config, plan: 'pro' });
-                      addToast('Forçado para plano Pro');
-                    }}
-                    className="py-2 px-3 rounded-lg bg-yellow-50 text-yellow-700 text-xs font-bold border border-yellow-200 hover:bg-yellow-100 transition-colors flex items-center justify-center gap-1"
-                  >
-                    <Crown size={12} /> Forçar Pro
-                  </button>
-                </div>
-              </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'settings' && settingsTab === 'themes' && (
-            <div className="space-y-3">
-              <div className="bg-white/40 p-3 rounded-xl border border-white/50 mb-4">
-                <h3 className="text-xs font-bold text-gray-700 uppercase mb-2">Ajuste Rápido (Atual)</h3>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-600">Cor Fundo Quiz</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full shadow-sm border border-white" style={{ backgroundColor: config.quiz.bgColor }}></div>
-                    <input
-                      type="color"
-                      value={config.quiz.bgColor}
-                      onChange={(e) => updateNestedConfig('quiz.bgColor', e.target.value)}
-                      className="w-8 h-8 rounded-lg cursor-pointer border-0 p-0"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <h3 className="text-xs font-bold text-gray-700 uppercase mb-2">Bibliotecas de Temas</h3>
-              <div className="grid grid-cols-1 gap-3">
-                {themesList.map(theme => (
-                  <div key={theme.id} className="flex items-center gap-2 p-2 bg-white/40 rounded-xl border border-white/50 hover:shadow-md transition-all">
-                    <button
-                      onClick={() => applyTheme(theme)}
-                      className="flex-1 flex items-center gap-4 text-left"
-                    >
-                      <div className="flex -space-x-2">
-                        {theme.colors.map((c, i) => <div key={i} className="w-6 h-6 rounded-full border border-white" style={{ backgroundColor: c }} />)}
-                      </div>
-                      <span className="font-bold text-xs text-gray-700">{theme.name}</span>
-                    </button>
-
-                    <div className="flex flex-col items-center border-l border-white/50 pl-2">
-                      <label className="text-[8px] font-bold text-gray-400 uppercase mb-1">Quiz</label>
-                      <input
-                        type="color"
-                        value={theme.config.quiz.bgColor}
-                        onChange={(e) => updateThemeQuizColor(theme.id, e.target.value)}
-                        title="Cor do Quiz Card"
-                        className="w-6 h-6 rounded-full border-none p-0 overflow-hidden cursor-pointer shadow-sm"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'settings' && settingsTab === 'social' && (
-            <div className="space-y-4">
-              <div className="bg-white/40 border border-white/50 rounded-xl p-3">
-                <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
-                  <Share2 size={14} /> Redes Sociais
-                </h3>
-                <p className="text-[10px] text-gray-500 mb-3">Links que aparecerão no rodapé do app.</p>
-
-                <InputGroup label="Instagram (@usuario ou link)" value={config.social.instagram} onChange={(v) => updateNestedConfig('social.instagram', v)} />
-                <InputGroup label="Facebook (Link)" value={config.social.facebook} onChange={(v) => updateNestedConfig('social.facebook', v)} />
-                <InputGroup label="TikTok (Link)" value={config.social.tiktok} onChange={(v) => updateNestedConfig('social.tiktok', v)} />
-              </div>
-
-              <div className="bg-white/40 border border-white/50 rounded-xl p-3">
-                <h3 className="text-xs font-bold text-gray-700 uppercase mb-3 flex items-center gap-2">
-                  <MapPin size={14} /> Endereço Físico
-                </h3>
-                <InputGroup label="Endereço Completo" value={config.location.address} onChange={(v) => updateNestedConfig('location.address', v)} />
-                <InputGroup label="Link do Google Maps Embed (iframe)" value={config.location.mapUrl} onChange={(v) => updateNestedConfig('location.mapUrl', v)} textarea placeholder="Cole a URL do src do iframe do Google Maps aqui" />
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'settings' && settingsTab === 'branding' && (
+          {activeTab === 'settings' && settingsTab === 'profile' && (
             <div className="space-y-6">
-              {/* HEADER CONFIGURATION GROUP - IDENTIDADE VISUAL */}
+              {/* BRANDING SECTION */}
               <div className="bg-indigo-600 border border-indigo-500 shadow-xl rounded-3xl p-6 text-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                
                 <h3 className="text-xs font-black uppercase tracking-widest mb-6 flex items-center gap-2 opacity-80">
                   <Star size={14} className="fill-white" /> Identidade da Loja
                 </h3>
-
                 <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-6 items-center">
-                  {/* Logo Upload Circle */}
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-full border-2 border-dashed border-white/40 flex items-center justify-center overflow-hidden relative group">
                       {config.header.logoUrl ? (
@@ -1075,7 +653,6 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                       ) : (
                         <ImageIcon size={32} className="text-white/40" />
                       )}
-
                       <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
                         <Upload size={20} className="text-white" />
                         <input
@@ -1088,8 +665,6 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                     </div>
                     <span className="text-[9px] font-black uppercase tracking-tighter opacity-60">Logotipo</span>
                   </div>
-
-                  {/* Name and Subtitle Inputs */}
                   <div className="space-y-4">
                     <div className="space-y-1">
                       <label className="text-[10px] font-black uppercase tracking-widest opacity-70 ml-1">Nome da sua Vitrine</label>
@@ -1113,229 +688,171 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                 </div>
               </div>
 
-              {/* MODO DE OPERACAO & WHATSAPP */}
+              {/* SOCIAL & CONTACT */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 relative overflow-hidden">
-                  <h3 className="text-[10px] font-black text-gray-400 uppercase mb-3 tracking-widest flex items-center gap-2">
+                <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5">
+                  <h3 className="text-xs font-bold text-gray-700 uppercase mb-4 flex items-center gap-2">
+                    <Share2 size={14} className="text-indigo-500" /> Redes Sociais
+                  </h3>
+                  <InputGroup label="Instagram (@usuario ou link)" value={config.social.instagram} onChange={(v) => updateNestedConfig('social.instagram', v)} />
+                  <InputGroup label="Facebook (Link)" value={config.social.facebook} onChange={(v) => updateNestedConfig('social.facebook', v)} />
+                  <InputGroup label="TikTok (Link)" value={config.social.tiktok} onChange={(v) => updateNestedConfig('social.tiktok', v)} />
+                </div>
+
+                <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5">
+                  <h3 className="text-xs font-bold text-gray-700 uppercase mb-4 flex items-center gap-2">
+                    <MapPin size={14} className="text-red-500" /> Endereço Físico
+                  </h3>
+                  <InputGroup label="Endereço Completo" value={config.location.address} onChange={(v) => updateNestedConfig('location.address', v)} />
+                  <InputGroup label="Link do Google Maps Embed" value={config.location.mapUrl} onChange={(v) => updateNestedConfig('location.mapUrl', v)} textarea placeholder="Cole a URL do iframe do Maps" />
+                </div>
+              </div>
+
+              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5">
+                <h3 className="text-xs font-bold text-gray-700 uppercase mb-4">Informações Legais</h3>
+                <InputGroup label="Texto do Rodapé (Direitos Autorais)" value={config.footerText} onChange={(v) => updateConfig({ ...config, footerText: v })} />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'settings' && settingsTab === 'store' && (
+            <div className="space-y-6">
+              {/* OPERATION MODE & WHATSAPP */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5">
+                  <h3 className="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-widest flex items-center gap-2">
                     <Store size={14} /> Modo de Operação
                   </h3>
-
                   <div className="space-y-2">
-                    <label className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors border border-transparent active:border-indigo-100">
-                      <input
-                        type="radio"
-                        name="storeMode"
-                        checked={config.storeMode === 'mixed'}
-                        onChange={() => handleStoreModeChange('mixed')}
-                        className="accent-indigo-600"
-                      />
+                    <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors border border-transparent active:border-indigo-100">
+                      <input type="radio" name="storeMode" checked={config.storeMode === 'mixed'} onChange={() => handleStoreModeChange('mixed')} className="accent-indigo-600" />
                       <div>
                         <p className="text-xs font-bold text-gray-800 tracking-tight">Híbrido (Padrão)</p>
-                        <p className="text-[9px] text-gray-500 font-bold uppercase">Vitrine + Compra Direta</p>
+                        <p className="text-[9px] text-gray-500 font-bold uppercase">Vitrine + Zap</p>
                       </div>
                     </label>
-
-                    <label className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-colors border border-transparent ${!isPro ? 'opacity-40 grayscale bg-gray-100' : 'bg-gray-50 hover:bg-gray-100 active:border-indigo-100'}`}>
-                      <input
-                        type="radio"
-                        name="storeMode"
-                        checked={config.storeMode === 'store'}
-                        onChange={() => handleStoreModeChange('store')}
-                        className="accent-indigo-600"
-                        disabled={!isPro}
-                      />
+                    <label className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors border border-transparent ${!isPro ? 'opacity-40 bg-gray-50' : 'bg-gray-50 hover:bg-gray-100 active:border-indigo-100'}`}>
+                      <input type="radio" name="storeMode" checked={config.storeMode === 'store'} onChange={() => handleStoreModeChange('store')} className="accent-indigo-600" disabled={!isPro} />
                       <div className="flex-1">
                         <div className="flex justify-between items-center">
                           <p className="text-xs font-bold text-gray-800 tracking-tight">Apenas Loja</p>
                           {!isPro && <Lock size={12} className="text-gray-400" />}
                         </div>
-                        <p className="text-[9px] text-gray-500 font-bold uppercase">Foco total no Carrinho</p>
+                        <p className="text-[9px] text-gray-500 font-bold uppercase">Foco no Carrinho</p>
                       </div>
                     </label>
                   </div>
                 </div>
 
-                {/* WHATSAPP CONFIG */}
-                <div className={`bg-white border border-gray-100 shadow-sm rounded-2xl p-4 ${!isPro ? 'opacity-60 grayscale' : ''}`}>
-                  <div className="flex items-center justify-between mb-3 leading-tight">
+                <div className={`bg-white border border-gray-200 shadow-sm rounded-2xl p-5 ${!isPro ? 'opacity-60' : ''}`}>
+                  <div className="flex items-center justify-between mb-4">
                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
                       <MessageCircle size={14} /> Botão WhatsApp
                     </span>
-                    <button
-                      onClick={handleWhatsappToggle}
-                      className={`transition-all active:scale-90 ${config.enableWhatsapp ? 'text-indigo-600' : 'text-gray-300'}`}
-                    >
-                      {config.enableWhatsapp ? <ToggleRight size={38} /> : <ToggleLeft size={38} />}
+                    <button onClick={handleWhatsappToggle} className={`transition-all ${config.enableWhatsapp ? 'text-indigo-600' : 'text-gray-300'}`}>
+                      {config.enableWhatsapp ? <ToggleRight size={36} /> : <ToggleLeft size={36} />}
                     </button>
                   </div>
                   <InputGroup label="WhatsApp Número" value={config.whatsapp.phoneNumber} onChange={(v) => updateNestedConfig('whatsapp.phoneNumber', v)} placeholder="Ex: 551199999999" />
-                </div>
-              </div>
-
-              {/* TOGGLE WHATSAPP */}
-              <div className={`bg-white/40 border border-white/50 rounded-xl p-3 ${!isPro ? 'opacity-60' : ''}`}>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold text-gray-700 flex items-center gap-2">
-                    Botão WhatsApp Flutuante
-                    {!isPro && <Lock size={12} />}
-                  </span>
-                  <button
-                    onClick={handleWhatsappToggle}
-                    className={`text-2xl transition-colors ${config.enableWhatsapp ? 'text-green-600' : 'text-gray-400'}`}
-                  >
-                    {config.enableWhatsapp ? <ToggleRight size={32} /> : <ToggleLeft size={32} />}
-                  </button>
-                </div>
-
-                {/* WhatsApp Label Selector */}
-                {config.enableWhatsapp && (
-                  <div className="mt-2">
-                    <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Texto do Botão</label>
-                    <div className="relative">
-                      <select
-                        value={config.whatsapp.label}
-                        onChange={(e) => updateNestedConfig('whatsapp.label', e.target.value)}
-                        disabled={!isPro}
-                        className="w-full bg-white/60 border border-white/50 rounded-xl px-3 py-2 text-xs outline-none appearance-none pr-8"
-                      >
-                        {WHATSAPP_LABELS.map((label) => (
-                          <option key={label} value={label}>{label}</option>
-                        ))}
+                  {config.enableWhatsapp && (
+                    <div className="mt-3">
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Texto do Botão</label>
+                      <select value={config.whatsapp.label} onChange={(e) => updateNestedConfig('whatsapp.label', e.target.value)} disabled={!isPro} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none">
+                        {WHATSAPP_LABELS.map((label) => <option key={label} value={label}>{label}</option>)}
                       </select>
-                      <ChevronDown size={14} className="absolute right-3 top-2.5 text-gray-400 pointer-events-none" />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* CUSTOM DOMAIN CONFIGURATION */}
-              <div className={`bg-white border border-gray-200 shadow-sm rounded-2xl p-4 mb-4 relative overflow-hidden ${!isPro ? 'opacity-60' : ''}`}>
-                <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-2">
-                  <h3 className="text-xs font-black text-gray-800 uppercase flex items-center gap-2">
-                    <Globe size={14} className="text-blue-500" /> Endereço da Loja (Subdomínio)
-                  </h3>
-                </div>
-                <div className="flex flex-col md:flex-row items-stretch md:items-start gap-4 mb-6">
-                  <div className="flex-1 flex flex-col gap-2">
-                    <div className="flex items-center bg-gray-100 border border-gray-200 rounded-2xl px-4 py-3 text-sm shadow-inner group focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
-                      <input
-                        value={newSubdomain}
-                        onChange={(e) => setNewSubdomain(e.target.value)}
-                        disabled={storeId === 'demo' || isChangingSubdomain}
-                        className="flex-1 text-gray-700 font-black text-right pr-1 tracking-tight bg-transparent outline-none w-full"
-                      />
-                      <span className="font-black text-gray-400">.vyzgo.com</span>
-                    </div>
-                    {newSubdomain !== storeId && (
-                      <div className="bg-red-50 border border-red-200 rounded-xl p-3 animate-in slide-in-from-top-2">
-                        <p className="text-[10px] text-red-600 font-bold mb-2 flex items-center gap-1">
-                          <AlertTriangle size={12} /> Atenção: Mudar o endereço quebra links antigos.
-                        </p>
-                        <div className="flex gap-2">
-                          <button 
-                            disabled={isChangingSubdomain}
-                            onClick={async () => {
-                              setIsChangingSubdomain(true);
-                              await updateStoreSlug(newSubdomain);
-                              setIsChangingSubdomain(false);
-                            }}
-                            className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-red-700 transition"
-                          >
-                            {isChangingSubdomain ? 'Alterando...' : 'Confirmar Mudança'}
-                          </button>
-                          <button 
-                            disabled={isChangingSubdomain}
-                            onClick={() => setNewSubdomain(storeId)}
-                            className="bg-white text-gray-600 border border-gray-200 px-3 py-1.5 rounded-lg text-[10px] font-bold hover:bg-gray-50 transition"
-                          >
-                            Desfazer
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <a 
-                      href={`https://${storeId}.vyzgo.com`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="bg-black text-white px-4 py-2 rounded-xl text-[10px] font-bold flex items-center justify-between group hover:bg-gray-800 transition-colors shadow-sm"
-                    >
-                      <span>Ver Loja (Subdomínio)</span>
-                      <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                    </a>
-                    <a 
-                      href={`/v/${storeId}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="bg-white text-black border border-gray-200 px-4 py-2 rounded-xl text-[10px] font-bold flex items-center justify-between group hover:bg-gray-50 transition-colors shadow-sm"
-                    >
-                      <div className="flex flex-col items-start">
-                        <span>Acesso Imediato (Provisório)</span>
-                        <span className="text-[8px] font-normal opacity-50">Não depende de DNS</span>
-                      </div>
-                      <ExternalLink size={14} className="opacity-40 group-hover:opacity-100 transition-opacity" />
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-bold text-gray-700 uppercase flex items-center gap-2">
-                    <Globe size={14} /> Domínio Personalizado
-                    {!isPro && <Lock size={12} />}
-                  </h3>
-                  {isPro && <span className="text-[10px] bg-green-100 text-green-700 px-2 rounded-full font-bold">PRO</span>}
-                </div>
-
-                <div className="relative">
-                  <input
-                    value={config.customDomain || ''}
-                    onChange={(e) => updateConfig({ ...config, customDomain: e.target.value })}
-                    placeholder="ex: loja.suamarca.com"
-                    disabled={!isPro}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed shadow-inner"
-                  />
-                  {!isPro && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/10 backdrop-blur-[1px]">
-                      <button onClick={() => setIsPaymentOpen(true)} className="text-[10px] bg-black text-white px-3 py-1 rounded-full shadow-lg font-bold hover:scale-105 transition-transform">
-                        Desbloquear
-                      </button>
                     </div>
                   )}
                 </div>
-                <p className="text-[9px] text-gray-500 mt-2 leading-relaxed">
-                  Para funcionar, configure um CNAME no seu provedor de domínio apontando para <b>cname.vyzgo.com</b>.
-                </p>
               </div>
 
-              <div className="pt-6 border-t border-gray-100 mt-4">
-                <InputGroup label="Texto do Rodapé (Direitos Autorais)" value={config.footerText} onChange={(v) => updateConfig({ ...config, footerText: v })} />
-              </div>
-
-              {/* DOMINIO E EXTRAS */}
-              <div className="space-y-4 pt-4">
-                {/* Tracking & Location Toggle */}
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => toggleCard('tracking')}
-                    className={`py-3 px-3 rounded-2xl flex flex-col items-center gap-2 text-[10px] font-black transition-all border ${hasTracking ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-gray-50 text-gray-400 border-transparent'}`}
-                  >
-                    {hasTracking ? <Package size={18} /> : <MapPinOff size={18} />}
-                    <span>Rastreio {hasTracking ? 'Ativo' : 'Off'}</span>
-                  </button>
-
-                  <button
-                    onClick={() => toggleCard('location')}
-                    className={`py-3 px-3 rounded-2xl flex flex-col items-center gap-2 text-[10px] font-black transition-all border ${hasLocation ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-gray-50 text-gray-400 border-transparent'}`}
-                  >
-                    {hasLocation ? <MapPin size={18} /> : <MapPinOff size={18} />}
-                    <span>Mapa {hasLocation ? 'Ativo' : 'Off'}</span>
-                  </button>
+              {/* THEMES SECTION */}
+              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5">
+                <h3 className="text-xs font-bold text-gray-700 uppercase mb-4">Temas de Cores Prontos</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {themesList.map(theme => (
+                    <button key={theme.id} onClick={() => applyTheme(theme)} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-indigo-300 transition-all text-left">
+                      <div className="flex -space-x-2">
+                        {theme.colors.map((c, i) => <div key={i} className="w-6 h-6 rounded-full border border-white" style={{ backgroundColor: c }} />)}
+                      </div>
+                      <span className="font-bold text-xs text-gray-700">{theme.name}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              <div className="pt-4 opacity-40">
-                <p className="text-[9px] text-gray-500 text-center font-black uppercase tracking-widest leading-relaxed">Configurações de Identidade e Operação</p>
+              {/* COUPONS & MODULES */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5">
+                  <h3 className="text-xs font-bold text-gray-700 uppercase mb-4 flex items-center gap-2">
+                    <Tag size={14} className="text-yellow-500" /> Cupons de Desconto
+                  </h3>
+                  <button onClick={() => setSettingsTab('store' as any)} className="w-full py-2 bg-gray-100 text-gray-600 rounded-xl text-xs font-bold">Gerenciar Cupons</button>
+                  {/* Simplificado aqui, o gerenciamento completo pode ser aberto em um modal ou subseção se necessário, mas por agora vamos manter o botão */}
+                </div>
+                <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5">
+                  <h3 className="text-xs font-bold text-gray-700 uppercase mb-4 flex items-center gap-2">
+                    <Puzzle size={14} className="text-purple-500" /> Módulos Ativos
+                  </h3>
+                  <div className="flex gap-2">
+                    <button onClick={() => toggleCard('tracking')} className={`flex-1 py-2 px-3 rounded-xl text-[10px] font-bold border ${hasTracking ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-gray-50 text-gray-400'}`}>Rastreio</button>
+                    <button onClick={() => toggleCard('location')} className={`flex-1 py-2 px-3 rounded-xl text-[10px] font-bold border ${hasLocation ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-gray-50 text-gray-400'}`}>Mapa</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'settings' && settingsTab === 'advanced' && (
+            <div className="space-y-6">
+              {/* PLAN SECTION */}
+              <div className={`p-8 rounded-3xl text-center border-2 ${isPro ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'}`}>
+                {isPro ? (
+                  <>
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+                      <Crown size={32} fill="currentColor" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800">Assinatura Premium Ativa</h3>
+                    <p className="text-sm text-gray-500 mb-6">Sua vitrine está operando no modo Elite.</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                      <Lock size={32} />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800">Plano Gratuito</h3>
+                    <p className="text-sm text-gray-500 mb-6">Desbloqueie modos exclusivos e remova limites.</p>
+                    <button onClick={() => setIsPaymentOpen(true)} className="w-full py-4 bg-indigo-600 text-white rounded-xl shadow-lg hover:bg-indigo-700 transition-all font-bold flex items-center justify-center gap-2">
+                      <Crown size={18} fill="gold" className="text-yellow-400" />
+                      Fazer Upgrade Agora
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* SUBDOMAIN CONFIG */}
+              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5">
+                <h3 className="text-xs font-bold text-gray-800 uppercase flex items-center gap-2 mb-4">
+                  <Globe size={14} className="text-blue-500" /> Endereço da Loja (.vyzgo.com)
+                </h3>
+                <div className="flex items-center bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-sm focus-within:ring-2 focus-within:ring-blue-200 transition-all">
+                  <input value={newSubdomain} onChange={(e) => setNewSubdomain(e.target.value)} disabled={storeId === 'demo' || isChangingSubdomain} className="flex-1 text-gray-700 font-bold text-right pr-1 bg-transparent outline-none" />
+                  <span className="font-bold text-gray-400">.vyzgo.com</span>
+                </div>
+                {newSubdomain !== storeId && (
+                  <button onClick={async () => { setIsChangingSubdomain(true); await updateStoreSlug(newSubdomain); setIsChangingSubdomain(false); }} className="mt-2 w-full py-2 bg-red-600 text-white rounded-lg text-xs font-bold">Confirmar Mudança de Link</button>
+                )}
+              </div>
+
+              {/* HELP SECTION */}
+              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
+                <h3 className="text-sm font-bold text-blue-800 mb-3 flex items-center gap-2">
+                  <HelpCircle size={16} /> Central de Ajuda
+                </h3>
+                <div className="space-y-4">
+                  <FAQItem title="Como recebo os pedidos?" content="Os pedidos feitos no carrinho geram uma mensagem automática formatada para o seu WhatsApp." />
+                  <FAQItem title="Como funciona o Plano Pro?" content="O plano Pro desbloqueia funcionalidades avançadas como modos exclusivos e domínio próprio." />
+                </div>
+                <button onClick={() => window.open('https://wa.me/5588997380123', '_blank')} className="w-full mt-4 py-3 bg-white text-blue-600 rounded-xl text-xs font-bold border border-blue-200">Falar com Suporte Humano</button>
               </div>
             </div>
           )}
@@ -1343,48 +860,73 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
           {activeTab === 'home' && (
             <div className="space-y-6">
               {/* BANNERS SECTION */}
-              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4">
-                <h3 className="text-xs font-black text-gray-700 uppercase mb-3 flex items-center gap-2">
-                  <ImageIcon size={14} className="text-blue-500" /> Banners da Vitrine (Carrossel)
+              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5">
+                <h3 className="text-xs font-black text-gray-800 uppercase mb-1 flex items-center gap-2">
+                  <ImageIcon size={14} className="text-indigo-500" /> Banners do Carrossel
                 </h3>
-                <p className="text-[10px] text-gray-500 mb-4">Adicione até 3-5 imagens para o destaque principal.</p>
-                
-                <div className="space-y-3">
-                  {(config.banners || []).map((url, idx) => (
-                    <div key={idx} className="flex gap-2">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-white">
-                        <img src={url} className="w-full h-full object-cover" />
+                <p className="text-[10px] text-gray-500 mb-4">Cada banner pode ter um link clicável ao ser tocado.</p>
+                <div className="space-y-4">
+                  {((config.bannerItems || []).length === 0 && (config.banners || []).length === 0) && (
+                    <div className="text-center py-6 text-gray-400 border-2 border-dashed border-gray-200 rounded-2xl">
+                      <ImageIcon size={28} className="mx-auto mb-2 opacity-40" />
+                      <p className="text-[11px] font-bold">Nenhum banner cadastrado</p>
+                    </div>
+                  )}
+                  {(config.bannerItems || (config.banners || []).map(url => ({ imageUrl: url, linkUrl: '', label: '' }))).map((banner, idx) => (
+                    <div key={idx} className="border border-gray-100 rounded-2xl p-4 bg-gray-50 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-16 h-10 bg-gray-200 rounded-lg overflow-hidden shrink-0">
+                          {banner.imageUrl && <img src={banner.imageUrl} className="w-full h-full object-cover" alt="" />}
+                        </div>
+                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider">Banner {idx + 1}</span>
+                        <button
+                          onClick={() => {
+                            const cur = config.bannerItems || (config.banners || []).map(u => ({ imageUrl: u, linkUrl: '', label: '' }));
+                            const updated = cur.filter((_, i) => i !== idx);
+                            updateConfig({ ...config, bannerItems: updated, banners: updated.map(b => b.imageUrl) });
+                          }}
+                          className="ml-auto text-red-400 hover:text-red-600 p-1"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
-                      <input 
-                        value={url}
-                        onChange={(e) => {
-                          const newBanners = [...(config.banners || [])];
-                          newBanners[idx] = e.target.value;
-                          updateConfig({ ...config, banners: newBanners });
-                        }}
-                        placeholder="URL da Imagem..."
-                        className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-[10px] outline-none shadow-inner"
-                      />
-                      <button 
-                         onClick={() => {
-                           const newBanners = (config.banners || []).filter((_, i) => i !== idx);
-                           updateConfig({ ...config, banners: newBanners });
-                         }}
-                         className="text-red-400 hover:text-red-600 p-2"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <div>
+                        <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1 block">URL da Imagem</label>
+                        <input
+                          value={banner.imageUrl}
+                          onChange={(e) => {
+                            const cur = [...(config.bannerItems || (config.banners || []).map(u => ({ imageUrl: u, linkUrl: '', label: '' })))];
+                            cur[idx] = { ...cur[idx], imageUrl: e.target.value };
+                            updateConfig({ ...config, bannerItems: cur, banners: cur.map(b => b.imageUrl) });
+                          }}
+                          placeholder="https://exemplo.com/banner.jpg"
+                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-[11px] outline-none focus:ring-2 focus:ring-indigo-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Link ao Clicar (opcional)</label>
+                        <input
+                          value={banner.linkUrl || ''}
+                          onChange={(e) => {
+                            const cur = [...(config.bannerItems || (config.banners || []).map(u => ({ imageUrl: u, linkUrl: '', label: '' })))];
+                            cur[idx] = { ...cur[idx], linkUrl: e.target.value };
+                            updateConfig({ ...config, bannerItems: cur });
+                          }}
+                          placeholder="/category/lancamentos  ou  https://..."
+                          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-[11px] outline-none focus:ring-2 focus:ring-indigo-200"
+                        />
+                        <p className="text-[9px] text-gray-400 mt-1">Exemplos: <span className="font-mono">/category/sapatos</span> ou uma URL completa.</p>
+                      </div>
                     </div>
                   ))}
-                  
-                  <button 
+                  <button
                     onClick={() => {
-                      const newBanners = [...(config.banners || []), ''];
-                      updateConfig({ ...config, banners: newBanners });
+                      const cur = config.bannerItems || (config.banners || []).map(u => ({ imageUrl: u, linkUrl: '', label: '' }));
+                      updateConfig({ ...config, bannerItems: [...cur, { imageUrl: '', linkUrl: '', label: '' }] });
                     }}
-                    className="w-full py-2 border-2 border-dashed border-blue-200 rounded-xl text-[10px] font-bold text-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center gap-1"
+                    className="w-full py-3 border-2 border-dashed border-indigo-200 rounded-2xl text-[11px] font-bold text-indigo-500 hover:bg-indigo-50 transition-all flex items-center justify-center gap-2"
                   >
-                    <Plus size={12} /> Adicionar Banner
+                    <Plus size={13} /> Adicionar Banner
                   </button>
                 </div>
               </div>

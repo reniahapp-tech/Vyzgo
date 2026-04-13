@@ -6,10 +6,20 @@ import {
     CreditCard, Users
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useConfig } from '../contexts/ConfigContext';
+import PaymentGateway from './PaymentGateway';
 
 const LandingPage: React.FC = () => {
+    const { addToast } = useConfig();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [openFaq, setOpenFaq] = useState<number | null>(null);
+    const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState({ name: '', price: '' });
+
+    const openCheckout = (name: string, price: string) => {
+        setSelectedPlan({ name, price });
+        setIsPaymentOpen(true);
+    };
 
     const toggleFaq = (index: number) => {
         setOpenFaq(openFaq === index ? null : index);
@@ -414,7 +424,7 @@ const LandingPage: React.FC = () => {
                                 </div>
 
                                 <button 
-                                    onClick={() => window.open('https://buy.stripe.com/test_placeholder_basic', '_blank')}
+                                    onClick={() => openCheckout('Plano Empreendedor', 'R$ 39,90')}
                                     className="w-full py-6 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-[25px] font-black text-xl text-center transition-all flex items-center justify-center gap-3 active:scale-95"
                                 >
                                     ASSINAR PLANO <ArrowRight size={20} />
@@ -463,7 +473,7 @@ const LandingPage: React.FC = () => {
                                 </div>
 
                                 <button 
-                                    onClick={() => window.open('https://buy.stripe.com/test_placeholder_express', '_blank')}
+                                    onClick={() => openCheckout('Setup Express', 'R$ 97,90')}
                                     className="w-full py-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[25px] font-black text-2xl text-center transition-all shadow-2xl shadow-indigo-900/40 flex items-center justify-center gap-3 group active:scale-95"
                                 >
                                     GARANTIR VAGA ⚡
@@ -560,6 +570,17 @@ const LandingPage: React.FC = () => {
                 </a>
             </div>
 
+
+            <PaymentGateway 
+                isOpen={isPaymentOpen} 
+                onClose={() => setIsPaymentOpen(false)} 
+                onSuccess={() => {
+                    setIsPaymentOpen(false);
+                    addToast('Pagamento iniciado! Verifique seu e-mail ou finalize no Asaas.', 'success');
+                }}
+                planName={selectedPlan.name}
+                price={selectedPlan.price}
+            />
 
             <style>{`
                 .animate-fade-in {

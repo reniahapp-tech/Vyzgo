@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useParams, useLocation, Navigate } from 'react-router-dom';
+import { MapPin } from 'lucide-react';
 import Header from './components/Header';
 import HeroCard from './components/HeroCard';
 import CategoryCard from './components/CategoryCard';
@@ -28,6 +28,8 @@ import SearchBar from './components/SearchBar';
 import AuthCallback from './components/AuthCallback';
 import TermsOfUse from './components/TermsOfUse';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import FeaturedCarousel from './components/FeaturedCarousel';
+import StoreMap from './components/StoreMap';
 
 // Hook to detect offline status
 const useNetworkStatus = () => {
@@ -44,38 +46,43 @@ const useNetworkStatus = () => {
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('online', handleOnline);
     };
-  }, []); // Empty dependency array = run once on mount
+  }, []);
 };
-
-import FeaturedCarousel from './components/FeaturedCarousel';
-import StoreMap from './components/StoreMap';
 
 const Home: React.FC<{ setIsProductModalOpen: (v: boolean) => void, setIsQuizModalOpen: (v: boolean) => void }> = ({ setIsProductModalOpen, setIsQuizModalOpen }) => {
   const { config } = useConfig();
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] relative overflow-x-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_#f3f4ff,_transparent_50%)] pointer-events-none opacity-50"></div>
+    <div className="min-h-screen bg-[#FDFBF7] relative overflow-x-hidden">
       
-      <div className="max-w-2xl mx-auto px-6 relative z-10">
-        <div className="animate-fade-in" style={{ animationDelay: '0ms' }}>
+      {/* ====== HEADER – inside max-width container ====== */}
+      <div className="max-w-5xl mx-auto px-4 md:px-6 sticky top-0 z-50 bg-[#FDFBF7]">
+        <div className="animate-fade-in">
           <Header />
         </div>
+      </div>
 
-        <main className="space-y-12 pb-24">
-          {/* 1. Hero Card - Multi-Banner Carousel */}
-          <section className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-            <HeroCard onClick={() => setIsProductModalOpen(true)} />
-          </section>
+      {/* ====== BANNER – full width, no padding ====== */}
+      <section className="w-full animate-fade-in" style={{ animationDelay: '80ms' }}>
+        <HeroCard onClick={() => setIsProductModalOpen(true)} />
+      </section>
+
+      {/* ====== REST OF CONTENT – back inside max-width container ====== */}
+      <div className="max-w-5xl mx-auto px-4 md:px-6 relative z-10">
+        <main className="space-y-14 py-10 pb-28">
 
           {/* 2. Categorias - Stories Style (Horizontal Scroll) */}
           <section className="animate-fade-in" style={{ animationDelay: '150ms' }}>
-             <div className="flex items-center justify-between mb-2 px-1">
-               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-                 Coleções
-               </h3>
+             <div className="flex items-center justify-between mb-4 px-1">
+               <div className="flex flex-col">
+                 <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-900 leading-none">
+                   Coleções Exclusivas
+                 </h3>
+                 <div className="h-0.5 w-6 bg-indigo-600 mt-1.5 rounded-full"></div>
+               </div>
+               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Arraste para o lado →</span>
              </div>
-             <div className="flex gap-1 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide snap-x">
+             <div className="flex gap-2 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide snap-x">
                {config.categories
                  .filter(item => item.id !== 'location' && item.id !== 'tracking') 
                  .map((item, index) => (
@@ -97,16 +104,21 @@ const Home: React.FC<{ setIsProductModalOpen: (v: boolean) => void, setIsQuizMod
 
           {/* 3. Featured Products - Carousel */}
           <section className="animate-fade-in" style={{ animationDelay: '300ms' }}>
-            <div className="flex items-center justify-between mb-4 px-1">
-               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
-                 Os mais desejados
+            <div className="flex items-center gap-2 mb-6 px-1">
+               <div className="w-1 h-4 bg-indigo-600 rounded-full"></div>
+               <h3 className="text-sm font-black text-gray-900 uppercase tracking-tight">
+                 Destaques da Temporada
                </h3>
              </div>
             <FeaturedCarousel />
           </section>
 
           {/* 4. Store Map & Location */}
-          <section className="animate-fade-in pb-10" style={{ animationDelay: '400ms' }}>
+          <section className="animate-fade-in" style={{ animationDelay: '400ms' }}>
+            <div className="flex items-center gap-2 mb-4 px-1 text-gray-400">
+               <MapPin size={14} />
+               <h3 className="text-[10px] font-black uppercase tracking-widest">Localização</h3>
+            </div>
             <StoreMap />
           </section>
         </main>
@@ -165,8 +177,6 @@ const ProtectedSetup: React.FC = () => {
   if (loading) return <FullScreenLoader />;
   if (!isAdmin) return <Navigate to="/login" replace />;
   
-  // Se já tem uma loja e não está na rota de edição (futuro), 
-  // poderíamos redirecionar para o painel, mas por enquanto o wizard é o setup inicial.
   return <OnboardingWizard />;
 };
 
@@ -247,14 +257,16 @@ const AppContent: React.FC = () => {
       }}
     >
       <div
-        className="w-full max-w-md md:max-w-3xl lg:max-w-5xl mx-auto min-h-screen relative shadow-2xl shadow-gray-200/50 flex flex-col transition-colors duration-300"
+        className="w-full max-w-md md:max-w-3xl lg:max-w-5xl mx-auto min-h-screen relative shadow-2xl shadow-gray-200/50 flex flex-col transition-colors duration-300 overflow-hidden"
         style={{ backgroundColor: config.theme.backgroundColor }}
       >
         {/* Main Content Area */}
-        <div className="p-6 md:p-8 lg:p-10 flex-grow flex flex-col">
-          {isAppDashboard && pathname !== '/corporate' ? (
+        {isAppDashboard && pathname !== '/corporate' ? (
+          <div className="p-6 md:p-8 lg:p-10 flex-grow flex flex-col">
             <AdminPanel isStandalone={true} />
-          ) : (
+          </div>
+        ) : (
+          <div className="flex-grow flex flex-col">
             <Routes>
               <Route path="/" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
               <Route path="/v/:slug" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
@@ -268,8 +280,8 @@ const AppContent: React.FC = () => {
               <Route path="/terms" element={<TermsOfUse />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
             </Routes>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Global Modals & Overlays (Only for store view) */}
         {!isAppDashboard && (

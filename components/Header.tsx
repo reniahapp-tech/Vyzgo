@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Search } from 'lucide-react';
+import { ShoppingBag, Search, MapPin } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
 import SearchModal from './SearchModal';
 
@@ -13,47 +13,49 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-[50] bg-white/70 backdrop-blur-xl border-b border-gray-100 flex items-center justify-between px-6 py-4 -mx-6 mb-6">
-        <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-[50] bg-white border-b border-gray-100 flex items-center justify-between px-6 py-5 -mx-6 mb-8 shadow-sm">
+        <div className="flex items-center gap-4">
           {header.logoUrl ? (
             <img 
               src={header.logoUrl} 
               alt={header.title} 
-              className="h-9 w-auto object-contain transition-transform active:scale-95"
+              className="h-10 w-auto object-contain transition-transform active:scale-95"
             />
           ) : (
              <div className="flex flex-col">
-                <h1 className="text-lg font-black tracking-tight leading-none text-gray-900">
+                <h1 className="text-xl font-black tracking-tighter leading-none text-gray-900 uppercase">
                   {header.title}
                 </h1>
-                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight mt-0.5">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5 align-middle"></span>
-                  {header.subtitle}
-                </span>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                  <span className="text-[9px] text-gray-400 font-black uppercase tracking-widest">
+                    {header.subtitle}
+                  </span>
+                </div>
              </div>
           )}
         </div>
 
-        <div className="flex gap-1">
+        <div className="flex gap-2">
           {/* Search Button */}
           <button 
             onClick={() => setIsSearchOpen(true)}
-            className="p-2.5 rounded-2xl transition-all active:scale-90 hover:bg-black/5 text-gray-800"
+            className="p-3 rounded-2xl transition-all active:scale-90 hover:bg-gray-50 text-gray-900 border border-transparent hover:border-gray-200"
             aria-label="Buscar"
           >
-            <Search size={22} strokeWidth={2.5} />
+            <Search size={20} strokeWidth={2.5} />
           </button>
 
           {/* Cart Button (Conditional) */}
           {showCart && (
             <button 
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 rounded-2xl transition-all active:scale-90 hover:bg-black/5 text-gray-800"
+              className="relative p-3 rounded-2xl transition-all active:scale-90 bg-indigo-600 text-white shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:bg-indigo-800"
             >
-              <ShoppingBag size={22} strokeWidth={2.5} />
+              <ShoppingBag size={20} strokeWidth={2.5} />
               {cart.length > 0 && (
                 <div 
-                  className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black text-white border border-white bg-indigo-600 animate-in zoom-in duration-300"
+                  className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black text-indigo-600 border-2 border-white bg-white animate-in zoom-in duration-300"
                 >
                   {cart.length}
                 </div>

@@ -39,7 +39,7 @@ const SearchBar: React.FC = () => {
   }, []);
 
   return (
-    <div data-search-bar="" className="relative w-full max-w-xl mx-auto mb-2 px-1">
+    <div data-search-bar="" className="relative w-full max-w-3xl mx-auto mb-6 px-1">
       {/* Input */}
       <div
         className="flex items-center gap-3 px-5 py-4 rounded-[1.5rem] shadow-xl shadow-gray-200/50 border border-gray-50 backdrop-blur-md transition-all group focus-within:ring-2 focus-within:ring-indigo-500/20"

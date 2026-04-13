@@ -4,7 +4,7 @@ import { loadConfigFromR2 } from '../services/r2';
 import { ProductService } from '../services/productService';
 import { StoreService, StoreData } from '../services/storeService';
 import { useAuth } from './AuthContext';
-import { AppConfig, CategoryItem, CartItem, ProductItem, Toast, Order, Coupon } from '../types';
+import { AppConfig, CategoryItem, CartItem, ProductItem, Toast, Order, Coupon, BannerItem } from '../types';
 
 // SAAS CONFIGURATION
 const DEFAULT_STORE_ID = 'demo';
@@ -119,6 +119,11 @@ const BASE_CONFIGS: Record<string, AppConfig> = {
       'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=1000',
       'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1000',
       'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1000'
+    ],
+    bannerItems: [
+      { imageUrl: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=1600', linkUrl: '/category/lancamentos', label: 'Coleção Verão' },
+      { imageUrl: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=1600', linkUrl: '/category/acessorios', label: 'Acessórios' },
+      { imageUrl: 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1600', linkUrl: '/category/sapatos', label: 'Sapatos' }
     ],
     featuredProductIds: ['l1', 'l2', 'a1']
   },
@@ -397,7 +402,12 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         if (data) {
           setStoreData(data);
           setStoreId(data.slug);
-          setConfig(data.config);
+          // Ativa Pro se o banco (Asaas) disser que é Pro
+          const finalConfig = {
+            ...data.config,
+            plan: (data as any).is_pro ? 'pro' : (data.config.plan || 'free')
+          };
+          setConfig(finalConfig);
           setIsNotFound(false);
         } else {
           setIsNotFound(true);

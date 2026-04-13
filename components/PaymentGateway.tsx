@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CreditCard, Lock, Check, ShieldCheck, X, QrCode, Copy } from 'lucide-react';
+import { Lock, ShieldCheck, X, ArrowRight } from 'lucide-react';
 import { useConfig } from '../contexts/ConfigContext';
-import { PaymentService } from '../services/paymentService';
 
 interface PaymentGatewayProps {
   isOpen: boolean;
@@ -13,24 +11,23 @@ interface PaymentGatewayProps {
 }
 
 const PaymentGateway: React.FC<PaymentGatewayProps> = ({ isOpen, onClose, onSuccess, planName, price }) => {
-  const { addToast } = useConfig();
-  const navigate = useNavigate();
+  const { addToast, storeId } = useConfig();
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<'method' | 'form' | 'pix' | 'processing' | 'success'>('method');
+  const [step, setStep] = useState<'form' | 'processing'>('form');
 
   const [formData, setFormData] = useState({
-    number: '',
     name: '',
-    expiry: '',
-    cvc: ''
+    email: '',
+    cpfCnpj: '',
+    mobilePhone: '',
   });
 
   if (!isOpen) return null;
 
-  const handlePay = async (e: React.FormEvent) => {
+  const handleAsaasSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.number || !formData.name || !formData.cvc) {
-      addToast('Preencha todos os campos do cartão.', 'error');
+    if (!formData.name || !formData.email || !formData.cpfCnpj || !formData.mobilePhone) {
+      addToast('Preencha todos os campos obrigatórios.', 'error');
       return;
     }
 
@@ -38,236 +35,137 @@ const PaymentGateway: React.FC<PaymentGatewayProps> = ({ isOpen, onClose, onSucc
     setStep('processing');
 
     try {
-      const result = await PaymentService.processPayment(
-        parseFloat(price.replace('R$', '').replace(',', '.')),
-        'credit_card',
-        formData
-      );
+      const response = await fetch('/api/asaas/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeId,
+          ...formData,
+          amount: parseFloat(price.replace('R$', '').replace(',', '.').trim()) || 39.90,
+          cycle: 'MONTHLY'
+        })
+      });
 
-      if (result.success) {
-        setLoading(false);
-        setStep('success');
-        setTimeout(() => {
-          onSuccess();
-          navigate('/setup');
-        }, 2000);
+      const result = await response.json();
+
+      if (response.ok && result.invoiceUrl) {
+        addToast('Assinatura gerada! Redirecionando para o pagamento...', 'success');
+        // Redireciona para o checkout do Asaas
+        window.location.href = result.invoiceUrl;
       } else {
-        setLoading(false);
-        addToast(result.message || 'Erro no pagamento', 'error');
-        setStep('form');
+        throw new Error(result.error || 'Erro ao gerar assinatura no Asaas.');
       }
-    } catch (e) {
+    } catch (e: any) {
       setLoading(false);
-      addToast('Erro de conexão. Tente novamente.', 'error');
+      addToast(e.message || 'Erro de conexão. Tente novamente.', 'error');
       setStep('form');
     }
   };
 
-  const handlePixCopy = () => {
-    const code = PaymentService.generatePixCode(
-      parseFloat(price.replace('R$', '').replace(',', '.')),
-      `TX-${Date.now()}`
-    );
-
-    navigator.clipboard.writeText(code);
-    addToast('Código PIX copiado!');
-
-    setTimeout(async () => {
-      setLoading(true);
-      setStep('processing');
-
-      const result = await PaymentService.processPayment(0, 'pix');
-
-      if (result.success) {
-        setLoading(false);
-        setStep('success');
-        setTimeout(() => {
-          onSuccess();
-          navigate('/setup');
-        }, 2000);
-      }
-    }, 5000);
-  };
-
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, '');
-    val = val.replace(/(\d{4})/g, '$1 ').trim();
-    setFormData({ ...formData, number: val.substring(0, 19) });
-  };
-
-  if (step === 'success') {
-    return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-green-500">
-        <div className="text-center text-white animate-in zoom-in duration-500">
-          <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-            <Check size={48} className="text-green-500" strokeWidth={4} />
-          </div>
-          <h2 className="text-3xl font-bold mb-2">Pagamento Aprovado!</h2>
-          <p className="text-lg opacity-90">Bem-vindo ao plano {planName}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={loading ? undefined : onClose}></div>
 
-      <div className="relative w-full max-w-md bg-white rounded-3xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom-10 duration-300">
+      <div className="relative w-full max-w-md bg-white rounded-[2.5rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-10 duration-300">
         {/* Header */}
-        <div className="bg-gray-900 p-6 text-white relative overflow-hidden">
+        <div className="bg-indigo-600 p-8 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-xl"></div>
           <div className="relative z-10 flex justify-between items-start">
             <div>
-              <p className="text-xs uppercase font-bold text-gray-400 mb-1">Assinando</p>
-              <h2 className="text-2xl font-bold">{planName}</h2>
-              <p className="text-3xl font-bold mt-2 text-green-400">{price}<span className="text-sm font-normal text-white/60">/mês</span></p>
+              <p className="text-[10px] uppercase font-black text-indigo-200 mb-1 tracking-widest">Assinando o Plano</p>
+              <h2 className="text-3xl font-black italic uppercase tracking-tighter">{planName}</h2>
+              <p className="text-4xl font-black mt-2 text-white">{price}<span className="text-sm font-normal text-white/60">/mês</span></p>
             </div>
-            <ShieldCheck size={32} className="text-green-400" />
+            <ShieldCheck size={40} className="text-white/20" />
           </div>
           {!loading && (
-            <button onClick={onClose} className="absolute top-4 right-4 text-white/50 hover:text-white"><X size={20} /></button>
+            <button onClick={onClose} className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors"><X size={24} /></button>
           )}
         </div>
 
-        {/* Method Selection */}
-        {step === 'method' && (
-          <div className="p-6">
-            <h3 className="text-sm font-bold text-gray-800 mb-4 uppercase">Escolha como pagar</h3>
-
-            <button
-              onClick={() => setStep('form')}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-gray-900 hover:bg-gray-50 transition-all mb-3 group"
-            >
-              <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <CreditCard size={20} />
+        {/* Content */}
+        <div className="p-8">
+          {step === 'form' && (
+            <form onSubmit={handleAsaasSubscribe} className="space-y-4">
+              <div className="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl flex items-center gap-3 mb-2">
+                <Lock size={18} className="text-indigo-500" />
+                <p className="text-[10px] text-indigo-700 font-black uppercase tracking-wider">Checkout Seguro via Asaas</p>
               </div>
-              <div className="text-left">
-                <p className="font-bold text-sm text-gray-900">Cartão de Crédito</p>
-                <p className="text-xs text-gray-500">Liberação imediata</p>
+
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome Completo</label>
+                  <input
+                    type="text"
+                    placeholder="João da Silva"
+                    required
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">E-mail para Nota Fiscal</label>
+                  <input
+                    type="email"
+                    placeholder="seu@email.com"
+                    required
+                    value={formData.email}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">CPF ou CNPJ</label>
+                    <input
+                      type="text"
+                      placeholder="000.000.000-00"
+                      required
+                      value={formData.cpfCnpj}
+                      onChange={e => setFormData({ ...formData, cpfCnpj: e.target.value.replace(/\D/g, '') })}
+                      className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">WhatsApp</label>
+                    <input
+                      type="tel"
+                      placeholder="(00) 00000-0000"
+                      required
+                      value={formData.mobilePhone}
+                      onChange={e => setFormData({ ...formData, mobilePhone: e.target.value })}
+                      className="w-full px-5 py-4 bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-2xl outline-none transition-all font-bold text-gray-900"
+                    />
+                  </div>
+                </div>
               </div>
-            </button>
 
-            <button
-              onClick={() => setStep('pix')}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border border-gray-200 hover:border-green-600 hover:bg-green-50 transition-all group"
-            >
-              <div className="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <QrCode size={20} />
-              </div>
-              <div className="text-left">
-                <p className="font-bold text-sm text-gray-900">Pix</p>
-                <p className="text-xs text-gray-500">Aprovação em segundos</p>
-              </div>
-            </button>
-          </div>
-        )}
-
-        {/* PIX Flow */}
-        {step === 'pix' && (
-          <div className="p-6 text-center">
-            <h3 className="text-sm font-bold text-gray-800 mb-2">Escaneie o QR Code</h3>
-            <p className="text-xs text-gray-500 mb-6">Abra o app do seu banco e pague instantaneamente.</p>
-
-            <div className="w-48 h-48 bg-gray-100 mx-auto rounded-xl flex items-center justify-center mb-6 border-2 border-dashed border-gray-300">
-              <QrCode size={96} className="opacity-80" />
-            </div>
-
-            <div className="bg-gray-50 p-3 rounded-lg flex items-center gap-2 mb-4">
-              <input
-                value="00020126580014BR.GOV.BCB.PIX..."
-                readOnly
-                className="bg-transparent text-xs text-gray-500 flex-1 outline-none"
-              />
-              <button onClick={handlePixCopy} className="text-green-600 font-bold text-xs flex items-center gap-1 hover:text-green-700">
-                <Copy size={12} /> Copiar
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-5 rounded-2xl shadow-xl shadow-indigo-100 transition-all active:scale-[0.98] mt-6 flex items-center justify-center gap-3 uppercase tracking-widest text-sm"
+              >
+                Gerar Pagamento (Pix/Cartão)
+                <ArrowRight size={20} />
               </button>
+              
+              <p className="text-[9px] text-gray-400 text-center font-medium leading-relaxed px-4">
+                Ao clicar em gerar pagamento, você será redirecionado para o ambiente seguro do Asaas para finalizar via Pix, Boleto ou Cartão.
+              </p>
+            </form>
+          )}
+
+          {step === 'processing' && (
+            <div className="py-20 flex flex-col items-center justify-center text-center">
+              <div className="w-20 h-20 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-8"></div>
+              <h3 className="font-black text-2xl text-gray-900 italic uppercase">Criando sua Assinatura...</h3>
+              <p className="text-sm text-gray-500 mt-2">Comunicando com o sistema do Asaas.</p>
             </div>
-
-            <button onClick={() => setStep('method')} className="text-xs text-gray-400 underline">Voltar</button>
-          </div>
-        )}
-
-        {/* Credit Card Form */}
-        {step === 'form' && (
-          <form onSubmit={handlePay} className="p-6 space-y-4">
-            <div className="flex items-center gap-2 mb-2">
-              <button type="button" onClick={() => setStep('method')} className="text-xs text-gray-400 hover:text-gray-900 font-bold">Voltar</button>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg flex items-center gap-2 mb-2">
-              <Lock size={14} className="text-blue-500" />
-              <p className="text-xs text-blue-700 font-medium">Ambiente seguro e criptografado.</p>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Número do Cartão</label>
-                <div className="relative">
-                  <CreditCard size={18} className="absolute left-3 top-3 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="0000 0000 0000 0000"
-                    value={formData.number}
-                    onChange={handleNumberChange}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-900 outline-none transition-all font-mono"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Nome no Cartão</label>
-                <input
-                  type="text"
-                  placeholder="JOAO A SILVA"
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value.toUpperCase() })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-900 outline-none transition-all"
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Validade</label>
-                  <input
-                    type="text"
-                    placeholder="MM/AA"
-                    maxLength={5}
-                    value={formData.expiry}
-                    onChange={e => setFormData({ ...formData, expiry: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-900 outline-none transition-all text-center"
-                  />
-                </div>
-                <div className="w-1/3">
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1">CVC</label>
-                  <input
-                    type="text"
-                    placeholder="123"
-                    maxLength={4}
-                    value={formData.cvc}
-                    onChange={e => setFormData({ ...formData, cvc: e.target.value })}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-900 outline-none transition-all text-center"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-gray-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-black transition-transform active:scale-[0.98] mt-4 flex items-center justify-center gap-2"
-            >
-              Confirmar Pagamento
-            </button>
-          </form>
-        )}
-
-        {step === 'processing' && (
-          <div className="p-12 flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 border-4 border-gray-100 border-t-green-500 rounded-full animate-spin mb-6"></div>
-            <h3 className="font-bold text-lg text-gray-800">Processando...</h3>
-            <p className="text-sm text-gray-500">Validando pagamento.</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

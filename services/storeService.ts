@@ -15,6 +15,11 @@ export interface StoreData {
   custom_domain?: string;
   config: AppConfig;
   is_active: boolean;
+  is_pro?: boolean;
+  asaas_customer_id?: string;
+  asaas_subscription_id?: string;
+  subscription_status?: string;
+  plan_type?: string;
   created_at?: string;
 }
 
