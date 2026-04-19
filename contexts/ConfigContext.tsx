@@ -362,7 +362,6 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     const loadStore = async () => {
       setIsLoadingStore(true);
       const hostname = window.location.hostname;
-      
       const queryStore = new URLSearchParams(window.location.search).get('store');
       
       // Se for a rota demo explícita, usamos o demo padrão
@@ -374,7 +373,6 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       }
       
       // Se estiver em localhost e pediu explicito outra store, pegaremos do Supabase (abaixo).
-      // Se não, forçamos demo.
       if (hostname === 'localhost' && (!queryStore || queryStore === 'demo')) {
         setStoreId('demo');
         setConfig(BASE_CONFIGS['demo']);
@@ -384,19 +382,26 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
       // 0. Detecta se é a Landing Page de Vendas (vyzgo.com ou www.vyzgo.com)
       const isApp = hostname === 'app.vyzgo.com';
-      const isRoot = hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com' || hostname === 'vitrinebio.vercel.app' || isApp;
+      const isLanding = hostname === 'vyzgo.com' || hostname === 'www.vyzgo.com' || hostname === 'agenciawint.com' || hostname === 'vitrinebio.vercel.app';
       
-      if (isRoot) {
+      // Se for a landing page (raiz), não carregamos loja
+      if (isLanding) {
         setIsLoadingStore(false);
         return;
       }
 
       try {
         let data = null;
-        if (hostname === 'localhost' && queryStore) {
-          data = await StoreService.getStoreBySlug(queryStore);
-        } else {
-          data = await StoreService.getStoreByHostname(hostname);
+        
+        // Se for o Dashboard do App e estivermos logados, tentamos buscar a loja do dono
+        if (isApp && user) {
+           data = await StoreService.getStoreByOwner(user.id);
+        } 
+        // Se não, tentamos buscar pelo hostname ou slug do localhost
+        else if (hostname === 'localhost' && queryStore) {
+           data = await StoreService.getStoreBySlug(queryStore);
+        } else if (!isApp) {
+           data = await StoreService.getStoreByHostname(hostname);
         }
         
         if (data) {
@@ -410,18 +415,19 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
           setConfig(finalConfig);
           setIsNotFound(false);
         } else {
-          setIsNotFound(true);
+          // Se for o app e não encontrou loja pro user, não é 404, apenas redirecionar pro setup (lidado no App.tsx)
+          if (!isApp) setIsNotFound(true);
         }
       } catch (err) {
         console.error("Erro ao carregar loja:", err);
-        setIsNotFound(true);
+        if (!isApp) setIsNotFound(true);
       } finally {
         setIsLoadingStore(false);
       }
     };
 
     loadStore();
-  }, []);
+  }, [user]); // Re-carregar quando o usuário mudar
 
   const saveStoreToCloud = async () => {
     if (!user || !storeData) return;

@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { useConfig } from '../contexts/ConfigContext';
 import { useNavigate } from 'react-router-dom';
-import { Store, Link, ShoppingBag, ArrowRight, Check, Sparkles, Smartphone, Palette, Type, Globe, Loader2 } from 'lucide-react';
+import { 
+    Store, Link as LinkIcon, ShoppingBag, ArrowRight, Check, Sparkles, 
+    Smartphone, Palette, Type, Globe, Loader2, ChevronRight, 
+    Zap, Star, ShieldCheck, CreditCard
+} from 'lucide-react';
 import { StoreService } from '../services/storeService';
 import { useAuth } from '../contexts/AuthContext';
 import { PRESET_THEMES } from './AdminPanel';
 
 const OnboardingWizard: React.FC = () => {
-    const { config, updateConfig, saveStoreToCloud } = useConfig();
+    const { config, updateConfig } = useConfig();
     const { user, refreshStoreStatus } = useAuth();
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [isSaving, setIsSaving] = useState(false);
     const [slugError, setSlugError] = useState('');
 
-    // Local state for the wizard to avoid flickering global config immediately
     const [localConfig, setLocalConfig] = useState({
         title: config.header.title,
         subtitle: config.header.subtitle,
@@ -24,14 +27,14 @@ const OnboardingWizard: React.FC = () => {
         slug: ''
     });
 
-    const totalSteps = 6; // Adicionamos 1 passo para o Slug
+    const totalSteps = 6;
 
     const nextStep = () => setStep(s => Math.min(s + 1, totalSteps));
     const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
     const checkSlug = async () => {
         if (!localConfig.slug) {
-            setSlugError('O endereço da loja é obrigatório.');
+            setSlugError('Endereço obrigatório.');
             return;
         }
         if (localConfig.slug.length < 3) {
@@ -43,7 +46,7 @@ const OnboardingWizard: React.FC = () => {
             setSlugError('');
             nextStep();
         } else {
-            setSlugError('Este endereço já está em uso.');
+            setSlugError('Indisponível.');
         }
     };
 
@@ -74,13 +77,7 @@ const OnboardingWizard: React.FC = () => {
             await refreshStoreStatus();
             updateConfig(newFullConfig);
             
-            // Redireciona para o novo subdomínio se possível, ou apenas limpa
-            const hostname = window.location.hostname;
-            if (hostname.includes('vyzgo.com')) {
-                window.location.href = window.location.origin;
-            } else {
-                navigate('/');
-            }
+            navigate('/');
         } catch (err) {
             console.error(err);
         } finally {
@@ -88,284 +85,290 @@ const OnboardingWizard: React.FC = () => {
         }
     };
 
-    // Mock Themes for display if we can't import easily yet
     const THEMES_PREVIEW = [
         { id: 'natura', color: '#C27B63', name: 'Natura' },
-        { id: 'dark', color: '#121212', name: 'Luxury' },
+        { id: 'dark', color: '#1A1A1A', name: 'Elite Dark' },
         { id: 'ocean', color: '#0EA5E9', name: 'Ocean' },
         { id: 'lavender', color: '#9333EA', name: 'Lavanda' },
         { id: 'solar', color: '#C2410C', name: 'Solar' },
-        { id: 'slate', color: '#334155', name: 'Minimal' },
+        { id: 'slate', color: '#334155', name: 'Minimale' },
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-            <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl overflow-hidden relative">
+        <div className="min-h-screen bg-[#0A0A0A] text-white flex flex-col items-center justify-center p-4 relative overflow-hidden font-['Inter',sans-serif]">
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+                
+                .glass-card {
+                    background: rgba(255, 255, 255, 0.03);
+                    backdrop-filter: blur(20px);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                }
+                .text-gradient {
+                    background: linear-gradient(to bottom right, #fff, #6366f1);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                }
+                .animate-slide-up {
+                    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+                @keyframes slideUp {
+                    from { opacity: 0; transform: translateY(30px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `}</style>
 
-                {/* Progress Bar */}
-                <div className="absolute top-0 left-0 w-full h-2 bg-gray-100">
-                    <div
-                        className="h-full bg-green-500 transition-all duration-500 ease-out"
-                        style={{ width: `${(step / totalSteps) * 100}%` }}
-                    />
+            {/* Background elements */}
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/10 blur-[120px] rounded-full"></div>
+            <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-600/10 blur-[120px] rounded-full"></div>
+
+            <div className="w-full max-w-2xl relative z-10">
+                {/* Progress Header */}
+                <div className="flex items-center justify-between mb-8 px-2">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-1">Passo {step} de {totalSteps}</span>
+                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Configuração de Vitrine Elite</h3>
+                    </div>
+                    <div className="flex gap-1">
+                        {Array.from({ length: totalSteps }).map((_, i) => (
+                            <div key={i} className={`h-1 w-6 rounded-full transition-all duration-300 ${i + 1 <= step ? 'bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]' : 'bg-white/10'}`}></div>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="p-8 md:p-12">
+                <div className="glass-card rounded-[40px] overflow-hidden shadow-2xl">
+                    <div className="p-10 md:p-14">
 
-                    {/* STEP 1: WELCOME */}
-                    {step === 1 && (
-                        <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <Sparkles size={48} className="text-green-600" />
-                            </div>
-                            <h1 className="text-3xl font-bold text-gray-900 mb-4">Parabéns! Você é Pro! 🚀</h1>
-                            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                                Agora vamos configurar sua loja profissional em <strong>menos de 2 minutos</strong>.
-                                Não se preocupe, é muito fácil.
-                            </p>
-                            <button
-                                onClick={nextStep}
-                                className="bg-gray-900 text-white text-lg font-bold py-4 px-12 rounded-full hover:bg-black transition-transform hover:scale-105 shadow-lg flex items-center gap-2 mx-auto"
-                            >
-                                Começar Agora <ArrowRight />
-                            </button>
-                        </div>
-                    )}
-
-                    {/* STEP 2: IDENTITY */}
-                    {step === 2 && (
-                        <div className="animate-in fade-in slide-in-from-right-8 duration-300">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Type className="text-blue-500" /> Qual o nome da sua loja?
-                            </h2>
-                            <p className="text-gray-500 mb-8">É assim que seus clientes vão te encontrar.</p>
-
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 uppercase mb-2">Nome Principal</label>
-                                    <input
-                                        value={localConfig.title}
-                                        onChange={(e) => setLocalConfig({ ...localConfig, title: e.target.value })}
-                                        placeholder="Ex: Boutique da Maria"
-                                        className="w-full text-2xl font-bold p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
-                                        autoFocus
-                                    />
+                        {/* STEP 1: WELCOME */}
+                        {step === 1 && (
+                            <div className="text-center animate-slide-up">
+                                <div className="w-20 h-20 bg-indigo-500/10 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-indigo-500/20 shadow-inner">
+                                    <Sparkles size={40} className="text-indigo-400" />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 uppercase mb-2">Subtítulo (Opcional)</label>
-                                    <input
-                                        value={localConfig.subtitle}
-                                        onChange={(e) => setLocalConfig({ ...localConfig, subtitle: e.target.value })}
-                                        placeholder="Ex: O melhor da moda feminina"
-                                        className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex justify-between mt-12">
-                                <button onClick={prevStep} className="text-gray-400 hover:text-gray-600 font-bold">Voltar</button>
-                                <button
-                                    onClick={nextStep}
-                                    disabled={!localConfig.title}
-                                    className="bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                >
-                                    Próximo
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 3: SLUG (Subdomain) */}
-                    {step === 3 && (
-                        <div className="animate-in fade-in slide-in-from-right-8 duration-300">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Globe className="text-green-500" /> Escolha seu endereço
-                            </h2>
-                            <p className="text-gray-500 mb-8">Como os clientes vão acessar sua vitrine.</p>
-
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl">
-                                    <span className="text-sm font-bold text-gray-400">vyzgo.com/</span>
-                                    <input
-                                        value={localConfig.slug}
-                                        onChange={(e) => setLocalConfig({ ...localConfig, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
-                                        placeholder="nome-da-sua-loja"
-                                        className="flex-1 bg-transparent text-xl font-bold outline-none focus:text-green-600"
-                                        autoFocus
-                                    />
-                                </div>
-                                {slugError && <p className="text-xs font-bold text-red-500 ml-2">{slugError}</p>}
-                                <p className="text-[10px] text-gray-400 ml-2 uppercase tracking-wider">Use apenas letras, números e hífens.</p>
-                            </div>
-
-                            <div className="flex justify-between mt-12">
-                                <button onClick={prevStep} className="text-gray-400 hover:text-gray-600 font-bold">Voltar</button>
-                                <button
-                                    onClick={checkSlug}
-                                    disabled={!localConfig.slug || localConfig.slug.length < 3}
-                                    className="bg-green-600 text-white font-bold py-3 px-8 rounded-full hover:bg-green-700 disabled:opacity-50 transition-all flex items-center gap-2"
-                                >
-                                    Verificar Disponibilidade
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 4: MODE */}
-                    {step === 4 && (
-                        <div className="animate-in fade-in slide-in-from-right-8 duration-300">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Store className="text-purple-500" /> Como você quer vender?
-                            </h2>
-                            <p className="text-gray-500 mb-8">Escolha o modelo que melhor se adapta ao seu negócio.</p>
-
-                            <div className="grid gap-4">
-                                <button
-                                    onClick={() => setLocalConfig({ ...localConfig, storeMode: 'store' })}
-                                    className={`p-6 rounded-2xl border-2 text-left transition-all hover:scale-[1.02] flex items-start gap-4 ${localConfig.storeMode === 'store' ? 'border-purple-500 bg-purple-50 ring-2 ring-purple-200' : 'border-gray-100 hover:border-purple-200'}`}
-                                >
-                                    <div className={`p-3 rounded-full ${localConfig.storeMode === 'store' ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-400'}`}>
-                                        <ShoppingBag size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-lg text-gray-900">Modo Loja</h3>
-                                        <p className="text-gray-500 text-sm mt-1">
-                                            Seus clientes montam um carrinho e enviam o pedido completo para o seu WhatsApp.
-                                        </p>
-                                    </div>
-                                </button>
-
-                                <button
-                                    onClick={() => setLocalConfig({ ...localConfig, storeMode: 'affiliate' })}
-                                    className={`p-6 rounded-2xl border-2 text-left transition-all hover:scale-[1.02] flex items-start gap-4 ${localConfig.storeMode === 'affiliate' ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-100 hover:border-blue-200'}`}
-                                >
-                                    <div className={`p-3 rounded-full ${localConfig.storeMode === 'affiliate' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400'}`}>
-                                        <Link size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-lg text-gray-900">Modo Afiliado</h3>
-                                        <p className="text-gray-500 text-sm mt-1">
-                                            Você exibe produtos, mas o botão de compra leva para outro site (Shopee, Amazon, etc).
-                                        </p>
-                                    </div>
-                                </button>
-
-                                <button
-                                    onClick={() => setLocalConfig({ ...localConfig, storeMode: 'mixed' })}
-                                    className={`p-6 rounded-2xl border-2 text-left transition-all hover:scale-[1.02] flex items-start gap-4 ${localConfig.storeMode === 'mixed' ? 'border-orange-500 bg-orange-50 ring-2 ring-orange-200' : 'border-gray-100 hover:border-orange-200'}`}
-                                >
-                                    <div className={`p-3 rounded-full ${localConfig.storeMode === 'mixed' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'}`}>
-                                        <Store size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-lg text-gray-900">Híbrido (Recomendado)</h3>
-                                        <p className="text-gray-500 text-sm mt-1">
-                                            O melhor dos dois mundos. Você pode ter produtos próprios e links de afiliado juntos.
-                                        </p>
-                                    </div>
-                                </button>
-                            </div>
-
-                            <div className="flex justify-between mt-8">
-                                <button onClick={prevStep} className="text-gray-400 hover:text-gray-600 font-bold">Voltar</button>
-                                <button
-                                    onClick={nextStep}
-                                    className="bg-purple-600 text-white font-bold py-3 px-8 rounded-full hover:bg-purple-700 transition-all"
-                                >
-                                    Próximo
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 5: THEME */}
-                    {step === 5 && (
-                        <div className="animate-in fade-in slide-in-from-right-8 duration-300">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Palette className="text-pink-500" /> Escolha seu estilo
-                            </h2>
-                            <p className="text-gray-500 mb-8">Selecione uma cor base para sua loja.</p>
-
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {THEMES_PREVIEW.map(theme => (
-                                    <button
-                                        key={theme.id}
-                                        onClick={() => {
-                                            setLocalConfig({ ...localConfig, themeId: theme.id });
-                                            // In reality we would call applyTheme here to preview
-                                            const realTheme = PRESET_THEMES.find(t => t.id === theme.id);
-                                            if (realTheme) {
-                                                updateConfig({ ...config, theme: { ...config.theme, ...realTheme.config.theme } });
-                                            }
-                                        }}
-                                        className={`relative p-4 rounded-xl border-2 flex flex-col items-center gap-3 transition-all ${localConfig.themeId === theme.id ? 'border-gray-900 bg-gray-50 scale-105' : 'border-gray-100 hover:border-gray-300'}`}
-                                    >
-                                        <div className="w-16 h-16 rounded-full shadow-md" style={{ backgroundColor: theme.color }}></div>
-                                        <span className="font-bold text-sm text-gray-700">{theme.name}</span>
-                                        {localConfig.themeId === theme.id && (
-                                            <div className="absolute top-2 right-2 bg-gray-900 text-white rounded-full p-1">
-                                                <Check size={12} />
-                                            </div>
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="flex justify-between mt-12">
-                                <button onClick={prevStep} className="text-gray-400 hover:text-gray-600 font-bold">Voltar</button>
-                                <button
-                                    onClick={nextStep}
-                                    className="bg-pink-600 text-white font-bold py-3 px-8 rounded-full hover:bg-pink-700 transition-all"
-                                >
-                                    Próximo
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 6: WHATSAPP */}
-                    {step === 6 && (
-                        <div className="animate-in fade-in slide-in-from-right-8 duration-300">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Smartphone className="text-green-500" /> Seu WhatsApp
-                            </h2>
-                            <p className="text-gray-500 mb-8">Para onde devemos enviar os pedidos?</p>
-
-                            <div className="mb-8">
-                                <div className="relative">
-                                    <div className="absolute left-4 top-4 text-gray-400 font-bold">+55</div>
-                                    <input
-                                        value={localConfig.whatsapp}
-                                        onChange={(e) => setLocalConfig({ ...localConfig, whatsapp: e.target.value.replace(/\D/g, '') })}
-                                        placeholder="11999999999"
-                                        type="tel"
-                                        className="w-full pl-14 p-4 text-xl font-bold border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-50 outline-none transition-all tracking-widest"
-                                        autoFocus
-                                    />
-                                </div>
-                                <p className="text-xs text-gray-400 mt-2 ml-2">Digite apenas números com DDD.</p>
-                            </div>
-
-                            <div className="bg-green-50 p-4 rounded-xl border border-green-100 mb-8 flex gap-3">
-                                <Check className="text-green-600 shrink-0" size={20} />
-                                <p className="text-sm text-green-800">
-                                    Tudo pronto! Ao clicar em finalizar, sua loja VyzGo estará configurada e pronta para receber produtos.
+                                <h1 className="text-4xl md:text-5xl font-black mb-6 tracking-tighter uppercase italic leading-[1.1]">
+                                    Sua jornada <br />
+                                    <span className="text-gradient">Começa aqui.</span>
+                                </h1>
+                                <p className="text-gray-400 text-lg mb-12 font-medium leading-relaxed max-w-md mx-auto">
+                                    Vamos transformar seu negócio em uma vitrine virtual irresistível. Prepare-se para a experiência máxima de venda.
                                 </p>
-                            </div>
-
-                            <div className="flex justify-between mt-8">
-                                <button onClick={prevStep} className="text-gray-400 hover:text-gray-600 font-bold">Voltar</button>
                                 <button
-                                    onClick={handleFinish}
-                                    disabled={localConfig.whatsapp.length < 10 || isSaving}
-                                    className="bg-green-600 text-white font-bold py-4 px-10 rounded-full hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center gap-2"
+                                    onClick={nextStep}
+                                    className="w-full py-5 bg-white text-black text-lg font-black rounded-3xl hover:bg-gray-100 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl flex items-center justify-center gap-3 uppercase tracking-wider"
                                 >
-                                    {isSaving ? <Loader2 className="animate-spin" /> : 'Finalizar e Criar Loja 🎉'}
+                                    Começar Configuração <ChevronRight size={20} />
                                 </button>
+                                <div className="mt-8 flex justify-center gap-6 opacity-30">
+                                   <Zap size={16} /> <Star size={16} /> <ShieldCheck size={16} />
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
+                        {/* STEP 2: IDENTITY */}
+                        {step === 2 && (
+                            <div className="animate-slide-up">
+                                <h2 className="text-3xl font-black mb-2 tracking-tighter uppercase italic flex items-center gap-3">
+                                    <Type className="text-indigo-400" /> Nome da Vitrine
+                                </h2>
+                                <p className="text-gray-400 mb-10 font-medium">Como o mundo conhecerá a sua marca?</p>
+
+                                <div className="space-y-8">
+                                    <div className="group">
+                                        <label className="block text-[10px] font-black text-indigo-400 uppercase mb-3 tracking-[0.2em] ml-1">Assinatura Principal</label>
+                                        <input
+                                            value={localConfig.title}
+                                            onChange={(e) => setLocalConfig({ ...localConfig, title: e.target.value })}
+                                            placeholder="Ex: Boutique Elite"
+                                            className="w-full text-2xl font-black p-6 bg-white/5 border border-white/10 rounded-3xl focus:border-indigo-500 outline-none transition-all placeholder:text-white/10"
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <div className="group">
+                                        <label className="block text-[10px] font-black text-indigo-400 uppercase mb-3 tracking-[0.2em] ml-1">Slogan Curto</label>
+                                        <input
+                                            value={localConfig.subtitle}
+                                            onChange={(e) => setLocalConfig({ ...localConfig, subtitle: e.target.value })}
+                                            placeholder="Ex: Exclusividade em cada detalhe"
+                                            className="w-full p-5 bg-white/5 border border-white/10 rounded-2xl focus:border-indigo-500 outline-none transition-all placeholder:text-white/10 text-gray-300 font-medium"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 mt-12">
+                                    <button onClick={prevStep} className="px-8 py-5 text-gray-500 font-black uppercase text-xs tracking-widest hover:text-white transition-colors">Voltar</button>
+                                    <button
+                                        onClick={nextStep}
+                                        disabled={!localConfig.title}
+                                        className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-3xl hover:bg-indigo-700 disabled:opacity-30 disabled:grayscale transition-all shadow-lg shadow-indigo-500/10 uppercase tracking-widest text-sm"
+                                    >
+                                        Próximo Passo
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* STEP 3: SLUG */}
+                        {step === 3 && (
+                            <div className="animate-slide-up">
+                                <h2 className="text-3xl font-black mb-2 tracking-tighter uppercase italic flex items-center gap-3">
+                                    <Globe className="text-indigo-400" /> Seu Domínio
+                                </h2>
+                                <p className="text-gray-400 mb-10 font-medium">O endereço digital da sua nova casa.</p>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-3 p-6 bg-white/5 border border-white/10 rounded-[32px] group focus-within:border-indigo-500 transition-all">
+                                        <span className="text-xs font-black text-gray-500 uppercase tracking-widest">vyzgo.com/</span>
+                                        <input
+                                            value={localConfig.slug}
+                                            onChange={(e) => setLocalConfig({ ...localConfig, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
+                                            placeholder="minhaloja"
+                                            className="flex-1 bg-transparent text-xl font-black outline-none placeholder:text-white/5"
+                                            autoFocus
+                                        />
+                                    </div>
+                                    {slugError && <p className="text-xs font-bold text-red-500 ml-4 animate-pulse">{slugError}</p>}
+                                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest ml-4">Min. 3 caracteres • Apenas letras e números</p>
+                                </div>
+
+                                <div className="flex gap-4 mt-12">
+                                    <button onClick={prevStep} className="px-8 py-5 text-gray-500 font-black uppercase text-xs tracking-widest hover:text-white transition-colors">Voltar</button>
+                                    <button
+                                        onClick={checkSlug}
+                                        disabled={!localConfig.slug || localConfig.slug.length < 3}
+                                        className="flex-1 py-5 bg-indigo-600 text-white font-black rounded-3xl hover:bg-indigo-700 disabled:opacity-30 transition-all shadow-lg shadow-indigo-500/10 uppercase tracking-widest text-sm flex items-center justify-center gap-2"
+                                    >
+                                        Verificar Disponibilidade <ChevronRight size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* STEP 4: MODE */}
+                        {step === 4 && (
+                            <div className="animate-slide-up">
+                                <h2 className="text-3xl font-black mb-1 tracking-tighter uppercase italic flex items-center gap-3">
+                                    <Zap className="text-indigo-400" /> Modelo de Venda
+                                </h2>
+                                <p className="text-gray-400 mb-8 font-medium">Escolha como a magia vai acontecer.</p>
+
+                                <div className="grid gap-4">
+                                    {[
+                                        { id: 'mixed', icon: Store, title: 'Híbrido Pro', desc: 'Produtos próprios e links de afiliado. Máxima flexibilidade.', color: 'indigo' },
+                                        { id: 'store', icon: ShoppingBag, title: 'Loja Direta', desc: 'Foco total em vendas pelo WhatsApp com carrinho estruturado.', color: 'purple' },
+                                        { id: 'affiliate', icon: LinkIcon, title: 'Afiliado Elite', desc: 'Curadoria de produtos com links externos (Shopee, Amazon).', color: 'blue' }
+                                    ].map(mode => (
+                                        <button
+                                            key={mode.id}
+                                            onClick={() => setLocalConfig({ ...localConfig, storeMode: mode.id as any })}
+                                            className={`p-6 rounded-[32px] border-2 text-left transition-all relative overflow-hidden group ${localConfig.storeMode === mode.id ? 'border-indigo-500 bg-indigo-500/10 shadow-lg' : 'border-white/5 bg-white/5 hover:border-white/20'}`}
+                                        >
+                                            <div className="flex items-start gap-5 relative z-10">
+                                                <div className={`p-4 rounded-3xl ${localConfig.storeMode === mode.id ? 'bg-indigo-500 text-white' : 'bg-white/5 text-gray-500'}`}>
+                                                    <mode.icon size={24} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-black text-xl italic uppercase tracking-tight">{mode.title}</h3>
+                                                    <p className="text-gray-400 text-xs mt-1 font-medium leading-relaxed">{mode.desc}</p>
+                                                </div>
+                                            </div>
+                                            {localConfig.storeMode === mode.id && <div className="absolute top-4 right-4 text-indigo-400"><Check size={20} /></div>}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="flex justify-between mt-10">
+                                    <button onClick={prevStep} className="px-6 py-4 text-gray-500 font-bold uppercase text-[10px] tracking-widest hover:text-white">Voltar</button>
+                                    <button onClick={nextStep} className="px-10 py-5 bg-white text-black font-black rounded-[25px] hover:bg-gray-200 transition-all uppercase tracking-widest text-sm">Próximo</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* STEP 5: THEME */}
+                        {step === 5 && (
+                            <div className="animate-slide-up text-center">
+                                <h2 className="text-3xl font-black mb-1 tracking-tighter uppercase italic inline-flex items-center gap-3">
+                                    <Palette className="text-indigo-400" /> Identidade Visual
+                                </h2>
+                                <p className="text-gray-400 mb-10 font-medium">A cor da sua marca transmite autoridade.</p>
+
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                                    {THEMES_PREVIEW.map(theme => (
+                                        <button
+                                            key={theme.id}
+                                            onClick={() => setLocalConfig({ ...localConfig, themeId: theme.id })}
+                                            className={`group relative p-6 rounded-[40px] transition-all flex flex-col items-center gap-4 ${localConfig.themeId === theme.id ? 'bg-white/10 shadow-2xl scale-105 border border-white/20' : 'hover:bg-white/5'}`}
+                                        >
+                                            <div 
+                                                className="w-14 h-14 rounded-full shadow-[0_0_30px_rgba(0,0,0,0.5)] border-2 border-white/20 transition-transform group-hover:rotate-12" 
+                                                style={{ backgroundColor: theme.color }}
+                                            ></div>
+                                            <span className="font-black text-[10px] uppercase tracking-widest text-gray-400 group-hover:text-white transition-colors">{theme.name}</span>
+                                            {localConfig.themeId === theme.id && (
+                                                <div className="absolute top-2 right-2 text-indigo-400 animate-pulse">
+                                                    <Star size={12} fill="currentColor" />
+                                                </div>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="flex justify-between mt-14">
+                                    <button onClick={prevStep} className="px-6 py-4 text-gray-500 font-bold uppercase text-[10px] tracking-widest hover:text-white">Voltar</button>
+                                    <button onClick={nextStep} className="px-12 py-5 bg-indigo-600 text-white font-black rounded-3xl hover:bg-indigo-700 transition-all uppercase tracking-widest text-sm shadow-xl shadow-indigo-900/40">Continuar</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* STEP 6: WHATSAPP */}
+                        {step === 6 && (
+                            <div className="animate-slide-up">
+                                <h2 className="text-3xl font-black mb-1 tracking-tighter uppercase italic flex items-center gap-3">
+                                    <Smartphone className="text-indigo-400" /> Conexão Direta
+                                </h2>
+                                <p className="text-gray-400 mb-10 font-medium">Onde você vai receber os pedidos e lucrar?</p>
+
+                                <div className="mb-10">
+                                    <div className="relative group">
+                                        <div className="absolute left-6 top-6 text-indigo-400 font-black text-lg">+55</div>
+                                        <input
+                                            value={localConfig.whatsapp}
+                                            onChange={(e) => setLocalConfig({ ...localConfig, whatsapp: e.target.value.replace(/\D/g, '') })}
+                                            placeholder="11999999999"
+                                            type="tel"
+                                            className="w-full pl-16 p-6 text-2xl font-black bg-white/5 border border-white/10 rounded-[32px] focus:border-indigo-500 outline-none transition-all tracking-[0.2em]"
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-4 ml-6">Número com DDD (Apenas números)</p>
+                                </div>
+
+                                <div className="bg-indigo-950/30 p-6 rounded-[28px] border border-indigo-500/20 mb-12 flex gap-4">
+                                    <ShieldCheck className="text-indigo-400 shrink-0" size={24} />
+                                    <p className="text-xs text-indigo-100 font-medium leading-relaxed">
+                                        Assinatura pronta para ativação. Ao finalizar, sua vitrine será implantada instantaneamente em nossos servidores de alto desempenho.
+                                    </p>
+                                </div>
+
+                                <div className="flex gap-4 items-center">
+                                    <button onClick={prevStep} className="px-6 py-4 text-gray-400 font-bold uppercase text-[10px] tracking-widest hover:text-white">Voltar</button>
+                                    <button
+                                        onClick={handleFinish}
+                                        disabled={localConfig.whatsapp.length < 10 || isSaving}
+                                        className="flex-1 py-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black rounded-[32px] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30 transition-all shadow-2xl flex items-center justify-center gap-3 uppercase tracking-widest"
+                                    >
+                                        {isSaving ? <Loader2 className="animate-spin" /> : <>Finalizar & Publicar Vitrine <ArrowRight size={20} /></>}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
+                </div>
+
+                <div className="mt-10 text-center">
+                    <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.4em] flex items-center justify-center gap-3">
+                        <CreditCard size={12} /> Pagamento Seguro via Asaas • VyzGo Tech Elite
+                    </p>
                 </div>
             </div>
         </div>

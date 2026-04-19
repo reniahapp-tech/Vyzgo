@@ -18,7 +18,7 @@ const HeroCard: React.FC<HeroCardProps> = ({ onClick }) => {
   const resolvedBanners: BannerItem[] = (() => {
     if (bannerItems && bannerItems.length > 0) return bannerItems;
     if (banners && banners.length > 0) return banners.map(url => ({ imageUrl: url }));
-    return [{ imageUrl: hero.imageUrl }];
+    return [{ imageUrl: hero.imageUrl, title: hero.title, subtitle: hero.subtitle, buttonText: hero.buttonText }];
   })();
 
   useEffect(() => {
@@ -42,7 +42,6 @@ const HeroCard: React.FC<HeroCardProps> = ({ onClick }) => {
   const handleBannerClick = () => {
     const current = resolvedBanners[currentIndex];
     if (current.linkUrl) {
-      // Se for link de categoria interno
       if (current.linkUrl.startsWith('/category/')) {
         navigateCategory(current.linkUrl.replace('/category/', ''));
       } else if (current.linkUrl.startsWith('http')) {
@@ -57,6 +56,9 @@ const HeroCard: React.FC<HeroCardProps> = ({ onClick }) => {
 
   const isVideo = (url: string) => /\.(mp4|webm|mov|ogg|m4v)$/i.test(url);
 
+  const current = resolvedBanners[currentIndex];
+  const hasText = current.title || current.subtitle;
+
   return (
     <div
       className="relative w-full overflow-hidden"
@@ -65,7 +67,7 @@ const HeroCard: React.FC<HeroCardProps> = ({ onClick }) => {
     >
       {/* Banner slider */}
       <div
-        className="relative w-full cursor-pointer"
+        className="relative w-full cursor-pointer select-none"
         style={{ aspectRatio: '16/7' }}
         onClick={handleBannerClick}
       >
@@ -85,7 +87,7 @@ const HeroCard: React.FC<HeroCardProps> = ({ onClick }) => {
               ) : (
                 <ImageWithFallback
                   src={banner.imageUrl}
-                  alt={banner.label || `Banner ${idx + 1}`}
+                  alt={banner.label || banner.title || `Banner ${idx + 1}`}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               )}
@@ -93,10 +95,38 @@ const HeroCard: React.FC<HeroCardProps> = ({ onClick }) => {
           ))}
         </div>
 
-        {/* Gradient overlay – bottom only, subtle */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+        {/* Gradient overlay — stronger when there is text */}
+        <div
+          className="absolute inset-0 pointer-events-none transition-opacity duration-500"
+          style={{
+            background: hasText
+              ? 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.25) 50%, transparent 100%)'
+              : 'linear-gradient(to top, rgba(0,0,0,0.40) 0%, transparent 60%)'
+          }}
+        />
 
-        {/* Navigation arrows – always visible on desktop, touch-friendly on mobile */}
+        {/* ── TEXT OVERLAY ── */}
+        {hasText && (
+          <div className="absolute bottom-0 left-0 right-0 p-5 md:p-10 z-10 pointer-events-none">
+            {current.subtitle && (
+              <p className="text-white/75 text-[10px] md:text-sm font-black uppercase tracking-[0.2em] mb-1">
+                {current.subtitle}
+              </p>
+            )}
+            {current.title && (
+              <h2 className="text-white text-xl md:text-5xl font-black leading-tight tracking-tight uppercase drop-shadow-lg mb-3">
+                {current.title}
+              </h2>
+            )}
+            {current.buttonText && (
+              <div className="pointer-events-auto inline-flex items-center gap-2 bg-white text-gray-900 px-5 py-2.5 md:px-8 md:py-3.5 rounded-full font-black text-[10px] md:text-sm uppercase tracking-widest shadow-xl hover:bg-gray-100 transition-all">
+                {current.buttonText}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Navigation arrows — same style as banner (semi-transparent dark) */}
         {resolvedBanners.length > 1 && (
           <>
             <button
@@ -116,7 +146,7 @@ const HeroCard: React.FC<HeroCardProps> = ({ onClick }) => {
           </>
         )}
 
-        {/* Dots / progress indicator */}
+        {/* Dots indicator */}
         {resolvedBanners.length > 1 && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
             {resolvedBanners.map((_, idx) => (
@@ -130,27 +160,6 @@ const HeroCard: React.FC<HeroCardProps> = ({ onClick }) => {
                 }`}
               />
             ))}
-          </div>
-        )}
-
-        {/* Hero text overlay – only shown when no specific link (acts like a "shop now" promo) */}
-        {!resolvedBanners[currentIndex]?.linkUrl && (
-          <div className="absolute bottom-0 left-0 right-0 p-5 md:p-8 z-10 pointer-events-none">
-            <p className="text-white/70 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-1">
-              {hero.subtitle}
-            </p>
-            <h2 className="text-white text-xl md:text-4xl font-black leading-tight tracking-tight uppercase drop-shadow-lg">
-              {hero.title}
-            </h2>
-            {hero.price && (
-              <div className="mt-2 inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 px-4 py-1.5 rounded-full pointer-events-auto cursor-pointer hover:bg-white/30 transition-all">
-                <span className="text-white text-xs font-black uppercase tracking-widest">
-                  {hero.buttonText}
-                </span>
-                <span className="text-white/80 text-xs font-bold">•</span>
-                <span className="text-white text-xs font-bold">{hero.price}</span>
-              </div>
-            )}
           </div>
         )}
       </div>

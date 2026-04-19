@@ -249,10 +249,10 @@ const AppContent: React.FC = () => {
 
   // RENDERIZAÇÃO PRINCIPAL
   return (
-    <div
-      className="min-h-screen font-sans selection:text-white transition-colors duration-300"
-      style={{
-        backgroundColor: config.theme.backgroundColor,
+    <div 
+      className="min-h-screen flex flex-col font-sans transition-colors duration-500"
+      style={{ 
+        backgroundColor: isAppDashboard ? '#0A0A0A' : config.theme.backgroundColor,
         color: config.theme.textColor
       }}
     >
@@ -261,27 +261,27 @@ const AppContent: React.FC = () => {
         style={{ backgroundColor: config.theme.backgroundColor }}
       >
         {/* Main Content Area */}
-        {isAppDashboard && pathname !== '/corporate' ? (
-          <div className="p-6 md:p-8 lg:p-10 flex-grow flex flex-col">
-            <AdminPanel isStandalone={true} />
-          </div>
-        ) : (
-          <div className="flex-grow flex flex-col">
-            <Routes>
-              <Route path="/" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
-              <Route path="/v/:slug" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
-              <Route path="/demo" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
-              <Route path="/login" element={<AuthPage />} />
-              <Route path="/setup" element={<ProtectedSetup />} />
-              <Route path="/corporate" element={<CorporateDashboard />} />
-              <Route path="/category/:categoryId" element={<CategoryRoute />} />
-              <Route path="/product/:productId" element={<ProductRoute />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/terms" element={<TermsOfUse />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-            </Routes>
-          </div>
-        )}
+        <div className="flex-grow flex flex-col">
+          <Routes>
+            <Route path="/" element={
+              isAppDashboard ? (
+                hasStore ? <AdminPanel isStandalone={true} /> : <Navigate to="/setup" replace />
+              ) : (
+                <Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />
+              )
+            } />
+            <Route path="/v/:slug" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
+            <Route path="/demo" element={<Home setIsProductModalOpen={setIsProductModalOpen} setIsQuizModalOpen={setIsQuizModalOpen} />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/setup" element={<ProtectedSetup />} />
+            <Route path="/corporate" element={<CorporateDashboard />} />
+            <Route path="/category/:categoryId" element={<CategoryRoute />} />
+            <Route path="/product/:productId" element={<ProductRoute />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/terms" element={<TermsOfUse />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+          </Routes>
+        </div>
 
         {/* Global Modals & Overlays (Only for store view) */}
         {!isAppDashboard && (

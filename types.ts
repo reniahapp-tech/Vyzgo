@@ -112,8 +112,11 @@ export type PlanType = 'free' | 'pro';
 
 export interface BannerItem {
   imageUrl: string;
-  linkUrl?: string;   // URL de destino ao clicar (categoria, produto ou URL externa)
-  label?: string;     // rótulo opcional para identificação no admin
+  linkUrl?: string;      // URL de destino ao clicar (categoria, produto ou URL externa)
+  label?: string;        // rótulo identificação no admin
+  title?: string;        // título exibido sobre o banner
+  subtitle?: string;     // subtítulo exibido sobre o banner
+  buttonText?: string;   // texto do botão de ação
 }
 
 export interface AppConfig {

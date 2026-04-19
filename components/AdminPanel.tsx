@@ -445,12 +445,12 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
   }
 
   const containerClasses = isStandalone 
-    ? "flex flex-col h-full bg-gray-50"
-    : "fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 animate-in fade-in zoom-in duration-300";
+    ? "flex flex-col h-full bg-[#0A0A0A]"
+    : "fixed inset-0 z-50 flex items-center justify-center p-2 md:p-8 animate-in fade-in zoom-in duration-300 font-['Inter',sans-serif]";
 
   const contentClasses = isStandalone
     ? "w-full h-full flex flex-col"
-    : "bg-white w-full max-w-6xl h-[90vh] rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden flex flex-col relative";
+    : "bg-[#0F0F0F] w-full max-w-7xl h-[95vh] rounded-[48px] shadow-[0_40px_100px_rgba(0,0,0,0.8)] border border-white/5 overflow-hidden flex flex-col relative";
 
   // 2. Login Screen (if not authenticated)
   if (!isAdmin) {
@@ -490,22 +490,22 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
 
   // 3. Admin Dashboard (Authenticated)
   const InputGroup = ({ label, value, onChange, placeholder, textarea = false }: { label: string, value: string, onChange: (val: string) => void, placeholder?: string, textarea?: boolean }) => (
-    <div className="mb-3 group">
-      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-wider">{label}</label>
+    <div className="mb-6 group">
+      <label className="block text-[10px] font-black text-white/30 uppercase mb-2 tracking-[0.2em] ml-1">{label}</label>
       {textarea ? (
         <textarea
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          rows={2}
-          className="w-full bg-white/40 border border-white/50 backdrop-blur-sm rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none resize-none"
+          rows={3}
+          className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white focus:border-indigo-500 outline-none transition-all placeholder:text-white/10"
         />
       ) : (
         <input
           value={value || ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-white/40 border border-white/50 backdrop-blur-sm rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none"
+          className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white focus:border-indigo-500 outline-none transition-all placeholder:text-white/10"
         />
       )}
     </div>
@@ -513,27 +513,44 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
 
   return (
     <div className={containerClasses}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        
+        .studio-glass {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .text-studio-gradient {
+            background: linear-gradient(to bottom right, #fff, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+      `}</style>
+      
       {!isStandalone && (
         <div 
-          className="absolute inset-0 bg-black/20 backdrop-blur-sm -z-10" 
+          className="absolute inset-0 bg-black/80 backdrop-blur-md -z-10" 
           onClick={() => setIsOpen(false)}
         />
       )}
       
       <div className={contentClasses}>
         {/* Header */}
-        <div className="p-6 md:p-8 border-b border-gray-200 flex items-center justify-between bg-white shadow-sm z-10">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center shadow-lg">
-              <Settings size={24} />
+        <div className="p-6 md:p-10 border-b border-white/5 flex items-center justify-between bg-white/[0.02] z-10">
+          <div className="flex items-center gap-6">
+            <div className="w-14 h-14 bg-white text-black rounded-3xl flex items-center justify-center shadow-2xl relative group">
+              <div className="absolute inset-0 bg-indigo-500 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+              <Settings size={28} className="relative z-10" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-gray-800 tracking-tight">VyzGo Painel</h2>
+              <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic">VyzGo <span className="text-studio-gradient">Studio</span></h2>
               <div className="flex items-center gap-2">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest leading-none">Configurações da sua Vitrine</p>
+                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] leading-none">Management Board Elite</p>
                 {storeId === 'demo' && (
-                  <span className="flex items-center gap-1 text-[8px] font-black bg-yellow-400 text-black px-1.5 py-0.5 rounded uppercase animate-pulse">
-                     <AlertTriangle size={8} /> Modo Demo
+                  <span className="flex items-center gap-1 text-[8px] font-black bg-yellow-400 text-black px-1.5 py-0.5 rounded uppercase">
+                     Modo Demo
                   </span>
                 )}
               </div>
@@ -545,18 +562,18 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
               href={window.location.hostname === 'localhost' ? `http://localhost:3000/v/${storeId}` : `https://vyzgo.com/v/${storeId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-xl text-[10px] md:text-xs font-black hover:bg-blue-100 transition-all border border-blue-100 shadow-sm active:scale-95"
+              className="flex items-center gap-2 px-5 py-3 bg-white/5 text-white rounded-2xl text-xs font-black hover:bg-white/10 transition-all border border-white/5 shadow-inner active:scale-95 uppercase tracking-widest"
             >
-              <ExternalLink size={14} />
-              <span className="hidden sm:inline">Ver Minha Vitrine</span>
+              <ExternalLink size={14} className="text-indigo-400" />
+              <span className="hidden sm:inline">Visualizar Vitrine</span>
               <span className="sm:hidden">Ver Loja</span>
             </a>
 
-            <div className="h-8 w-[1px] bg-gray-100 mx-1 hidden md:block" />
+            <div className="h-10 w-[1px] bg-white/5 mx-2 hidden md:block" />
 
             <button
                onClick={() => { signOut(); setIsOpen(false); }}
-               className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-500 rounded-xl text-[10px] md:text-xs font-black hover:bg-red-100 transition-all border border-red-100 active:scale-95"
+               className="flex items-center gap-2 px-4 py-3 bg-red-500/10 text-red-400 rounded-2xl text-xs font-black hover:bg-red-500/20 transition-all border border-red-500/20 active:scale-95 uppercase tracking-widest"
                title="Sair da conta"
             >
               <LogOut size={14} />
@@ -566,35 +583,35 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             {!isStandalone && (
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-black"
+                className="p-3 hover:bg-white/5 rounded-2xl transition-colors text-white/20 hover:text-white"
               >
-                <X size={20} />
+                <X size={24} />
               </button>
             )}
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex p-2 gap-1 overflow-x-auto scrollbar-hide">
+        <div className="flex p-4 gap-2 overflow-x-auto scrollbar-hide bg-black/20">
           {[
             { id: 'home', icon: Layout, label: 'Início' },
-            { id: 'products', icon: ShoppingBag, label: 'Produtos' },
+            { id: 'products', icon: ShoppingBag, label: 'Catálogo' },
             { id: 'orders', icon: ClipboardList, label: 'Vendas', badge: orders.filter(o => o.status === 'pending').length || 0 },
-            { id: 'settings', icon: Settings, label: 'Configurações' },
+            { id: 'settings', icon: Settings, label: 'Studio' },
           ].map(tab => (
             <button
                key={tab.id}
                onClick={() => setActiveTab(tab.id as any)}
-               className={`flex-1 py-3 px-3 rounded-2xl flex flex-col items-center gap-1.5 text-[10px] font-black uppercase transition-all whitespace-nowrap relative border ${
+               className={`flex-1 py-4 px-6 rounded-[28px] flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap relative border ${
                  activeTab === tab.id 
-                 ? 'bg-white border-blue-100 shadow-lg text-blue-600 scale-105 z-10' 
-                 : 'bg-gray-50/50 border-transparent text-gray-400 hover:bg-white hover:border-gray-100'
-               } ${(tab as any).highlight ? 'text-yellow-600 bg-yellow-50 border-yellow-100' : ''}`}
+                 ? 'bg-white text-black shadow-2xl scale-105 z-10 border-transparent' 
+                 : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:text-white'
+               }`}
              >
-              <tab.icon size={18} className={(tab as any).highlight ? 'fill-yellow-500 text-yellow-600' : ''} />
-              {tab.label}
+              <tab.icon size={18} />
+              <span className="hidden md:inline">{tab.label}</span>
               {(tab as any).badge > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold">
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-indigo-500 text-white text-[10px] rounded-full flex items-center justify-center font-black shadow-lg">
                   {(tab as any).badge}
                 </span>
               )}
@@ -623,13 +640,13 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
           )}
 
           {activeTab === 'settings' && (
-             <div className="mb-8 p-1 flex overflow-x-auto gap-1 bg-gray-100 rounded-2xl border border-gray-200">
+             <div className="mb-10 p-2 flex overflow-x-auto gap-2 bg-white/5 rounded-[32px] border border-white/5">
                  {[
-                   { id: 'profile', label: '1. Perfil e Marca' },
-                   { id: 'store', label: '2. Minha Loja' },
-                   { id: 'advanced', label: '3. Assinatura e Ajuda' },
+                   { id: 'profile', label: 'Marca & Conceito' },
+                   { id: 'store', label: 'Estratégia de Loja' },
+                   { id: 'advanced', label: 'Elite & Support' },
                  ].map(t => (
-                    <button key={t.id} onClick={() => setSettingsTab(t.id as any)} className={`flex-1 px-5 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-2 ${settingsTab === t.id ? 'bg-white text-indigo-600 shadow-sm border border-gray-200' : 'text-gray-400 hover:text-gray-600 border border-transparent'}`}>
+                    <button key={t.id} onClick={() => setSettingsTab(t.id as any)} className={`flex-1 px-6 py-4 rounded-[24px] text-[11px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all flex items-center justify-center gap-3 ${settingsTab === t.id ? 'bg-white text-black shadow-2xl' : 'text-white/30 hover:text-white hover:bg-white/5'}`}>
                        {t.label} 
                        {t.id === 'advanced' && !isPro && <Crown size={12} className="text-yellow-500"/>}
                     </button>
@@ -638,12 +655,12 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
           )}
 
           {activeTab === 'settings' && settingsTab === 'profile' && (
-            <div className="space-y-6">
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {/* BRANDING SECTION */}
-              <div className="bg-indigo-600 border border-indigo-500 shadow-xl rounded-3xl p-6 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-                <h3 className="text-xs font-black uppercase tracking-widest mb-6 flex items-center gap-2 opacity-80">
-                  <Star size={14} className="fill-white" /> Identidade da Loja
+              <div className="bg-indigo-600 border border-white/10 shadow-2xl rounded-[40px] p-8 md:p-12 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] mb-8 flex items-center gap-3 opacity-60">
+                  <Star size={14} className="fill-white" /> Identidade de Luxo
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-6 items-center">
                   <div className="flex flex-col items-center gap-2">
@@ -858,13 +875,13 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
           )}
 
           {activeTab === 'home' && (
-            <div className="space-y-6">
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {/* BANNERS SECTION */}
-              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5">
-                <h3 className="text-xs font-black text-gray-800 uppercase mb-1 flex items-center gap-2">
-                  <ImageIcon size={14} className="text-indigo-500" /> Banners do Carrossel
+              <div className="bg-white/5 border border-white/5 shadow-2xl rounded-[40px] p-8">
+                <h3 className="text-[10px] font-black text-white/40 uppercase mb-2 tracking-[0.4em] flex items-center gap-3">
+                  <ImageIcon size={14} className="text-indigo-400" /> Vitrine Visual (Banners)
                 </h3>
-                <p className="text-[10px] text-gray-500 mb-4">Cada banner pode ter um link clicável ao ser tocado.</p>
+                <p className="text-xs text-white/20 mb-8 font-medium italic">Transforme seu topo em uma experiência cinematográfica.</p>
                 <div className="space-y-4">
                   {((config.bannerItems || []).length === 0 && (config.banners || []).length === 0) && (
                     <div className="text-center py-6 text-gray-400 border-2 border-dashed border-gray-200 rounded-2xl">
@@ -932,11 +949,11 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
               </div>
 
               {/* FEATURED PRODUCTS SECTION */}
-              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-4">
-                <h3 className="text-xs font-black text-gray-800 uppercase mb-3 flex items-center gap-2">
-                  <Star size={14} className="text-yellow-500" /> Produtos em Destaque
+              <div className="bg-indigo-600/5 border border-indigo-500/10 shadow-2xl rounded-[40px] p-8">
+                <h3 className="text-[10px] font-black text-white/40 uppercase mb-2 tracking-[0.4em] flex items-center gap-3">
+                  <Star size={14} className="text-yellow-500" /> Seleção do Curador
                 </h3>
-                <p className="text-[10px] text-gray-500 mb-4">Selecione até 5 produtos para aparecerem no carrossel de destaques.</p>
+                <p className="text-xs text-white/20 mb-8 font-medium italic">Destaque suas peças mais valiosas no palco principal.</p>
                 
                 <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-thin pr-2">
                   {config.categories.flatMap(cat => cat.products).map(product => {
@@ -1081,19 +1098,19 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {config.categories[selectedCategoryIndex]?.products.map((prod, pIndex) => (
-                  <div key={prod.id} className="bg-white border border-gray-100 shadow-sm rounded-2xl p-3 flex items-center justify-between hover:border-blue-200 transition-colors group">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-100">
-                        <ImageWithFallback src={prod.imageUrl} className="w-full h-full object-cover" />
+                  <div key={prod.id} className="bg-white/[0.03] border border-white/5 shadow-2xl rounded-[32px] p-5 flex items-center justify-between hover:border-indigo-500/30 transition-all group">
+                    <div className="flex items-center gap-6">
+                      <div className="w-16 h-16 bg-white/5 rounded-2xl overflow-hidden shrink-0 border border-white/5 p-1">
+                        <ImageWithFallback src={prod.imageUrl} className="w-full h-full object-cover rounded-xl" />
                       </div>
                       <div className="flex flex-col">
-                        <h4 className="text-[13px] font-black text-gray-800 line-clamp-1">{prod.title || 'Produto S/ Nome'}</h4>
-                        <div className="flex items-center gap-2 mt-0.5">
-                           <p className="text-[11px] font-bold text-green-600">{prod.price || 'R$ 0,00'}</p>
+                        <h4 className="text-lg font-black text-white italic tracking-tighter line-clamp-1">{prod.title || 'Peça Sem Nome'}</h4>
+                        <div className="flex items-center gap-3 mt-1">
+                           <p className="text-sm font-black text-indigo-400">{prod.price || 'R$ 0,00'}</p>
                            {prod.stock !== undefined && prod.stock !== null && (
-                              <span className="text-[9px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded font-bold">{prod.stock} em estoque</span>
+                              <span className="text-[9px] px-2 py-0.5 bg-white/5 text-white/30 rounded-full font-black uppercase tracking-widest">{prod.stock} em estoque</span>
                            )}
                         </div>
                       </div>
@@ -1153,18 +1170,21 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
 
         {/* Product Editor Modal */}
         {editingProductIndex !== null && config.categories[editingProductIndex.cIdx]?.products[editingProductIndex.pIdx] && (
-          <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex justify-center items-end md:items-center animate-in fade-in duration-300">
-            <div className="bg-white w-full md:w-[600px] md:max-h-[90vh] md:rounded-3xl rounded-t-3xl overflow-y-auto shadow-2xl animate-in slide-in-from-bottom-10 md:slide-in-from-bottom-4 duration-500 relative">
+          <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex justify-center items-end md:items-center animate-in fade-in duration-500 font-['Inter',sans-serif]">
+            <div className="bg-[#121212] w-full md:w-[700px] md:max-h-[95vh] md:rounded-[48px] rounded-t-[48px] overflow-y-auto shadow-[0_0_100px_rgba(0,0,0,1)] animate-in slide-in-from-bottom-20 duration-700 relative border border-white/5 scrollbar-hide">
               {(() => {
                 const cIdx = editingProductIndex.cIdx;
                 const pIdx = editingProductIndex.pIdx;
                 const prod = config.categories[cIdx].products[pIdx];
                 return (
                   <div>
-                    <div className="sticky top-0 bg-white/90 backdrop-blur-md z-10 border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-                      <h2 className="text-lg font-black text-gray-800 tracking-tight">Editar Produto</h2>
-                      <button onClick={() => setEditingProductIndex(null)} className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition-colors text-gray-500 cursor-pointer">
-                        <X size={18} />
+                    <div className="sticky top-0 bg-[#121212]/90 backdrop-blur-2xl z-20 border-b border-white/5 px-10 py-8 flex items-center justify-between">
+                      <div>
+                        <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic">Editar <span className="text-indigo-400">Obra</span></h2>
+                        <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mt-1">Refine os detalhes do produto</p>
+                      </div>
+                      <button onClick={() => setEditingProductIndex(null)} className="w-12 h-12 flex items-center justify-center bg-white/5 rounded-2xl hover:bg-white/10 transition-colors text-white/40 hover:text-white cursor-pointer group">
+                        <X size={24} className="group-hover:rotate-90 transition-transform" />
                       </button>
                     </div>
                     
@@ -1181,55 +1201,55 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                       
                       {/* Grid de Informacoes Essenciais */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1.5 md:col-span-2">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Nome do Produto</label>
+                        <div className="space-y-2 md:col-span-2">
+                          <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Nome da Peça</label>
                           <input
                             value={prod.title}
                             onChange={(e) => updateProduct(cIdx, pIdx, 'title', e.target.value)}
-                            className="w-full bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white text-sm font-bold rounded-xl px-4 py-3 outline-none transition-all"
+                            className="w-full bg-white/5 border border-white/5 focus:border-indigo-500 text-sm font-bold rounded-2xl px-5 py-4 outline-none transition-all text-white placeholder:text-white/10"
                             placeholder="Ex: Tênis Nike Air Max"
                           />
                         </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Preço (R$)</label>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Preço Sugerido</label>
                           <input
                             value={prod.price}
                             onChange={(e) => updateProduct(cIdx, pIdx, 'price', e.target.value)}
-                            className="w-full bg-gray-50 border-2 border-transparent focus:border-green-500 focus:bg-white text-sm text-green-600 font-bold rounded-xl px-4 py-3 outline-none transition-all"
+                            className="w-full bg-white/5 border border-white/5 focus:border-indigo-500 text-sm text-indigo-400 font-black rounded-2xl px-5 py-4 outline-none transition-all placeholder:text-white/5"
                             placeholder="199,90"
                           />
                         </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Estoque</label>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Estoque</label>
                           <div className="relative">
-                            <Package size={16} className="absolute left-3 top-3 text-orange-400" />
+                            <Package size={16} className="absolute left-5 top-[18px] text-orange-400" />
                             <input
                               type="number"
                               value={prod.stock ?? ''}
                               placeholder="Ilimitado"
                               min={0}
                               onChange={e => updateProduct(cIdx, pIdx, 'stock', e.target.value === '' ? null : Number(e.target.value))}
-                              className="w-full bg-orange-50/50 border-2 border-transparent focus:border-orange-500 focus:bg-white text-sm text-orange-700 font-bold rounded-xl pl-10 pr-4 py-3 outline-none transition-all"
+                              className="w-full bg-white/5 border border-white/5 focus:border-orange-500 text-sm text-white font-bold rounded-2xl pl-12 pr-5 py-4 outline-none transition-all"
                             />
                           </div>
                         </div>
                       </div>
 
                       {/* Descricao Area */}
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Descrição</label>
+                           <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Descrição Detalhada</label>
                            <button
                               onClick={async () => {
                                 if (!prod.title) return alert("Digite o nome do produto primeiro.");
-                                addToast('Criando mágica AI... ✨', 'info');
+                                addToast('IA processando nuances... ✨', 'info');
                                 try {
                                   const desc = await generateProductDescription(prod.title, prod.price, config.categories[cIdx].title);
                                   updateProduct(cIdx, pIdx, 'description', desc);
-                                  addToast('Descrição gerada!', 'success');
+                                  addToast('Descrição Elite gerada!', 'success');
                                 } catch (e: any) { addToast(e.message || 'Erro.', 'error'); }
                               }}
-                              className="text-[10px] text-purple-600 font-black flex items-center gap-1 hover:bg-purple-100 px-3 py-1.5 rounded-full transition-colors uppercase tracking-wider"
+                              className="text-[10px] text-indigo-400 font-black flex items-center gap-2 hover:bg-white/5 px-4 py-2 rounded-full transition-all uppercase italic tracking-[0.1em]"
                             >
                               <Sparkles size={12} /> Gerar Mágica IA
                            </button>
@@ -1237,8 +1257,8 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                         <textarea
                           value={prod.description}
                           onChange={(e) => updateProduct(cIdx, pIdx, 'description', e.target.value)}
-                          className="w-full bg-gray-50 border-2 border-transparent focus:border-indigo-500 focus:bg-white rounded-xl p-4 text-xs resize-none outline-none shadow-inner min-h-[100px]"
-                          placeholder="Fale sobre os benefícios do produto..."
+                          className="w-full bg-white/5 border border-white/5 focus:border-indigo-500 rounded-[28px] p-6 text-sm text-white/70 font-medium resize-none outline-none min-h-[150px] transition-all"
+                          placeholder="Descreva a exclusividade desta obra..."
                         />
                       </div>
 
@@ -1258,8 +1278,8 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
 
                     </div>
                     
-                    <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 md:p-6 flex gap-3">
-                       <button onClick={() => setEditingProductIndex(null)} className="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-sm uppercase tracking-wider transition-all shadow-xl shadow-indigo-900/20 active:scale-95">Concluir Edição</button>
+                    <div className="sticky bottom-0 bg-[#121212] border-t border-white/5 p-6 md:p-10 flex gap-4">
+                       <button onClick={() => setEditingProductIndex(null)} className="flex-1 py-6 bg-white text-black rounded-[28px] font-black text-sm uppercase tracking-[0.2em] transition-all shadow-2xl active:scale-95">Salvar Obra no Catálogo</button>
                     </div>
                   </div>
                 );
@@ -1276,13 +1296,13 @@ const FAQItem = ({ title, content }: { title: string, content: React.ReactNode }
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="bg-white border border-gray-200 shadow-sm rounded-2xl overflow-hidden transition-all mb-2">
+    <div className="bg-white/5 border border-white/5 shadow-2xl rounded-[32px] overflow-hidden transition-all mb-4">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between p-3 text-left hover:bg-white/30"
+        className="w-full flex items-center justify-between p-6 text-left hover:bg-white/5 transition-all"
       >
-        <span className="text-xs font-bold text-gray-700">{title}</span>
-        {open ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
+        <span className="text-sm font-black text-white/80 uppercase tracking-tighter italic">{title}</span>
+        {open ? <ChevronUp size={18} className="text-white/20" /> : <ChevronDown size={18} className="text-white/20" />}
       </button>
       {open && (
         <div className="px-3 pb-3 pt-0">
