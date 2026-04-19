@@ -11,7 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { PRESET_THEMES } from './AdminPanel';
 
 const OnboardingWizard: React.FC = () => {
-    const { config, updateConfig } = useConfig();
+    const { config, updateConfig, addToast } = useConfig();
     const { user, refreshStoreStatus } = useAuth();
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
@@ -77,9 +77,20 @@ const OnboardingWizard: React.FC = () => {
             await refreshStoreStatus();
             updateConfig(newFullConfig);
             
+            // Sucesso!
+            addToast('Vitrine publicada com sucesso! ✨', 'success');
             navigate('/');
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
+            // Captura o código de erro do Supabase ou mensagem genérica
+            const errMsg = err.message || (err.code === '23505' ? 'Este endereço já está sendo usado.' : 'Erro ao salvar loja. Tente novamente.');
+            addToast(`Falha no Cadastro: ${errMsg}`, 'error');
+            
+            // Se o erro for no slug, volta para o passo 3
+            if (err.code === '23505' || errMsg.includes('slug')) {
+                setStep(3);
+                setSlugError('Este endereço já está em uso.');
+            }
         } finally {
             setIsSaving(false);
         }

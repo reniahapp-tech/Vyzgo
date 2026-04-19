@@ -71,29 +71,34 @@ const Home: React.FC<{ setIsProductModalOpen: (v: boolean) => void, setIsQuizMod
       <div className="max-w-5xl mx-auto px-4 md:px-6 relative z-10">
         <main className="space-y-14 py-10 pb-28">
 
-          {/* 2. Categorias - Stories Style (Horizontal Scroll) */}
+          {/* 2. Coleções - Boutique Showcase Formation */}
           <section className="animate-fade-in" style={{ animationDelay: '150ms' }}>
-             <div className="flex items-center justify-between mb-4 px-1">
-               <div className="flex flex-col">
-                 <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-900 leading-none">
-                   Coleções Exclusivas
-                 </h3>
-                 <div className="h-0.5 w-6 bg-indigo-600 mt-1.5 rounded-full"></div>
-               </div>
-               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Arraste para o lado →</span>
+             <div className="flex flex-col mb-8 px-1">
+                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-2 leading-none">Curadoria Especial</span>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-2xl font-black italic uppercase tracking-tighter text-gray-900 leading-none">
+                    Nossas <span className="text-indigo-600">Coleções</span>
+                  </h3>
+                  <div className="h-[1px] flex-grow bg-gray-100 mx-6 hidden md:block"></div>
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-full border border-gray-100">Deslize p/ ver mais →</span>
+                </div>
              </div>
-             <div className="flex gap-2 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide snap-x">
+             
+             <div className="flex gap-4 overflow-x-auto pb-8 -mx-6 px-6 scrollbar-hide snap-x">
                {config.categories
                  .filter(item => item.id !== 'location' && item.id !== 'tracking') 
                  .map((item, index) => (
                  <div
                    key={item.id}
                    className="snap-start animate-fade-in"
-                   style={{ animationDelay: `${200 + (index * 50)}ms` }}
+                   style={{ animationDelay: `${200 + (index * 100)}ms` }}
                  >
                    <CategoryCard item={item} />
                  </div>
                ))}
+               
+               {/* Last Card Placeholder for visual balance */}
+               <div className="w-[1px] shrink-0"></div>
              </div>
           </section>
 

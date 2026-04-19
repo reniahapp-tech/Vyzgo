@@ -25,36 +25,49 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ item }) => {
   return (
     <div
       onClick={handleClick}
-      className="flex flex-col items-center gap-3 cursor-pointer group shrink-0 w-[88px] py-1"
+      className="relative group shrink-0 w-[140px] h-[180px] rounded-[32px] overflow-hidden cursor-pointer shadow-xl hover:shadow-indigo-500/20 transition-all duration-500 active:scale-95"
     >
-      {/* Gradient ring — Instagram Story style */}
-      <div className="relative w-[72px] h-[72px] p-[3px] rounded-full bg-gradient-to-tr from-indigo-500 via-purple-500 to-yellow-400 shadow-md group-hover:shadow-indigo-400/40 transition-all duration-300 group-active:scale-95">
-        <div className="w-full h-full rounded-full bg-white p-[2.5px]">
-          <div
-            className="w-full h-full rounded-full flex items-center justify-center relative overflow-hidden"
+      {/* Background Image/Color */}
+      <div className="absolute inset-0 z-0">
+        {item.imageUrl ? (
+          <>
+            <ImageWithFallback
+              src={item.imageUrl}
+              alt={item.title}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent group-hover:bg-black/40 transition-colors duration-500" />
+          </>
+        ) : (
+          <div 
+            className="w-full h-full flex items-center justify-center group-hover:scale-110 transition-transform duration-700"
             style={{ backgroundColor: item.bgColor || '#F8F9FA' }}
           >
-            {item.imageUrl ? (
-              <ImageWithFallback
-                src={item.imageUrl}
-                alt={item.title}
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-              />
-            ) : (
-              <DynamicIcon
-                iconKey={item.iconKey}
-                size={26}
-                strokeWidth={2}
-                style={{ color: item.iconColor || theme.primaryColor }}
-              />
-            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-40" />
+            <DynamicIcon
+              iconKey={item.iconKey}
+              size={40}
+              strokeWidth={1.5}
+              style={{ color: item.iconColor || theme.primaryColor }}
+              className="relative z-10"
+            />
           </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="absolute inset-0 z-10 p-5 flex flex-col justify-end">
+        <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+           <span className="block text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-1 opacity-0 group-hover:opacity-100 transition-opacity">Ver Estilo</span>
+           <h3 className="text-sm font-black text-white uppercase tracking-tighter leading-none italic">
+             {item.title}
+           </h3>
+           <div className="h-0.5 w-0 group-hover:w-8 bg-indigo-500 mt-2 transition-all duration-500 rounded-full"></div>
         </div>
       </div>
 
-      <span className="text-[10px] font-black text-gray-800 uppercase tracking-tight text-center line-clamp-1 w-full leading-none group-hover:text-indigo-600 transition-colors">
-        {item.title}
-      </span>
+      {/* Glass Border Effect */}
+      <div className="absolute inset-0 border border-white/10 rounded-[32px] pointer-events-none group-hover:border-white/20 transition-colors" />
     </div>
   );
 };
