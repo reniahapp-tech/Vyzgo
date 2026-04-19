@@ -21,7 +21,7 @@ const OnboardingWizard: React.FC = () => {
     const [localConfig, setLocalConfig] = useState({
         title: config.header.title,
         subtitle: config.header.subtitle,
-        storeMode: config.storeMode,
+        storeMode: 'store' as 'store' | 'mixed' | 'affiliate',
         whatsapp: config.whatsapp.phoneNumber,
         themeId: 'natura',
         slug: ''

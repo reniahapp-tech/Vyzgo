@@ -12,7 +12,7 @@ const DEFAULT_STORE_ID = 'demo';
 const BASE_CONFIGS: Record<string, AppConfig> = {
   // GENERIC TEMPLATE (Default)
   demo: {
-    storeMode: 'mixed',
+    storeMode: 'store',
     enableWhatsapp: true,
     plan: 'pro',
     footerText: 'VyzGo - Demonstração',

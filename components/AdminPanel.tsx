@@ -262,10 +262,10 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
   const [settingsTab, setSettingsTab] = useState<'branding' | 'themes' | 'modules' | 'coupons' | 'plan' | 'social' | 'help'>('branding');
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
   const [activePluginId, setActivePluginId] = useState<string | null>(null);
-  const [editingProductIndex, setEditingProductIndex] = useState<{cIdx: number, pIdx: number} | null>(null);
+  const [editingProductIndex, setEditingProductIndex] = useState<{ cIdx: number, pIdx: number } | null>(null);
   // Coupon form state
   const [couponForm, setCouponForm] = useState({ code: '', type: 'percent' as 'percent' | 'fixed', value: 10, minOrder: 0, active: true });
-  
+
   const [newSubdomain, setNewSubdomain] = useState(storeId);
   const [isChangingSubdomain, setIsChangingSubdomain] = useState(false);
   React.useEffect(() => { setNewSubdomain(storeId); }, [storeId]);
@@ -361,7 +361,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
         .upload(filePath, finalFile, { cacheControl: '3600', upsert: false });
 
       if (error) throw error;
-      
+
       const { data: publicData } = supabase.storage
         .from('vitrine-media')
         .getPublicUrl(filePath);
@@ -385,7 +385,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
     const pIdx = config.categories[selectedCategoryIndex].products.length;
     addProductToCategory(selectedCategoryIndex, newProduct);
     setTimeout(() => {
-        setEditingProductIndex({ cIdx: selectedCategoryIndex, pIdx });
+      setEditingProductIndex({ cIdx: selectedCategoryIndex, pIdx });
     }, 50);
   };
 
@@ -444,7 +444,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
     );
   }
 
-  const containerClasses = isStandalone 
+  const containerClasses = isStandalone
     ? "flex flex-col h-full bg-[#0A0A0A]"
     : "fixed inset-0 z-50 flex items-center justify-center p-2 md:p-8 animate-in fade-in zoom-in duration-300 font-['Inter',sans-serif]";
 
@@ -470,13 +470,13 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             Sua vitrine está temporariamente desativada. Regularize seu plano para voltar a gerenciar seus produtos e receber pedidos.
           </p>
           <div className="space-y-3">
-            <button 
+            <button
               onClick={() => window.open('https://wa.me/5588997380123?text=Quero+ativar+minha+vitrine', '_blank')}
               className="w-full py-4 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-700 transition-all shadow-lg shadow-green-100"
             >
               Falar com Suporte
             </button>
-            <button 
+            <button
               onClick={() => { signOut(); setIsOpen(false); }}
               className="w-full py-3 text-gray-400 text-xs font-bold hover:text-gray-600 transition-colors"
             >
@@ -528,14 +528,14 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
         }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
       `}</style>
-      
+
       {!isStandalone && (
-        <div 
-          className="absolute inset-0 bg-black/80 backdrop-blur-md -z-10" 
+        <div
+          className="absolute inset-0 bg-black/80 backdrop-blur-md -z-10"
           onClick={() => setIsOpen(false)}
         />
       )}
-      
+
       <div className={contentClasses}>
         {/* Header */}
         <div className="p-6 md:p-10 border-b border-white/5 flex items-center justify-between bg-white/[0.02] z-10">
@@ -550,15 +550,15 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                 <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] leading-none">Management Board Elite</p>
                 {storeId === 'demo' && (
                   <span className="flex items-center gap-1 text-[8px] font-black bg-yellow-400 text-black px-1.5 py-0.5 rounded uppercase">
-                     Modo Demo
+                    Modo Demo
                   </span>
                 )}
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2 md:gap-4">
-            <a 
+            <a
               href={window.location.hostname === 'localhost' ? `http://localhost:3000/v/${storeId}` : `https://vyzgo.com/v/${storeId}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -572,9 +572,9 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             <div className="h-10 w-[1px] bg-white/5 mx-2 hidden md:block" />
 
             <button
-               onClick={() => { signOut(); setIsOpen(false); }}
-               className="flex items-center gap-2 px-4 py-3 bg-red-500/10 text-red-400 rounded-2xl text-xs font-black hover:bg-red-500/20 transition-all border border-red-500/20 active:scale-95 uppercase tracking-widest"
-               title="Sair da conta"
+              onClick={() => { signOut(); setIsOpen(false); }}
+              className="flex items-center gap-2 px-4 py-3 bg-red-500/10 text-red-400 rounded-2xl text-xs font-black hover:bg-red-500/20 transition-all border border-red-500/20 active:scale-95 uppercase tracking-widest"
+              title="Sair da conta"
             >
               <LogOut size={14} />
               <span className="hidden md:inline">Sair</span>
@@ -600,14 +600,13 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
             { id: 'settings', icon: Settings, label: 'Studio' },
           ].map(tab => (
             <button
-               key={tab.id}
-               onClick={() => setActiveTab(tab.id as any)}
-               className={`flex-1 py-4 px-6 rounded-[28px] flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap relative border ${
-                 activeTab === tab.id 
-                 ? 'bg-white text-black shadow-2xl scale-105 z-10 border-transparent' 
-                 : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:text-white'
-               }`}
-             >
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex-1 py-4 px-6 rounded-[28px] flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap relative border ${activeTab === tab.id
+                  ? 'bg-white text-black shadow-2xl scale-105 z-10 border-transparent'
+                  : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:text-white'
+                }`}
+            >
               <tab.icon size={18} />
               <span className="hidden md:inline">{tab.label}</span>
               {(tab as any).badge > 0 && (
@@ -621,7 +620,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 scrollbar-thin">
-          
+
           {storeId === 'demo' && (
             <div className="mb-6 p-4 bg-yellow-50 border border-yellow-100 rounded-2xl flex items-start gap-4 animate-in slide-in-from-top-2 duration-500">
               <div className="w-10 h-10 bg-yellow-400 text-black rounded-xl flex items-center justify-center shrink-0 shadow-sm">
@@ -633,25 +632,25 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                   Você está visualizando a vitrine de exemplo. Qualquer alteração feita aqui é <b>compartilhada com outros usuários</b> e pode ser resetada a qualquer momento. Para ter sua própria vitrine exclusiva, faça login ou crie sua conta.
                 </p>
                 <div className="flex gap-3 mt-3">
-                   <button onClick={() => window.location.href = window.location.hostname === 'localhost' ? 'http://localhost:3000/login' : 'https://app.vyzgo.com/'} className="text-[10px] font-black text-yellow-800 underline decoration-yellow-300 hover:decoration-yellow-500 transition-all">Criar Minha Própria Vitrine</button>
+                  <button onClick={() => window.location.href = window.location.hostname === 'localhost' ? 'http://localhost:3000/login' : 'https://app.vyzgo.com/'} className="text-[10px] font-black text-yellow-800 underline decoration-yellow-300 hover:decoration-yellow-500 transition-all">Criar Minha Própria Vitrine</button>
                 </div>
               </div>
             </div>
           )}
 
           {activeTab === 'settings' && (
-             <div className="mb-10 p-2 flex overflow-x-auto gap-2 bg-white/5 rounded-[32px] border border-white/5">
-                 {[
-                   { id: 'profile', label: 'Marca & Conceito' },
-                   { id: 'store', label: 'Estratégia de Loja' },
-                   { id: 'advanced', label: 'Elite & Support' },
-                 ].map(t => (
-                    <button key={t.id} onClick={() => setSettingsTab(t.id as any)} className={`flex-1 px-6 py-4 rounded-[24px] text-[11px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all flex items-center justify-center gap-3 ${settingsTab === t.id ? 'bg-white text-black shadow-2xl' : 'text-white/30 hover:text-white hover:bg-white/5'}`}>
-                       {t.label} 
-                       {t.id === 'advanced' && !isPro && <Crown size={12} className="text-yellow-500"/>}
-                    </button>
-                 ))}
-             </div>
+            <div className="mb-10 p-2 flex overflow-x-auto gap-2 bg-white/5 rounded-[32px] border border-white/5">
+              {[
+                { id: 'profile', label: 'Marca & Conceito' },
+                { id: 'store', label: 'Estratégia de Loja' },
+                { id: 'advanced', label: 'Elite & Support' },
+              ].map(t => (
+                <button key={t.id} onClick={() => setSettingsTab(t.id as any)} className={`flex-1 px-6 py-4 rounded-[24px] text-[11px] font-black uppercase tracking-[0.2em] whitespace-nowrap transition-all flex items-center justify-center gap-3 ${settingsTab === t.id ? 'bg-white text-black shadow-2xl' : 'text-white/30 hover:text-white hover:bg-white/5'}`}>
+                  {t.label}
+                  {t.id === 'advanced' && !isPro && <Crown size={12} className="text-yellow-500" />}
+                </button>
+              ))}
+            </div>
           )}
 
           {activeTab === 'settings' && settingsTab === 'profile' && (
@@ -741,21 +740,28 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                     <Store size={14} /> Modo de Operação
                   </h3>
                   <div className="space-y-2">
-                    <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors border border-transparent active:border-indigo-100">
-                      <input type="radio" name="storeMode" checked={config.storeMode === 'mixed'} onChange={() => handleStoreModeChange('mixed')} className="accent-indigo-600" />
-                      <div>
-                        <p className="text-xs font-bold text-gray-800 tracking-tight">Híbrido (Padrão)</p>
-                        <p className="text-[9px] text-gray-500 font-bold uppercase">Vitrine + Zap</p>
-                      </div>
-                    </label>
                     <label className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors border border-transparent ${!isPro ? 'opacity-40 bg-gray-50' : 'bg-gray-50 hover:bg-gray-100 active:border-indigo-100'}`}>
                       <input type="radio" name="storeMode" checked={config.storeMode === 'store'} onChange={() => handleStoreModeChange('store')} className="accent-indigo-600" disabled={!isPro} />
                       <div className="flex-1">
                         <div className="flex justify-between items-center">
-                          <p className="text-xs font-bold text-gray-800 tracking-tight">Apenas Loja</p>
+                          <p className="text-xs font-bold text-gray-800 tracking-tight">Loja Direta (Padrão)</p>
                           {!isPro && <Lock size={12} className="text-gray-400" />}
                         </div>
-                        <p className="text-[9px] text-gray-500 font-bold uppercase">Foco no Carrinho</p>
+                        <p className="text-[9px] text-gray-500 font-bold uppercase">Foco total no Carrinho e WhatsApp</p>
+                      </div>
+                    </label>
+                    <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors border border-transparent active:border-indigo-100">
+                      <input type="radio" name="storeMode" checked={config.storeMode === 'mixed'} onChange={() => handleStoreModeChange('mixed')} className="accent-indigo-600" />
+                      <div>
+                        <p className="text-xs font-bold text-gray-800 tracking-tight">Híbrido Pro</p>
+                        <p className="text-[9px] text-gray-500 font-bold uppercase">Produtos Próprios + Afiliados</p>
+                      </div>
+                    </label>
+                    <label className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors border border-transparent active:border-indigo-100">
+                      <input type="radio" name="storeMode" checked={config.storeMode === 'affiliate'} onChange={() => handleStoreModeChange('affiliate')} className="accent-indigo-600" />
+                      <div>
+                        <p className="text-xs font-bold text-gray-800 tracking-tight">Afiliado Elite</p>
+                        <p className="text-[9px] text-gray-500 font-bold uppercase">Apenas links externos</p>
                       </div>
                     </label>
                   </div>
@@ -954,7 +960,7 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                   <Star size={14} className="text-yellow-500" /> Seleção do Curador
                 </h3>
                 <p className="text-xs text-white/20 mb-8 font-medium italic">Destaque suas peças mais valiosas no palco principal.</p>
-                
+
                 <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-thin pr-2">
                   {config.categories.flatMap(cat => cat.products).map(product => {
                     const isFeatured = config.featuredProductIds?.includes(product.id);
@@ -963,21 +969,20 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                         key={product.id}
                         onClick={() => {
                           const current = config.featuredProductIds || [];
-                          const next = isFeatured 
+                          const next = isFeatured
                             ? current.filter(id => id !== product.id)
                             : [...current, product.id].slice(0, 5);
                           updateConfig({ ...config, featuredProductIds: next });
                         }}
-                        className={`w-full flex items-center gap-3 p-2 rounded-xl border transition-all text-left ${
-                          isFeatured ? 'bg-yellow-50 border-yellow-200 shadow-sm' : 'bg-gray-50 border-gray-200 opacity-60 hover:opacity-100'
-                        }`}
+                        className={`w-full flex items-center gap-3 p-2 rounded-xl border transition-all text-left ${isFeatured ? 'bg-yellow-50 border-yellow-200 shadow-sm' : 'bg-gray-50 border-gray-200 opacity-60 hover:opacity-100'
+                          }`}
                       >
                         <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
                           <img src={product.imageUrl} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1">
-                           <p className="text-[10px] font-bold text-gray-800 truncate">{product.title}</p>
-                           <p className="text-[9px] text-gray-500">{product.price}</p>
+                          <p className="text-[10px] font-bold text-gray-800 truncate">{product.title}</p>
+                          <p className="text-[9px] text-gray-500">{product.price}</p>
                         </div>
                         {isFeatured ? <Star size={14} className="text-yellow-500 fill-yellow-500" /> : <div className="w-3.5 h-3.5 rounded-full border border-gray-300" />}
                       </button>
@@ -1009,33 +1014,33 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                         <InputGroup label="Título" value={cat.title} onChange={(v) => {
-                            const newCats = [...config.categories];
-                            newCats[index].title = v;
-                            updateConfig({ ...config, categories: newCats });
-                         }} />
-                         <InputGroup label="Subtítulo" value={cat.subtitle} onChange={(v) => {
-                            const newCats = [...config.categories];
-                            newCats[index].subtitle = v;
-                            updateConfig({ ...config, categories: newCats });
-                         }} />
-                         <div className="mb-3">
-                            <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-wider">Ícone</label>
-                            <div className="relative">
-                               <select
-                                  value={cat.iconKey}
-                                  onChange={(e) => {
-                                      const newCats = [...config.categories];
-                                      newCats[index].iconKey = e.target.value;
-                                      updateConfig({ ...config, categories: newCats });
-                                  }}
-                                  className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none shadow-inner appearance-none pr-8"
-                               >
-                                  {availableIcons.map(icon => <option key={icon} value={icon}>{icon}</option>)}
-                               </select>
-                               <ChevronDown size={14} className="absolute right-3 top-2.5 text-gray-400 pointer-events-none" />
-                            </div>
-                         </div>
+                        <InputGroup label="Título" value={cat.title} onChange={(v) => {
+                          const newCats = [...config.categories];
+                          newCats[index].title = v;
+                          updateConfig({ ...config, categories: newCats });
+                        }} />
+                        <InputGroup label="Subtítulo" value={cat.subtitle} onChange={(v) => {
+                          const newCats = [...config.categories];
+                          newCats[index].subtitle = v;
+                          updateConfig({ ...config, categories: newCats });
+                        }} />
+                        <div className="mb-3">
+                          <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-wider">Ícone</label>
+                          <div className="relative">
+                            <select
+                              value={cat.iconKey}
+                              onChange={(e) => {
+                                const newCats = [...config.categories];
+                                newCats[index].iconKey = e.target.value;
+                                updateConfig({ ...config, categories: newCats });
+                              }}
+                              className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none shadow-inner appearance-none pr-8"
+                            >
+                              {availableIcons.map(icon => <option key={icon} value={icon}>{icon}</option>)}
+                            </select>
+                            <ChevronDown size={14} className="absolute right-3 top-2.5 text-gray-400 pointer-events-none" />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1080,17 +1085,15 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                     <button
                       key={cat.id}
                       onClick={() => setSelectedCategoryIndex(i)}
-                      className={`flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
-                        selectedCategoryIndex === i 
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-105' 
-                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                      }`}
+                      className={`flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${selectedCategoryIndex === i
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-105'
+                          : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                        }`}
                     >
                       <DynamicIcon iconKey={cat.iconKey} size={14} />
                       {cat.title}
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
-                        selectedCategoryIndex === i ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
-                      }`}>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${selectedCategoryIndex === i ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
+                        }`}>
                         {cat.products.length}
                       </span>
                     </button>
@@ -1108,28 +1111,28 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                       <div className="flex flex-col">
                         <h4 className="text-lg font-black text-white italic tracking-tighter line-clamp-1">{prod.title || 'Peça Sem Nome'}</h4>
                         <div className="flex items-center gap-3 mt-1">
-                           <p className="text-sm font-black text-indigo-400">{prod.price || 'R$ 0,00'}</p>
-                           {prod.stock !== undefined && prod.stock !== null && (
-                              <span className="text-[9px] px-2 py-0.5 bg-white/5 text-white/30 rounded-full font-black uppercase tracking-widest">{prod.stock} em estoque</span>
-                           )}
+                          <p className="text-sm font-black text-indigo-400">{prod.price || 'R$ 0,00'}</p>
+                          {prod.stock !== undefined && prod.stock !== null && (
+                            <span className="text-[9px] px-2 py-0.5 bg-white/5 text-white/30 rounded-full font-black uppercase tracking-widest">{prod.stock} em estoque</span>
+                          )}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <button 
+                      <button
                         onClick={() => {
                           let domain = window.location.origin;
                           const originAndParams = storeId !== 'demo' && domain.includes('localhost') ? `${domain}?store=${storeId}` : domain;
                           const finalPath = domain.includes('localhost') ? originAndParams.replace('localhost:3000', `localhost:3000/product/${prod.id}`) : `${domain}/product/${prod.id}`;
                           navigator.clipboard.writeText(finalPath);
                           addToast('Link copiado!', 'success');
-                        }} 
+                        }}
                         className="text-gray-400 p-2 hover:bg-gray-50 hover:text-black rounded-lg transition-colors"
                         title="Obter Link de Venda"
                       >
                         <Link size={16} />
                       </button>
-                      <button 
+                      <button
                         onClick={() => setEditingProductIndex({ cIdx: selectedCategoryIndex, pIdx: pIndex })}
                         className="px-3 py-1.5 bg-blue-50 text-blue-600 font-bold text-[11px] rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm"
                       >
@@ -1160,135 +1163,135 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
         </div>
       </div>
 
-        <PaymentGateway
-          isOpen={isPaymentOpen}
-          onClose={() => setIsPaymentOpen(false)}
-          onSuccess={upgradeToPro}
-          planName="Plano Pro"
-          price="R$ 39,90"
-        />
+      <PaymentGateway
+        isOpen={isPaymentOpen}
+        onClose={() => setIsPaymentOpen(false)}
+        onSuccess={upgradeToPro}
+        planName="Plano Pro"
+        price="R$ 39,90"
+      />
 
-        {/* Product Editor Modal */}
-        {editingProductIndex !== null && config.categories[editingProductIndex.cIdx]?.products[editingProductIndex.pIdx] && (
-          <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex justify-center items-end md:items-center animate-in fade-in duration-500 font-['Inter',sans-serif]">
-            <div className="bg-[#121212] w-full md:w-[700px] md:max-h-[95vh] md:rounded-[48px] rounded-t-[48px] overflow-y-auto shadow-[0_0_100px_rgba(0,0,0,1)] animate-in slide-in-from-bottom-20 duration-700 relative border border-white/5 scrollbar-hide">
-              {(() => {
-                const cIdx = editingProductIndex.cIdx;
-                const pIdx = editingProductIndex.pIdx;
-                const prod = config.categories[cIdx].products[pIdx];
-                return (
-                  <div>
-                    <div className="sticky top-0 bg-[#121212]/90 backdrop-blur-2xl z-20 border-b border-white/5 px-10 py-8 flex items-center justify-between">
-                      <div>
-                        <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic">Editar <span className="text-indigo-400">Obra</span></h2>
-                        <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mt-1">Refine os detalhes do produto</p>
-                      </div>
-                      <button onClick={() => setEditingProductIndex(null)} className="w-12 h-12 flex items-center justify-center bg-white/5 rounded-2xl hover:bg-white/10 transition-colors text-white/40 hover:text-white cursor-pointer group">
-                        <X size={24} className="group-hover:rotate-90 transition-transform" />
-                      </button>
+      {/* Product Editor Modal */}
+      {editingProductIndex !== null && config.categories[editingProductIndex.cIdx]?.products[editingProductIndex.pIdx] && (
+        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex justify-center items-end md:items-center animate-in fade-in duration-500 font-['Inter',sans-serif]">
+          <div className="bg-[#121212] w-full md:w-[700px] md:max-h-[95vh] md:rounded-[48px] rounded-t-[48px] overflow-y-auto shadow-[0_0_100px_rgba(0,0,0,1)] animate-in slide-in-from-bottom-20 duration-700 relative border border-white/5 scrollbar-hide">
+            {(() => {
+              const cIdx = editingProductIndex.cIdx;
+              const pIdx = editingProductIndex.pIdx;
+              const prod = config.categories[cIdx].products[pIdx];
+              return (
+                <div>
+                  <div className="sticky top-0 bg-[#121212]/90 backdrop-blur-2xl z-20 border-b border-white/5 px-10 py-8 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic">Editar <span className="text-indigo-400">Obra</span></h2>
+                      <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mt-1">Refine os detalhes do produto</p>
                     </div>
-                    
-                    <div className="p-6 space-y-6">
-                      {/* Imagem (Hero do Form Cadastro) */}
-                      <div className="w-full h-48 md:h-64 bg-gray-100 rounded-2xl overflow-hidden relative group border-2 border-dashed border-gray-200 hover:border-indigo-400 transition-colors">
-                        <ImageWithFallback src={prod.imageUrl} className="w-full h-full object-cover" />
-                        <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer text-white transition-opacity">
-                          <Upload size={24} className="mb-2" />
-                          <span className="text-xs font-bold uppercase tracking-widest">Nova Foto/Vídeo</span>
-                          <input type="file" accept="image/*,video/mp4,video/webm" className="hidden" onChange={(e) => handleImageUpload(e, (url) => updateProduct(cIdx, pIdx, 'imageUrl', url))} />
-                        </label>
-                      </div>
-                      
-                      {/* Grid de Informacoes Essenciais */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2 md:col-span-2">
-                          <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Nome da Peça</label>
-                          <input
-                            value={prod.title}
-                            onChange={(e) => updateProduct(cIdx, pIdx, 'title', e.target.value)}
-                            className="w-full bg-white/5 border border-white/5 focus:border-indigo-500 text-sm font-bold rounded-2xl px-5 py-4 outline-none transition-all text-white placeholder:text-white/10"
-                            placeholder="Ex: Tênis Nike Air Max"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Preço Sugerido</label>
-                          <input
-                            value={prod.price}
-                            onChange={(e) => updateProduct(cIdx, pIdx, 'price', e.target.value)}
-                            className="w-full bg-white/5 border border-white/5 focus:border-indigo-500 text-sm text-indigo-400 font-black rounded-2xl px-5 py-4 outline-none transition-all placeholder:text-white/5"
-                            placeholder="199,90"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Estoque</label>
-                          <div className="relative">
-                            <Package size={16} className="absolute left-5 top-[18px] text-orange-400" />
-                            <input
-                              type="number"
-                              value={prod.stock ?? ''}
-                              placeholder="Ilimitado"
-                              min={0}
-                              onChange={e => updateProduct(cIdx, pIdx, 'stock', e.target.value === '' ? null : Number(e.target.value))}
-                              className="w-full bg-white/5 border border-white/5 focus:border-orange-500 text-sm text-white font-bold rounded-2xl pl-12 pr-5 py-4 outline-none transition-all"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Descricao Area */}
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                           <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Descrição Detalhada</label>
-                           <button
-                              onClick={async () => {
-                                if (!prod.title) return alert("Digite o nome do produto primeiro.");
-                                addToast('IA processando nuances... ✨', 'info');
-                                try {
-                                  const desc = await generateProductDescription(prod.title, prod.price, config.categories[cIdx].title);
-                                  updateProduct(cIdx, pIdx, 'description', desc);
-                                  addToast('Descrição Elite gerada!', 'success');
-                                } catch (e: any) { addToast(e.message || 'Erro.', 'error'); }
-                              }}
-                              className="text-[10px] text-indigo-400 font-black flex items-center gap-2 hover:bg-white/5 px-4 py-2 rounded-full transition-all uppercase italic tracking-[0.1em]"
-                            >
-                              <Sparkles size={12} /> Gerar Mágica IA
-                           </button>
-                        </div>
-                        <textarea
-                          value={prod.description}
-                          onChange={(e) => updateProduct(cIdx, pIdx, 'description', e.target.value)}
-                          className="w-full bg-white/5 border border-white/5 focus:border-indigo-500 rounded-[28px] p-6 text-sm text-white/70 font-medium resize-none outline-none min-h-[150px] transition-all"
-                          placeholder="Descreva a exclusividade desta obra..."
-                        />
-                      </div>
-
-                      {/* Affiliate Link Input */}
-                      <div className="space-y-1.5 p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
-                        <label className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest ml-1">
-                          <Link size={12} /> Link de Pagamento / Afiliado (Opcional)
-                        </label>
-                        <p className="text-[10px] text-blue-400 mb-2 ml-1">Se preenchido, o cliente não vai pro seu WhatsApp, vai direto pra esse site comprar.</p>
-                        <input
-                          value={prod.affiliateUrl || ''}
-                          onChange={(e) => updateProduct(cIdx, pIdx, 'affiliateUrl', e.target.value)}
-                          placeholder="https://..."
-                          className="w-full bg-white border border-blue-200 focus:border-blue-500 rounded-lg px-3 py-2.5 text-xs text-blue-800 outline-none transition-colors"
-                        />
-                      </div>
-
-                    </div>
-                    
-                    <div className="sticky bottom-0 bg-[#121212] border-t border-white/5 p-6 md:p-10 flex gap-4">
-                       <button onClick={() => setEditingProductIndex(null)} className="flex-1 py-6 bg-white text-black rounded-[28px] font-black text-sm uppercase tracking-[0.2em] transition-all shadow-2xl active:scale-95">Salvar Obra no Catálogo</button>
-                    </div>
+                    <button onClick={() => setEditingProductIndex(null)} className="w-12 h-12 flex items-center justify-center bg-white/5 rounded-2xl hover:bg-white/10 transition-colors text-white/40 hover:text-white cursor-pointer group">
+                      <X size={24} className="group-hover:rotate-90 transition-transform" />
+                    </button>
                   </div>
-                );
-              })()}
-            </div>
+
+                  <div className="p-6 space-y-6">
+                    {/* Imagem (Hero do Form Cadastro) */}
+                    <div className="w-full h-48 md:h-64 bg-gray-100 rounded-2xl overflow-hidden relative group border-2 border-dashed border-gray-200 hover:border-indigo-400 transition-colors">
+                      <ImageWithFallback src={prod.imageUrl} className="w-full h-full object-cover" />
+                      <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer text-white transition-opacity">
+                        <Upload size={24} className="mb-2" />
+                        <span className="text-xs font-bold uppercase tracking-widest">Nova Foto/Vídeo</span>
+                        <input type="file" accept="image/*,video/mp4,video/webm" className="hidden" onChange={(e) => handleImageUpload(e, (url) => updateProduct(cIdx, pIdx, 'imageUrl', url))} />
+                      </label>
+                    </div>
+
+                    {/* Grid de Informacoes Essenciais */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Nome da Peça</label>
+                        <input
+                          value={prod.title}
+                          onChange={(e) => updateProduct(cIdx, pIdx, 'title', e.target.value)}
+                          className="w-full bg-white/5 border border-white/5 focus:border-indigo-500 text-sm font-bold rounded-2xl px-5 py-4 outline-none transition-all text-white placeholder:text-white/10"
+                          placeholder="Ex: Tênis Nike Air Max"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Preço Sugerido</label>
+                        <input
+                          value={prod.price}
+                          onChange={(e) => updateProduct(cIdx, pIdx, 'price', e.target.value)}
+                          className="w-full bg-white/5 border border-white/5 focus:border-indigo-500 text-sm text-indigo-400 font-black rounded-2xl px-5 py-4 outline-none transition-all placeholder:text-white/5"
+                          placeholder="199,90"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Estoque</label>
+                        <div className="relative">
+                          <Package size={16} className="absolute left-5 top-[18px] text-orange-400" />
+                          <input
+                            type="number"
+                            value={prod.stock ?? ''}
+                            placeholder="Ilimitado"
+                            min={0}
+                            onChange={e => updateProduct(cIdx, pIdx, 'stock', e.target.value === '' ? null : Number(e.target.value))}
+                            className="w-full bg-white/5 border border-white/5 focus:border-orange-500 text-sm text-white font-bold rounded-2xl pl-12 pr-5 py-4 outline-none transition-all"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Descricao Area */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Descrição Detalhada</label>
+                        <button
+                          onClick={async () => {
+                            if (!prod.title) return alert("Digite o nome do produto primeiro.");
+                            addToast('IA processando nuances... ✨', 'info');
+                            try {
+                              const desc = await generateProductDescription(prod.title, prod.price, config.categories[cIdx].title);
+                              updateProduct(cIdx, pIdx, 'description', desc);
+                              addToast('Descrição Elite gerada!', 'success');
+                            } catch (e: any) { addToast(e.message || 'Erro.', 'error'); }
+                          }}
+                          className="text-[10px] text-indigo-400 font-black flex items-center gap-2 hover:bg-white/5 px-4 py-2 rounded-full transition-all uppercase italic tracking-[0.1em]"
+                        >
+                          <Sparkles size={12} /> Gerar Mágica IA
+                        </button>
+                      </div>
+                      <textarea
+                        value={prod.description}
+                        onChange={(e) => updateProduct(cIdx, pIdx, 'description', e.target.value)}
+                        className="w-full bg-white/5 border border-white/5 focus:border-indigo-500 rounded-[28px] p-6 text-sm text-white/70 font-medium resize-none outline-none min-h-[150px] transition-all"
+                        placeholder="Descreva a exclusividade desta obra..."
+                      />
+                    </div>
+
+                    {/* Affiliate Link Input */}
+                    <div className="space-y-1.5 p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
+                      <label className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest ml-1">
+                        <Link size={12} /> Link de Pagamento / Afiliado (Opcional)
+                      </label>
+                      <p className="text-[10px] text-blue-400 mb-2 ml-1">Se preenchido, o cliente não vai pro seu WhatsApp, vai direto pra esse site comprar.</p>
+                      <input
+                        value={prod.affiliateUrl || ''}
+                        onChange={(e) => updateProduct(cIdx, pIdx, 'affiliateUrl', e.target.value)}
+                        placeholder="https://..."
+                        className="w-full bg-white border border-blue-200 focus:border-blue-500 rounded-lg px-3 py-2.5 text-xs text-blue-800 outline-none transition-colors"
+                      />
+                    </div>
+
+                  </div>
+
+                  <div className="sticky bottom-0 bg-[#121212] border-t border-white/5 p-6 md:p-10 flex gap-4">
+                    <button onClick={() => setEditingProductIndex(null)} className="flex-1 py-6 bg-white text-black rounded-[28px] font-black text-sm uppercase tracking-[0.2em] transition-all shadow-2xl active:scale-95">Salvar Obra no Catálogo</button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
-        )}
-      </div>
-    );
+        </div>
+      )}
+    </div>
+  );
 };
 
 // FAQ Accordion Component
