@@ -83,8 +83,9 @@ const OnboardingWizard: React.FC = () => {
         } catch (err: any) {
             console.error(err);
             // Captura o código de erro do Supabase ou mensagem genérica
-            const errMsg = err.message || (err.code === '23505' ? 'Este endereço já está sendo usado.' : 'Erro ao salvar loja. Tente novamente.');
-            addToast(`Falha no Cadastro: ${errMsg}`, 'error');
+            const errMsg = err.message || (err.code === '23505' ? 'Este endereço já está sendo usado.' : 'Erro ao salvar loja.');
+            const errCode = err.code ? `[${err.code}]` : '';
+            addToast(`Falha no Cadastro ${errCode}: ${errMsg}`, 'error');
             
             // Se o erro for no slug, volta para o passo 3
             if (err.code === '23505' || errMsg.includes('slug')) {
@@ -364,7 +365,7 @@ const OnboardingWizard: React.FC = () => {
                                     <button onClick={prevStep} className="px-6 py-4 text-gray-400 font-bold uppercase text-[10px] tracking-widest hover:text-white">Voltar</button>
                                     <button
                                         onClick={handleFinish}
-                                        disabled={localConfig.whatsapp.length < 10 || isSaving}
+                                        disabled={isSaving || (localConfig.storeMode !== 'affiliate' && localConfig.whatsapp.length < 10)}
                                         className="flex-1 py-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black rounded-[32px] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30 transition-all shadow-2xl flex items-center justify-center gap-3 uppercase tracking-widest"
                                     >
                                         {isSaving ? <Loader2 className="animate-spin" /> : <>Finalizar & Publicar Vitrine <ArrowRight size={20} /></>}

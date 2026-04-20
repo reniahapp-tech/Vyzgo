@@ -172,4 +172,5 @@ export interface AppConfig {
     facebook: string;
     tiktok: string;
   };
+  marketingScripts?: string; // NEW: Custom HTML/Scripts for marketing tools
 }

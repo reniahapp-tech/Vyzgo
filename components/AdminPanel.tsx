@@ -3,14 +3,13 @@ import { useConfig } from '../contexts/ConfigContext';
 import { usePlugins } from '../contexts/PluginContext';
 import { useAuth } from '../contexts/AuthContext';
 import AuthModal from './AuthModal';
-import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle, Puzzle, Tag, LogOut, User as UserIcon, Save, ArrowRight } from 'lucide-react';
+import { Settings, X, RotateCcw, Palette, Layout, Type, Image as ImageIcon, Plus, Trash2, Link, Upload, ShoppingBag, Lock, Unlock, MapPinOff, MapPin, ToggleLeft, ToggleRight, Store, Crown, Star, Share2, Map, HelpCircle, ChevronDown, ChevronUp, BookOpen, ExternalLink, MessageCircle, Terminal, Globe, ClipboardList, Package, AlertTriangle, Puzzle, Tag, LogOut, User as UserIcon, Save, ArrowRight, Sparkles, Code, CloudUpload } from 'lucide-react';
 import { availableIcons, DynamicIcon } from './IconMapper';
 import { ProductItem } from '../types';
 import PaymentGateway from './PaymentGateway';
 import { uploadToR2, saveConfigToR2 } from '../services/r2';
 import { supabase } from '../services/supabase';
 import { generateProductDescription } from '../services/ai';
-import { CloudUpload, Sparkles } from 'lucide-react';
 import ImageWithFallback from './ImageWithFallback';
 
 // Preset Themes Configuration
@@ -776,14 +775,21 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                       {config.enableWhatsapp ? <ToggleRight size={36} /> : <ToggleLeft size={36} />}
                     </button>
                   </div>
-                  <InputGroup label="WhatsApp Número" value={config.whatsapp.phoneNumber} onChange={(v) => updateNestedConfig('whatsapp.phoneNumber', v)} placeholder="Ex: 551199999999" />
                   {config.enableWhatsapp && (
-                    <div className="mt-3">
-                      <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Texto do Botão</label>
-                      <select value={config.whatsapp.label} onChange={(e) => updateNestedConfig('whatsapp.label', e.target.value)} disabled={!isPro} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none">
-                        {WHATSAPP_LABELS.map((label) => <option key={label} value={label}>{label}</option>)}
-                      </select>
-                    </div>
+                    <>
+                      <InputGroup 
+                        label={`WhatsApp Número ${config.storeMode === 'affiliate' ? '(Opcional)' : ''}`} 
+                        value={config.whatsapp.phoneNumber} 
+                        onChange={(v) => updateNestedConfig('whatsapp.phoneNumber', v)} 
+                        placeholder="Ex: 551199999999" 
+                      />
+                      <div className="mt-3">
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Texto do Botão</label>
+                        <select value={config.whatsapp.label} onChange={(e) => updateNestedConfig('whatsapp.label', e.target.value)} disabled={!isPro} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none">
+                          {WHATSAPP_LABELS.map((label) => <option key={label} value={label}>{label}</option>)}
+                        </select>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -852,18 +858,36 @@ const AdminPanel: React.FC<{ isStandalone?: boolean }> = ({ isStandalone = false
                 )}
               </div>
 
-              {/* SUBDOMAIN CONFIG */}
-              <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5">
-                <h3 className="text-xs font-bold text-gray-800 uppercase flex items-center gap-2 mb-4">
-                  <Globe size={14} className="text-blue-500" /> Endereço da Loja (.vyzgo.com)
+               {/* SUBDOMAIN CONFIG */}
+               <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 text-[#121212]">
+                 <h3 className="text-xs font-bold uppercase flex items-center gap-2 mb-4 text-[#121212]">
+                   <Globe size={14} className="text-blue-500" /> Endereço da Loja (.vyzgo.com)
+                 </h3>
+                 <div className="flex items-center bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-sm focus-within:ring-2 focus-within:ring-blue-200 transition-all">
+                   <input value={newSubdomain} onChange={(e) => setNewSubdomain(e.target.value)} disabled={storeId === 'demo' || isChangingSubdomain} className="flex-1 text-gray-700 font-bold text-right pr-1 bg-transparent outline-none" />
+                   <span className="font-bold text-gray-400">.vyzgo.com</span>
+                 </div>
+                 {newSubdomain !== storeId && (
+                   <button onClick={async () => { setIsChangingSubdomain(true); await updateStoreSlug(newSubdomain); setIsChangingSubdomain(false); }} className="mt-2 w-full py-2 bg-red-600 text-white rounded-lg text-xs font-bold">Confirmar Mudança de Link</button>
+                 )}
+               </div>
+
+              {/* MARKETING SCRIPTS SECTION */}
+              <div className={`p-6 rounded-[32px] border-2 bg-white ${!isPro ? 'opacity-40 grayscale pointer-events-none' : 'border-indigo-100 shadow-xl shadow-indigo-500/5'}`}>
+                <h3 className="text-sm font-black text-gray-800 uppercase flex items-center gap-2 mb-4">
+                  <Code size={18} className="text-indigo-600" /> Scripts de Marketing & HTML
+                  {!isPro && <Lock size={14} className="ml-2 text-gray-400" />}
                 </h3>
-                <div className="flex items-center bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-sm focus-within:ring-2 focus-within:ring-blue-200 transition-all">
-                  <input value={newSubdomain} onChange={(e) => setNewSubdomain(e.target.value)} disabled={storeId === 'demo' || isChangingSubdomain} className="flex-1 text-gray-700 font-bold text-right pr-1 bg-transparent outline-none" />
-                  <span className="font-bold text-gray-400">.vyzgo.com</span>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-6">Injete códigos do Brevo, SendPulse, Mautic ou Pixels (Meta/Google).</p>
+                <div className="space-y-4">
+                   <textarea
+                     value={config.marketingScripts || ''}
+                     onChange={(e) => updateConfig({ ...config, marketingScripts: e.target.value })}
+                     placeholder="Cole aqui seus scripts <script>...</script> ou HTML personalizado"
+                     className="w-full bg-gray-50 border border-gray-100 focus:border-indigo-500 rounded-[24px] p-6 text-xs text-gray-600 font-mono resize-none outline-none min-h-[160px] transition-all"
+                   />
+                   <p className="text-[9px] text-gray-400 italic">Estes scripts serão carregados automaticamente na sua vitrine oficial.</p>
                 </div>
-                {newSubdomain !== storeId && (
-                  <button onClick={async () => { setIsChangingSubdomain(true); await updateStoreSlug(newSubdomain); setIsChangingSubdomain(false); }} className="mt-2 w-full py-2 bg-red-600 text-white rounded-lg text-xs font-bold">Confirmar Mudança de Link</button>
-                )}
               </div>
 
               {/* HELP SECTION */}

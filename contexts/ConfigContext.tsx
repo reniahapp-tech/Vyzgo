@@ -194,7 +194,8 @@ const BASE_CONFIGS: Record<string, AppConfig> = {
       instagram: 'techstore',
       facebook: '',
       tiktok: ''
-    }
+    },
+    marketingScripts: ''
   }
 };
 
@@ -324,7 +325,8 @@ export const ConfigProvider: React.FC<{ children: ReactNode }> = ({ children }) 
           ...parsed,
           footerText: parsed.footerText || base.footerText,
           location: { ...base.location, ...parsed.location },
-          social: { ...base.social, ...parsed.social }
+          social: { ...base.social, ...parsed.social },
+          marketingScripts: parsed.marketingScripts ?? base.marketingScripts
         };
       }
       return BASE_CONFIGS[storeId] || BASE_CONFIGS['demo'];

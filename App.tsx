@@ -214,6 +214,34 @@ const AppContent: React.FC = () => {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
 
+  // MARKETING SCRIPTS INJECTION
+  useEffect(() => {
+    if (config.marketingScripts) {
+      // Cria um container para os scripts se não existir
+      let scriptContainer = document.getElementById('vyzgo-marketing-scripts');
+      if (!scriptContainer) {
+        scriptContainer = document.createElement('div');
+        scriptContainer.id = 'vyzgo-marketing-scripts';
+        document.body.appendChild(scriptContainer);
+      }
+      
+      // Injeta o HTML (perigoso, mas solicitado pelo usuário para marketing)
+      scriptContainer.innerHTML = config.marketingScripts;
+      
+      // Executa scripts inseridos via innerHTML (eles não rodam por padrão)
+      const scripts = scriptContainer.getElementsByTagName('script');
+      for (let i = 0; i < scripts.length; i++) {
+        const s = document.createElement('script');
+        if (scripts[i].src) {
+          s.src = scripts[i].src;
+        } else {
+          s.textContent = scripts[i].textContent;
+        }
+        document.head.appendChild(s);
+      }
+    }
+  }, [config.marketingScripts]);
+
   // Initialize Network Listener
   useNetworkStatus();
 
